@@ -46,8 +46,20 @@ class Game7 {
     }
     
     spawnItem() {
-        const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎹'];
-        const emoji = allItems[Math.floor(Math.random() * allItems.length)];
+        // Сначала ищем несобранные товары из списка
+        const neededItems = this.shoppingList.filter(item => !this.collected.has(item));
+        
+        let emoji;
+        
+        // 70% шанс спавна нужного товара (если есть несобранные)
+        if (neededItems.length > 0 && Math.random() < 0.7) {
+            emoji = neededItems[Math.floor(Math.random() * neededItems.length)];
+        } else {
+            // Спавн отвлекающего товара
+            const distractingItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎹']
+                .filter(item => !this.shoppingList.includes(item) || this.collected.has(item)); // Исключаем уже собранные нужные
+            emoji = distractingItems[Math.floor(Math.random() * distractingItems.length)];
+        }
         
         this.conveyor.push({
             emoji: emoji,

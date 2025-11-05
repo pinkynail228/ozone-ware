@@ -47,21 +47,32 @@ class Game9 {
     }
     
     spawnItem() {
-        const categories = ['tech', 'clothes', 'books'];
-        const category = categories[Math.floor(Math.random() * categories.length)];
-        const emoji = this.items[category][Math.floor(Math.random() * this.items[category].length)];
+        // Категории товаров
+        const categories = {
+            tech: ['📱', '💻', '⌚'],
+            clothes: ['👕', '👟', '🧢'],
+            books: ['📚', '📖', '📰']
+        };
+        
+        // Выбираем случайную категорию
+        const categoryKeys = Object.keys(categories);
+        const randomCategory = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
+        
+        // Выбираем товар из категории
+        const items = categories[randomCategory];
+        const emoji = items[Math.floor(Math.random() * items.length)];
         
         this.currentItem = {
             emoji: emoji,
-            category: category,
+            category: randomCategory,
             x: this.canvas.width / 2,
-            y: 150,
+            y: 200,
             size: 60,
             offsetX: 0,
             offsetY: 0
         };
         
-        console.log('📦 Товар:', emoji, 'Категория:', category);
+        console.log('📦 Новый товар:', emoji, 'Категория:', randomCategory);
     }
     
     setupControls() {
@@ -102,16 +113,22 @@ class Game9 {
             e.preventDefault();
             
             const swipeY = this.currentItem.offsetY;
+            const swipeThreshold = 50;
+            const longSwipeThreshold = 150;
             
-            // Определить на какую полку свайпнули
             let targetShelf = null;
-            if (Math.abs(swipeY) > 50) { // Минимальная дистанция свайпа
-                if (swipeY > 0) {
-                    // Свайп вниз
-                    targetShelf = swipeY > 200 ? this.shelves[2] : this.shelves[1];
-                } else {
-                    // Свайп вверх
+            
+            if (Math.abs(swipeY) > swipeThreshold) {
+                if (swipeY < 0) {
+                    // Свайп вверх = верхняя полка (ЭЛЕКТРОНИКА)
                     targetShelf = this.shelves[0];
+                } else {
+                    // Свайп вниз = средняя или нижняя полка
+                    if (Math.abs(swipeY) > longSwipeThreshold) {
+                        targetShelf = this.shelves[2]; // Длинный свайп = нижняя полка (КНИГИ)
+                    } else {
+                        targetShelf = this.shelves[1]; // Короткий свайп = средняя полка (ОДЕЖДА)
+                    }
                 }
             }
             

@@ -231,11 +231,11 @@ class RunnerGame {
         this.ctx.fillRect(p.x + 8, p.y + 40, 8, 20);
         this.ctx.fillRect(p.x + 24, p.y + 40 + legOffset, 8, 20);
         
-        // Велосипед (упрощенный)
+        // Велосипед (поднимаю выше)
         this.ctx.fillStyle = '#333';
         this.ctx.beginPath();
-        this.ctx.arc(p.x + 10, p.y + 65, 8, 0, Math.PI * 2);
-        this.ctx.arc(p.x + 30, p.y + 65, 8, 0, Math.PI * 2);
+        this.ctx.arc(p.x + 10, p.y + 55, 8, 0, Math.PI * 2); // Был p.y + 65
+        this.ctx.arc(p.x + 30, p.y + 55, 8, 0, Math.PI * 2); // Был p.y + 65
         this.ctx.fill();
     }
     
