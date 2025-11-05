@@ -11,7 +11,7 @@ class GameManager {
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7'];
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8'];
         this.playedGames = [];
         
         // DOM элементы
@@ -132,7 +132,8 @@ class GameManager {
             'game3': 'НАЙДИ ТОВАР',
             'game5': 'ПОЙМАЙ НОУТБУКИ',
             'game6': 'ПОСЧИТАЙ ТОВАРЫ',
-            'game7': 'СБОРКА ЗАКАЗА'
+            'game7': 'СБОРКА ЗАКАЗА',
+            'game8': 'АДРЕСА ДОСТАВКИ'
         };
         
         const instructions = {
@@ -141,7 +142,8 @@ class GameManager {
             'game3': 'Тапай на правильный!',
             'game5': 'Лови только ноутбуки 💻',
             'game6': 'Реши пример!',
-            'game7': 'Собери товары из списка!'
+            'game7': 'Собери товары из списка!',
+            'game8': 'Запомни адрес за 2 сек!'
         };
         
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
