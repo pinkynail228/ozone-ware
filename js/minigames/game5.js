@@ -96,8 +96,9 @@ class Game5 {
         this.ctx.textAlign = 'center';
         this.ctx.fillText('ПОЙМАЙ НОУТБУКИ 💻', this.canvas.width / 2, 80);
         
-        this.ctx.font = '18px Courier New';
-        this.ctx.fillText(`Поймано: ${this.caught}/${this.requiredCaught}`, this.canvas.width / 2, 110);
+        // Убрали счетчик - просто ловим за время
+        this.ctx.font = '16px Courier New';
+        this.ctx.fillText('Лови только 💻 ноутбуки!', this.canvas.width / 2, 110);
         
         // Спавн товаров
         this.spawnTimer++;

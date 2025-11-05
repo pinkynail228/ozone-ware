@@ -92,9 +92,6 @@ class GameManager {
             case 'game3':
                 this.currentGame = new Game3(this.canvas, this.ctx, this);
                 break;
-            case 'game4':
-                this.currentGame = new Game4(this.canvas, this.ctx, this);
-                break;
             case 'game5':
                 this.currentGame = new Game5(this.canvas, this.ctx, this);
                 break;
