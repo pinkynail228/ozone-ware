@@ -25,8 +25,8 @@ class RunnerGame {
             width: 40,
             height: 60,
             velocityY: 0,
-            gravity: 1.2,
-            jumpPower: -18,
+            gravity: 1.0, // Уменьшили гравитацию
+            jumpPower: -20, // Увеличили силу прыжка для более высокого прыжка
             isJumping: false,
             groundY: 600,
             color: '#0066ff' // Синий цвет Ozone
@@ -266,27 +266,33 @@ class RunnerGame {
     }
     
     /**
-     * Создать препятствие
+     * Спавн препятствия (как в Chrome Dino)
      */
     spawnObstacle() {
-        const types = ['car', 'person'];
+        const types = ['dog', 'fence', 'box'];
         const type = types[Math.floor(Math.random() * types.length)];
         
         let obstacle = {
             x: this.canvas.width,
-            type: type
+            type: type,
+            y: 630, // На земле
         };
         
-        if (type === 'car') {
-            obstacle.y = 620;
-            obstacle.width = 60;
+        if (type === 'dog') {
+            // Собачка - узкая и низкая
+            obstacle.width = 25;
+            obstacle.height = 30;
+            obstacle.emoji = '🐶';
+        } else if (type === 'fence') {
+            // Забор - узкий и высокий
+            obstacle.width = 20;
             obstacle.height = 40;
-            obstacle.color = '#ff0000';
+            obstacle.color = '#8B4513';
         } else {
-            obstacle.y = 630;
+            // Коробка - квадратная
             obstacle.width = 30;
             obstacle.height = 30;
-            obstacle.color = '#ffaa00';
+            obstacle.emoji = '📦';
         }
         
         this.obstacles.push(obstacle);
@@ -294,41 +300,50 @@ class RunnerGame {
     }
     
     /**
-     * Отрисовать препятствия
+     * Отрисовать препятствия (собачки, заборы, коробки)
      */
     drawObstacles() {
         this.obstacles.forEach(obs => {
-            this.ctx.fillStyle = obs.color;
-            
-            if (obs.type === 'car') {
-                // Машина (простой пиксель-арт)
-                this.ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                // Окна
-                this.ctx.fillStyle = '#87ceeb';
-                this.ctx.fillRect(obs.x + 10, obs.y + 5, 15, 15);
-                this.ctx.fillRect(obs.x + 35, obs.y + 5, 15, 15);
-            } else {
-                // Пешеход
-                this.ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                // Голова
-                this.ctx.fillStyle = '#ffcc99';
-                this.ctx.fillRect(obs.x + 7, obs.y - 10, 16, 16);
+            if (obs.emoji) {
+                // Emoji препятствия (собачка или коробка)
+                this.ctx.font = '32px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(obs.emoji, obs.x + obs.width / 2, obs.y + obs.height - 5);
+            } else if (obs.type === 'fence') {
+                // Забор (пиксель-арт)
+                this.ctx.fillStyle = obs.color;
+                // Вертикальные планки
+                this.ctx.fillRect(obs.x, obs.y, 5, obs.height);
+                this.ctx.fillRect(obs.x + 7, obs.y, 5, obs.height);
+                this.ctx.fillRect(obs.x + 14, obs.y, 5, obs.height);
+                // Горизонтальные
+                this.ctx.fillRect(obs.x, obs.y + 10, obs.width, 4);
+                this.ctx.fillRect(obs.x, obs.y + 25, obs.width, 4);
             }
         });
     }
     
     /**
-     * Проверить коллизии
+     * Проверить коллизии (более прощающие как в Chrome Dino)
      */
     checkCollisions() {
         const p = this.player;
         
+        // Уменьшенный hitbox для более прощающих коллизий
+        const hitboxPadding = 5;
+        const playerHitbox = {
+            x: p.x + hitboxPadding,
+            y: p.y + hitboxPadding,
+            width: p.width - hitboxPadding * 2,
+            height: p.height - hitboxPadding * 2
+        };
+        
         for (const obs of this.obstacles) {
-            // AABB коллизия
-            if (p.x < obs.x + obs.width &&
-                p.x + p.width > obs.x &&
-                p.y + p.height > obs.y &&
-                p.y < obs.y + obs.height) {
+            // AABB коллизия с уменьшенным hitbox
+            if (playerHitbox.x < obs.x + obs.width &&
+                playerHitbox.x + playerHitbox.width > obs.x &&
+                playerHitbox.y + playerHitbox.height > obs.y &&
+                playerHitbox.y < obs.y + obs.height) {
                 console.log('💥 КОЛЛИЗИЯ! Игра провалена');
                 this.lose();
                 return;
