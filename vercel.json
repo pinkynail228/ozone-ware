@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "ozone-warioware",
+  "builds": [
+    {
+      "src": "**/*",
+      "use": "@vercel/static"
+    }
+  ]
+}

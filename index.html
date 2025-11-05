@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Ozone WarioWare - Мини-игры</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Главный контейнер игры (390x844) -->
+    <div id="game-container">
+        <!-- Экран загрузки -->
+        <div id="loading-screen" class="screen active">
+            <div class="logo">🎮</div>
+            <h1>OZONE<br>WARIOWARE</h1>
+            <p>Нажми, чтобы начать!</p>
+            <div class="tap-hint">👆 TAP</div>
+        </div>
+
+        <!-- Экран выбора игры / Промежуточный -->
+        <div id="transition-screen" class="screen">
+            <div class="game-number">ИГРА #<span id="game-number-display">1</span></div>
+            <h2 id="game-title">КУРЬЕР-РАННЕР</h2>
+            <p id="game-instruction">Тапай чтобы прыгать!</p>
+            <div class="countdown">
+                <span id="countdown-number">3</span>
+            </div>
+        </div>
+
+        <!-- Экран игры -->
+        <div id="game-screen" class="screen">
+            <!-- Canvas для игры -->
+            <canvas id="game-canvas" width="390" height="844"></canvas>
+            
+            <!-- UI поверх игры -->
+            <div id="game-ui">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timer-fill"></div>
+                    <span class="timer-text" id="timer-text">10</span>
+                </div>
+                <div class="score">Очки: <span id="score-display">0</span></div>
+            </div>
+        </div>
+
+        <!-- Экран результата -->
+        <div id="result-screen" class="screen">
+            <div class="result-icon" id="result-icon">✅</div>
+            <h2 id="result-title">УСПЕХ!</h2>
+            <div class="result-stats">
+                <p>Очки: <span id="final-score">0</span></p>
+                <p>Игр пройдено: <span id="games-completed">0</span></p>
+            </div>
+            <button id="next-game-btn" class="btn-primary">Следующая игра</button>
+            <button id="restart-btn" class="btn-secondary">Начать заново</button>
+        </div>
+    </div>
+
+    <!-- Debug консоль (скрыта в проде) -->
+    <div id="debug-panel">
+        <div id="debug-info"></div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="js/game-manager.js"></script>
+    <script src="js/minigames/runner.js"></script>
+    <script src="js/minigames/game2.js"></script>
+    <script src="js/minigames/game3.js"></script>
+    <script src="js/minigames/game4.js"></script>
+    <script src="js/minigames/game5.js"></script>
+    <script src="js/minigames/game6.js"></script>
+    <script src="js/minigames/game7.js"></script>
+    <script src="js/minigames/game8.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
