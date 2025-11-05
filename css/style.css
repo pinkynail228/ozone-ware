@@ -347,6 +347,7 @@ body {
 }
 
 .score {
+    display: none; /* Скрыто - не мешает игре */
     margin-top: 15px;
     font-size: 24px;
     font-weight: bold;
