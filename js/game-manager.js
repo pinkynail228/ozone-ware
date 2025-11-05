@@ -11,7 +11,7 @@ class GameManager {
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8'];
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6'];
         this.playedGames = [];
         
         // DOM элементы

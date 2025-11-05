@@ -1,7 +1,7 @@
 /**
  * GAME 2 - Сортировка посылок
- * Механика: Перетаскивай посылки в правильные ящики по цветам
- * Длительность: 10 секунд
+ * Механика: Перетаскивай посылки в правильные ящики по ФОРМЕ
+ * Длительность: 7 секунд
  */
 
 class Game2 {
@@ -19,18 +19,17 @@ class Game2 {
         
         this.score = 0;
         this.sortedPackages = 0;
-        this.totalPackages = 6;
+        this.totalPackages = 4;
         
         // Посылки
         this.packages = [];
         this.draggedPackage = null;
         this.dragOffset = { x: 0, y: 0 };
         
-        // Ящики (корзины)
+        // Ящики (корзины) по ФОРМЕ
         this.boxes = [
-            { x: 50, y: 650, width: 80, height: 80, color: '#0066ff', label: 'СИНИЙ' },
-            { x: 155, y: 650, width: 80, height: 80, color: '#ff0066', label: 'КРАСНЫЙ' },
-            { x: 260, y: 650, width: 80, height: 80, color: '#00cc66', label: 'ЗЕЛЁНЫЙ' }
+            { x: 80, y: 650, width: 100, height: 80, shape: 'square', label: '■', color: '#0066ff' },
+            { x: 210, y: 650, width: 100, height: 80, shape: 'circle', label: '●', color: '#ff0066' }
         ];
         
         // Создать посылки
@@ -43,35 +42,28 @@ class Game2 {
     }
     
     /**
-     * Создать посылки разных цветов
+     * Создать посылки разных ФОРМ
      */
     createPackages() {
-        const colors = [
-            '#0066ff', '#0066ff', // 2 синих
-            '#ff0066', '#ff0066', // 2 красных
-            '#00cc66', '#00cc66'  // 2 зелёных
-        ];
+        const shapes = ['square', 'circle', 'square', 'circle'];
         
         // Перемешать
-        for (let i = colors.length - 1; i > 0; i--) {
+        for (let i = shapes.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [colors[i], colors[j]] = [colors[j], colors[i]];
+            [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
         }
         
-        // Создать посылки в 2 ряда
-        let index = 0;
-        for (let row = 0; row < 2; row++) {
-            for (let col = 0; col < 3; col++) {
-                this.packages.push({
-                    x: col * 100 + 70,
-                    y: row * 90 + 200,
-                    width: 60,
-                    height: 60,
-                    color: colors[index],
-                    sorted: false
-                });
-                index++;
-            }
+        // Создать 4 посылки в ряд
+        for (let i = 0; i < 4; i++) {
+            this.packages.push({
+                x: i * 80 + 35,
+                y: 250,
+                width: 60,
+                height: 60,
+                shape: shapes[i],
+                color: '#FFD700', // Все золотые
+                sorted: false
+            });
         }
         
         console.log('📦 Создано посылок:', this.packages.length);
@@ -172,14 +164,14 @@ class Game2 {
         // Проверить каждый ящик
         for (const box of this.boxes) {
             if (this.isInside(centerX, centerY, box)) {
-                // Правильный цвет?
-                if (pkg.color === box.color) {
+                // Правильная ФОРМА?
+                if (pkg.shape === box.shape) {
                     console.log('✅ Правильно! Посылка в ящик:', box.label);
                     pkg.sorted = true;
-                    pkg.x = box.x + 10;
+                    pkg.x = box.x + 20;
                     pkg.y = box.y + 10;
                     this.sortedPackages++;
-                    this.score += 20;
+                    this.score += 25;
                     
                     // Проверить победу
                     if (this.sortedPackages >= this.totalPackages) {
@@ -281,11 +273,11 @@ class Game2 {
             this.ctx.lineWidth = 4;
             this.ctx.strokeRect(box.x, box.y, box.width, box.height);
             
-            // Метка
+            // Метка с ФОРМОЙ
             this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 12px Courier New';
+            this.ctx.font = 'bold 48px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + box.height + 20);
+            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + 55);
         });
     }
     
@@ -305,20 +297,25 @@ class Game2 {
                 this.ctx.textAlign = 'center';
                 this.ctx.fillText('✓', pkg.x + 20, pkg.y + 28);
             } else if (pkg !== this.draggedPackage) {
-                // Обычные посылки
+                // Обычные посылки - рисуем ФОРМУ
                 this.ctx.fillStyle = pkg.color;
-                this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
+                
+                if (pkg.shape === 'square') {
+                    this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
+                } else if (pkg.shape === 'circle') {
+                    this.ctx.beginPath();
+                    this.ctx.arc(pkg.x + pkg.width / 2, pkg.y + pkg.height / 2, pkg.width / 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
                 
                 // Обводка
                 this.ctx.strokeStyle = '#fff';
-                this.ctx.lineWidth = 2;
-                this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
-                
-                // Иконка посылки
-                this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 32px Courier New';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('📦', pkg.x + pkg.width / 2, pkg.y + pkg.height / 2 + 10);
+                this.ctx.lineWidth = 3;
+                if (pkg.shape === 'square') {
+                    this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
+                } else {
+                    this.ctx.stroke();
+                }
             }
         });
         
@@ -326,16 +323,22 @@ class Game2 {
         if (this.draggedPackage) {
             const pkg = this.draggedPackage;
             this.ctx.fillStyle = pkg.color;
-            this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
+            
+            if (pkg.shape === 'square') {
+                this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
+            } else if (pkg.shape === 'circle') {
+                this.ctx.beginPath();
+                this.ctx.arc(pkg.x + pkg.width / 2, pkg.y + pkg.height / 2, pkg.width / 2, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
             
             this.ctx.strokeStyle = '#fff';
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
-            
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 32px Courier New';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('📦', pkg.x + pkg.width / 2, pkg.y + pkg.height / 2 + 10);
+            this.ctx.lineWidth = 4;
+            if (pkg.shape === 'square') {
+                this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
+            } else {
+                this.ctx.stroke();
+            }
         }
     }
     
