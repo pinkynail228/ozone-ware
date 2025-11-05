@@ -11,7 +11,7 @@ class GameManager {
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8'];
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game9', 'game10', 'game11'];
         this.playedGames = [];
         
         // DOM элементы
@@ -107,6 +107,15 @@ class GameManager {
             case 'game8':
                 this.currentGame = new Game8(this.canvas, this.ctx, this);
                 break;
+            case 'game9':
+                this.currentGame = new Game9(this.canvas, this.ctx, this);
+                break;
+            case 'game10':
+                this.currentGame = new Game10(this.canvas, this.ctx, this);
+                break;
+            case 'game11':
+                this.currentGame = new Game11(this.canvas, this.ctx, this);
+                break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
                 return;
@@ -133,7 +142,10 @@ class GameManager {
             'game5': 'ПОЙМАЙ НОУТБУКИ',
             'game6': 'ПОСЧИТАЙ ТОВАРЫ',
             'game7': 'СБОРКА ЗАКАЗА',
-            'game8': 'АДРЕСА ДОСТАВКИ'
+            'game8': 'АДРЕСА ДОСТАВКИ',
+            'game9': 'СКЛАДСКИЕ ПОЛКИ',
+            'game10': 'ВЕСЫ СКЛАДА',
+            'game11': 'ПРИЁМКА ТОВАРОВ'
         };
         
         const instructions = {
@@ -143,7 +155,10 @@ class GameManager {
             'game5': 'Лови только ноутбуки 💻',
             'game6': 'Реши пример!',
             'game7': 'Собери товары из списка!',
-            'game8': 'Запомни адрес за 2 сек!'
+            'game8': 'Запомни адрес за 2 сек!',
+            'game9': 'Свайпай на полку!',
+            'game10': 'Выбери категорию веса!',
+            'game11': 'Свайп вверх/вниз!'
         };
         
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
