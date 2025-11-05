@@ -26,10 +26,10 @@ class Game2 {
         this.draggedPackage = null;
         this.dragOffset = { x: 0, y: 0 };
         
-        // Ящики (корзины) по ФОРМЕ
+        // Ящики (корзины) по ФОРМЕ - с понятными цветами
         this.boxes = [
-            { x: 80, y: 650, width: 100, height: 80, shape: 'square', label: '■', color: '#0066ff' },
-            { x: 210, y: 650, width: 100, height: 80, shape: 'circle', label: '●', color: '#ff0066' }
+            { x: 80, y: 650, width: 100, height: 80, shape: 'square', label: '■', color: '#0066ff', name: 'КВАДРАТ' },
+            { x: 210, y: 650, width: 100, height: 80, shape: 'circle', label: '●', color: '#ff0066', name: 'КРУГ' }
         ];
         
         // Создать посылки
@@ -53,7 +53,7 @@ class Game2 {
             [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
         }
         
-        // Создать 4 посылки в ряд
+        // Создать 4 посылки в ряд - с разными цветами по форме
         for (let i = 0; i < 4; i++) {
             this.packages.push({
                 x: i * 80 + 35,
@@ -61,7 +61,7 @@ class Game2 {
                 width: 60,
                 height: 60,
                 shape: shapes[i],
-                color: '#FFD700', // Все золотые
+                color: shapes[i] === 'square' ? '#0066ff' : '#ff0066', // Синие квадраты, красные круги
                 sorted: false
             });
         }
@@ -273,11 +273,15 @@ class Game2 {
             this.ctx.lineWidth = 4;
             this.ctx.strokeRect(box.x, box.y, box.width, box.height);
             
-            // Метка с ФОРМОЙ
+            // Метка с ФОРМОЙ - большая и понятная
             this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 48px Arial';
+            this.ctx.font = 'bold 60px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + 55);
+            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + 60);
+            
+            // Название формы
+            this.ctx.font = 'bold 12px Courier New';
+            this.ctx.fillText(box.name, box.x + box.width / 2, box.y + box.height + 20);
         });
     }
     

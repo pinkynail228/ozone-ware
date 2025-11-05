@@ -33,7 +33,7 @@ class Game5 {
         // Падающие товары
         this.items = [];
         this.spawnTimer = 0;
-        this.spawnInterval = 40; // Кадры между спавном
+        this.spawnInterval = 70; // Кадры между спавном - реже!
         
         this.setupControls();
         
@@ -157,7 +157,7 @@ class Game5 {
             y: 150,
             width: 40,
             height: 40,
-            speed: 3 + Math.random() * 2,
+            speed: 2 + Math.random() * 1, // Медленнее! 2-3 вместо 3-5
             emoji: emoji,
             isGood: isGood
         };

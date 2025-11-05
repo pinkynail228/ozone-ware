@@ -65,15 +65,15 @@ class Game6 {
         
         // Создать 3 варианта ответа
         this.answers = [];
-        this.answers.push({ value: correctAnswer, correct: true, x: 50, y: 500, width: 80, height: 80 });
+        this.answers.push({ value: correctAnswer, correct: true });
         
         // Два неправильных ответа
         let wrong1 = correctAnswer + Math.floor(Math.random() * 5) + 1;
         let wrong2 = correctAnswer - Math.floor(Math.random() * 5) - 1;
         if (wrong2 < 0) wrong2 = correctAnswer + Math.floor(Math.random() * 3) + 6;
         
-        this.answers.push({ value: wrong1, correct: false, x: 155, y: 500, width: 80, height: 80 });
-        this.answers.push({ value: wrong2, correct: false, x: 260, y: 500, width: 80, height: 80 });
+        this.answers.push({ value: wrong1, correct: false });
+        this.answers.push({ value: wrong2, correct: false });
         
         // Перемешать
         for (let i = this.answers.length - 1; i > 0; i--) {
@@ -81,10 +81,21 @@ class Game6 {
             [this.answers[i], this.answers[j]] = [this.answers[j], this.answers[i]];
         }
         
-        // Обновить позиции после перемешивания
+        // ПОСЛЕ перемешивания установить координаты
         this.answers[0].x = 50;
+        this.answers[0].y = 500;
+        this.answers[0].width = 80;
+        this.answers[0].height = 80;
+        
         this.answers[1].x = 155;
+        this.answers[1].y = 500;
+        this.answers[1].width = 80;
+        this.answers[1].height = 80;
+        
         this.answers[2].x = 260;
+        this.answers[2].y = 500;
+        this.answers[2].width = 80;
+        this.answers[2].height = 80;
         
         console.log('🔢 Пример:', this.currentProblem.text, '=', correctAnswer);
     }
