@@ -1,60 +1,61 @@
 /**
- * GAME 7 - Цвет или текст? (Stroop Test)
- * Механика: Тапай ТОЛЬКО если цвет текста совпадает со словом
- * Длительность: 5 секунд
+ * GAME 7 - Сборка заказа 🛒
+ * Механика: Тапай товары из списка на конвейере
+ * Длительность: 7 секунд
+ * Стиль: Ozon брендинг - синие градиенты, крупные emoji
  */
 
 class Game7 {
     constructor(canvas, ctx, gameManager) {
-        console.log('🎨 Game7: Инициализация...');
+        console.log('🛒 Game7: Инициализация...');
         
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
         
-        this.gameTime = 5;
+        this.gameTime = 7;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
         
         this.score = 0;
-        this.correct = 0;
-        this.requiredCorrect = 5; // Нужно 5 правильных
         
-        // Цвета
-        this.colors = [
-            { name: 'СИНИЙ', code: '#0066ff' },
-            { name: 'КРАСНЫЙ', code: '#ff0000' },
-            { name: 'ЗЕЛЁНЫЙ', code: '#00cc00' },
-            { name: 'ЖЁЛТЫЙ', code: '#ffcc00' }
-        ];
+        // Список товаров для заказа (3 товара)
+        const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮'];
+        this.shoppingList = [];
+        for (let i = 0; i < 3; i++) {
+            const randomIndex = Math.floor(Math.random() * allItems.length);
+            const item = allItems[randomIndex];
+            if (!this.shoppingList.includes(item)) {
+                this.shoppingList.push(item);
+            } else {
+                i--; // Повторить итерацию
+            }
+        }
+        this.collected = new Set();
         
-        // Текущее слово
-        this.currentWord = null;
-        this.currentColor = null;
-        this.isMatch = false;
-        this.changeTimer = 0;
-        this.changeInterval = 90; // Показывать 1.5 секунды
+        // Конвейер товаров
+        this.conveyor = [];
+        this.conveyorSpeed = 2;
+        this.spawnTimer = 0;
+        this.spawnInterval = 60;
         
-        this.generateWord();
         this.setupControls();
         
-        console.log('✅ Game7: Готов');
+        console.log('✅ Game7: Готов. Список:', this.shoppingList);
     }
     
-    generateWord() {
-        // Случайное слово
-        this.currentWord = this.colors[Math.floor(Math.random() * this.colors.length)];
+    spawnItem() {
+        const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎹'];
+        const emoji = allItems[Math.floor(Math.random() * allItems.length)];
         
-        // Случайный цвет для текста
-        this.currentColor = this.colors[Math.floor(Math.random() * this.colors.length)];
-        
-        // Проверить совпадение
-        this.isMatch = this.currentWord.name === this.currentColor.name;
-        
-        console.log('🎨 Слово:', this.currentWord.name, 'Цвет:', this.currentColor.name, 'Совпадение:', this.isMatch);
-        
-        this.changeTimer = 0;
+        this.conveyor.push({
+            emoji: emoji,
+            x: this.canvas.width,
+            y: 400,
+            size: 50,
+            needed: this.shoppingList.includes(emoji) && !this.collected.has(emoji)
+        });
     }
     
     setupControls() {
@@ -62,21 +63,33 @@ class Game7 {
             if (!this.isRunning) return;
             e.preventDefault();
             
-            // Тап = "совпадает"
-            if (this.isMatch) {
-                console.log('✅ ПРАВИЛЬНО! Совпадает');
-                this.correct++;
-                this.score += 20;
-                
-                if (this.correct >= this.requiredCorrect) {
-                    this.isRunning = false; // Остановить игру
-                    setTimeout(() => this.win(), 200);
-                } else {
-                    this.generateWord();
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+            const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+            
+            // Проверить тап по товару на конвейере
+            for (let i = this.conveyor.length - 1; i >= 0; i--) {
+                const item = this.conveyor[i];
+                if (x > item.x && x < item.x + item.size &&
+                    y > item.y && y < item.y + item.size) {
+                    
+                    if (item.needed) {
+                        console.log('✅ Собрал нужный товар:', item.emoji);
+                        this.collected.add(item.emoji);
+                        this.score += 30;
+                        this.conveyor.splice(i, 1);
+                        
+                        // Проверить победу
+                        if (this.collected.size === this.shoppingList.length) {
+                            setTimeout(() => this.win(), 300);
+                        }
+                    } else {
+                        console.log('❌ Собрал НЕ нужный товар!');
+                        this.lose();
+                    }
+                    break;
                 }
-            } else {
-                console.log('❌ НЕПРАВИЛЬНО! Не совпадает');
-                this.lose();
             }
         };
         
@@ -108,61 +121,88 @@ class Game7 {
     update() {
         if (!this.isRunning) return;
         
-        // Фон
+        // Фон Ozon - синий градиент
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#2c3e50');
-        gradient.addColorStop(1, '#34495e');
+        gradient.addColorStop(0, '#003d82');
+        gradient.addColorStop(1, '#005bff');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Заголовок
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 24px Courier New';
+        this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('ЦВЕТ = СЛОВО?', this.canvas.width / 2, 100);
+        this.ctx.fillText('СОБЕРИ ЗАКАЗ 🛒', this.canvas.width / 2, 80);
         
-        this.ctx.font = '16px Courier New';
-        this.ctx.fillText('Тапай ТОЛЬКО если совпадает!', this.canvas.width / 2, 130);
+        // Список товаров
+        this.ctx.font = '18px Arial';
+        this.ctx.fillText('СПИСОК:', this.canvas.width / 2, 130);
         
-        this.ctx.fillText(`Правильно: ${this.correct}/${this.requiredCorrect}`, this.canvas.width / 2, 160);
-        
-        // Слово с цветом
-        if (this.currentWord && this.currentColor) {
-            this.ctx.font = 'bold 64px Courier New';
-            this.ctx.fillStyle = this.currentColor.code;
-            this.ctx.fillText(this.currentWord.name, this.canvas.width / 2, 400);
+        let offsetX = (this.canvas.width - this.shoppingList.length * 70) / 2;
+        this.shoppingList.forEach((item, index) => {
+            const x = offsetX + index * 70 + 35;
+            const y = 180;
             
-            // Подсказка (пульсирует если совпадает)
-            if (this.isMatch) {
-                const alpha = 0.5 + Math.sin(Date.now() / 200) * 0.3;
-                this.ctx.globalAlpha = alpha;
-                this.ctx.fillStyle = '#00ff00';
-                this.ctx.font = 'bold 32px Courier New';
-                this.ctx.fillText('ТАПАЙ!', this.canvas.width / 2, 500);
+            // Фон товара
+            if (this.collected.has(item)) {
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 30, 0, Math.PI * 2);
+                this.ctx.fill();
                 this.ctx.globalAlpha = 1;
-            } else {
-                this.ctx.fillStyle = '#ff6b6b';
-                this.ctx.font = 'bold 32px Courier New';
-                this.ctx.fillText('НЕ ТАПАЙ!', this.canvas.width / 2, 500);
             }
+            
+            // Emoji
+            this.ctx.font = '48px Arial';
+            this.ctx.fillText(item, x, y + 15);
+            
+            // Галочка если собрано
+            if (this.collected.has(item)) {
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.font = 'bold 24px Arial';
+                this.ctx.fillText('✓', x + 20, y - 15);
+            }
+        });
+        
+        // Конвейер
+        this.ctx.fillStyle = '#333';
+        this.ctx.globalAlpha = 0.5;
+        this.ctx.fillRect(0, 370, this.canvas.width, 80);
+        this.ctx.globalAlpha = 1;
+        
+        // Линии конвейера
+        this.ctx.strokeStyle = '#666';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 375);
+        this.ctx.lineTo(this.canvas.width, 375);
+        this.ctx.moveTo(0, 445);
+        this.ctx.lineTo(this.canvas.width, 445);
+        this.ctx.stroke();
+        
+        // Спавн товаров
+        this.spawnTimer++;
+        if (this.spawnTimer >= this.spawnInterval) {
+            this.spawnItem();
+            this.spawnTimer = 0;
         }
         
-        // Автосмена через время (если не тапнули)
-        this.changeTimer++;
-        if (this.changeTimer >= this.changeInterval) {
-            // Пропустили не-совпадение = хорошо
-            if (!this.isMatch) {
-                console.log('✅ Правильно пропущено не-совпадение');
-                this.correct++;
-                this.score += 10;
-                
-                if (this.correct >= this.requiredCorrect) {
-                    this.isRunning = false; // Остановить игру
-                    setTimeout(() => this.win(), 200);
-                    return; // Прекратить выполнение
-                }
+        // Обновить и отрисовать товары на конвейере
+        for (let i = this.conveyor.length - 1; i >= 0; i--) {
+            const item = this.conveyor[i];
+            item.x -= this.conveyorSpeed;
+            
+            // Удалить если уехал
+            if (item.x + item.size < 0) {
+                this.conveyor.splice(i, 1);
+                continue;
             }
-            this.generateWord();
+            
+            // Отрисовать товар
+            this.ctx.font = '50px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size - 10);
         }
         
         // Обновить UI
@@ -171,8 +211,8 @@ class Game7 {
         // Проверить время
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
-            console.log('⏰ Время вышло! Правильных:', this.correct);
-            if (this.correct >= this.requiredCorrect) {
+            console.log('⏰ Время вышло! Собрано:', this.collected.size);
+            if (this.collected.size === this.shoppingList.length) {
                 this.win();
             } else {
                 this.lose();
@@ -193,13 +233,13 @@ class Game7 {
     }
     
     win() {
-        console.log('🏆 УСПЕХ! Достаточно правильных ответов');
+        console.log('🏆 УСПЕХ! Заказ собран!');
         this.stop();
         this.gameManager.endGame(true, this.score);
     }
     
     lose() {
-        console.log('💀 ПРОВАЛ!');
+        console.log('💀 ПРОВАЛ! Неправильный товар или время вышло');
         this.stop();
         this.gameManager.endGame(false, 0);
     }

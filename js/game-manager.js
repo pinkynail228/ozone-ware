@@ -11,7 +11,7 @@ class GameManager {
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6'];
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7'];
         this.playedGames = [];
         
         // DOM элементы
@@ -128,18 +128,20 @@ class GameManager {
         // Установить название игры
         const titles = {
             'runner': 'КУРЬЕР-РАННЕР',
-            'game2': 'СОРТИРОВКА ПОСЫЛОК',
+            'game2': 'СОРТИРОВКА',
             'game3': 'НАЙДИ ТОВАР',
             'game5': 'ПОЙМАЙ НОУТБУКИ',
-            'game6': 'МАТЕМАТИКА'
+            'game6': 'ПОСЧИТАЙ ТОВАРЫ',
+            'game7': 'СБОРКА ЗАКАЗА'
         };
         
         const instructions = {
             'runner': 'Тапай чтобы прыгать!',
-            'game2': 'Сортируй по форме!',
+            'game2': 'Одежда vs Техника!',
             'game3': 'Тапай на правильный!',
             'game5': 'Лови только ноутбуки 💻',
-            'game6': 'Реши пример!'
+            'game6': 'Реши пример!',
+            'game7': 'Собери товары из списка!'
         };
         
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
