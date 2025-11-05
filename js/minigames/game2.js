@@ -26,10 +26,10 @@ class Game2 {
         this.draggedPackage = null;
         this.dragOffset = { x: 0, y: 0 };
         
-        // Ящики (корзины) по ФОРМЕ - с понятными цветами
+        // Корзины: ОДЕЖДА и ТЕХНИКА
         this.boxes = [
-            { x: 80, y: 650, width: 100, height: 80, shape: 'square', label: '■', color: '#0066ff', name: 'КВАДРАТ' },
-            { x: 210, y: 650, width: 100, height: 80, shape: 'circle', label: '●', color: '#ff0066', name: 'КРУГ' }
+            { x: 60, y: 650, width: 120, height: 80, category: 'clothes', label: '👕', color: '#FF6B9D', name: 'ОДЕЖДА' },
+            { x: 210, y: 650, width: 120, height: 80, category: 'tech', label: '📱', color: '#4A90E2', name: 'ТЕХНИКА' }
         ];
         
         // Создать посылки
@@ -42,31 +42,38 @@ class Game2 {
     }
     
     /**
-     * Создать посылки разных ФОРМ
+     * Создать товары для сортировки
      */
     createPackages() {
-        const shapes = ['square', 'circle', 'square', 'circle'];
+        // Товары: 2 одежда + 2 техника
+        const items = [
+            { category: 'clothes', emoji: '👕', name: 'ФУТБОЛКА' },
+            { category: 'clothes', emoji: '👟', name: 'КРОССОВКИ' },
+            { category: 'tech', emoji: '📱', name: 'ТЕЛЕФОН' },
+            { category: 'tech', emoji: '💻', name: 'НОУТБУК' }
+        ];
         
         // Перемешать
-        for (let i = shapes.length - 1; i > 0; i--) {
+        for (let i = items.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
+            [items[i], items[j]] = [items[j], items[i]];
         }
         
-        // Создать 4 посылки в ряд - с разными цветами по форме
+        // Создать 4 товара в ряд
         for (let i = 0; i < 4; i++) {
             this.packages.push({
                 x: i * 80 + 35,
                 y: 250,
                 width: 60,
                 height: 60,
-                shape: shapes[i],
-                color: shapes[i] === 'square' ? '#0066ff' : '#ff0066', // Синие квадраты, красные круги
+                category: items[i].category,
+                emoji: items[i].emoji,
+                name: items[i].name,
                 sorted: false
             });
         }
         
-        console.log('📦 Создано посылок:', this.packages.length);
+        console.log('📦 Создано товаров:', this.packages.length);
     }
     
     /**
@@ -83,14 +90,14 @@ class Game2 {
             const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
-            // Найти посылку под пальцем (проверяем в обратном порядке - верхние первыми)
+            // Найти товар под пальцем (проверяем в обратном порядке - верхние первыми)
             for (let i = this.packages.length - 1; i >= 0; i--) {
                 const pkg = this.packages[i];
                 if (!pkg.sorted && this.isInside(x, y, pkg)) {
                     this.draggedPackage = pkg;
                     this.dragOffset.x = x - pkg.x;
                     this.dragOffset.y = y - pkg.y;
-                    console.log('🖐️ Схватил посылку:', pkg.color);
+                    console.log('🖐️ Схватил товар:', pkg.name);
                     break;
                 }
             }
@@ -106,7 +113,7 @@ class Game2 {
             const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
-            // Двигать посылку
+            // Двигать товар
             this.draggedPackage.x = x - this.dragOffset.x;
             this.draggedPackage.y = y - this.dragOffset.y;
         };
@@ -164,9 +171,9 @@ class Game2 {
         // Проверить каждый ящик
         for (const box of this.boxes) {
             if (this.isInside(centerX, centerY, box)) {
-                // Правильная ФОРМА?
-                if (pkg.shape === box.shape) {
-                    console.log('✅ Правильно! Посылка в ящик:', box.label);
+                // Правильная КАТЕГОРИЯ?
+                if (pkg.category === box.category) {
+                    console.log('✅ Правильно! Товар в ящик:', box.label);
                     pkg.sorted = true;
                     pkg.x = box.x + 20;
                     pkg.y = box.y + 10;
@@ -178,8 +185,8 @@ class Game2 {
                         setTimeout(() => this.win(), 300);
                     }
                 } else {
-                    console.log('❌ Неправильный цвет!');
-                    // Вернуть посылку на место (или проиграть)
+                    console.log('❌ Неправильный ящик!');
+                    // Вернуть товар на место (или проиграть)
                     this.lose();
                 }
                 return;
@@ -273,79 +280,47 @@ class Game2 {
             this.ctx.lineWidth = 4;
             this.ctx.strokeRect(box.x, box.y, box.width, box.height);
             
-            // Метка с ФОРМОЙ - большая и понятная
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 60px Arial';
+            // Emoji категории
+            this.ctx.font = 'bold 50px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + 60);
+            this.ctx.fillText(box.label, box.x + box.width / 2, box.y + 55);
             
-            // Название формы
-            this.ctx.font = 'bold 12px Courier New';
+            // Название категории
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = 'bold 14px Courier New';
             this.ctx.fillText(box.name, box.x + box.width / 2, box.y + box.height + 20);
         });
     }
     
     /**
-     * Отрисовать посылки
+     * Отрисовать товары (emoji)
      */
     drawPackages() {
         this.packages.forEach(pkg => {
             if (pkg.sorted && pkg !== this.draggedPackage) {
-                // Отсортированные посылки рисуем меньше
-                this.ctx.fillStyle = pkg.color;
-                this.ctx.fillRect(pkg.x, pkg.y, 40, 40);
+                // Отсортированные товары - меньше с галочкой
+                this.ctx.font = '32px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(pkg.emoji, pkg.x + 20, pkg.y + 32);
                 
                 // Галочка
-                this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 24px Courier New';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('✓', pkg.x + 20, pkg.y + 28);
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.font = 'bold 20px Arial';
+                this.ctx.fillText('✓', pkg.x + 35, pkg.y + 15);
             } else if (pkg !== this.draggedPackage) {
-                // Обычные посылки - рисуем ФОРМУ
-                this.ctx.fillStyle = pkg.color;
-                
-                if (pkg.shape === 'square') {
-                    this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
-                } else if (pkg.shape === 'circle') {
-                    this.ctx.beginPath();
-                    this.ctx.arc(pkg.x + pkg.width / 2, pkg.y + pkg.height / 2, pkg.width / 2, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-                
-                // Обводка
-                this.ctx.strokeStyle = '#fff';
-                this.ctx.lineWidth = 3;
-                if (pkg.shape === 'square') {
-                    this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
-                } else {
-                    this.ctx.stroke();
-                }
-                
-                // Штрихкод на посылке
-                this.drawBarcode(pkg.x + 10, pkg.y + pkg.height - 15, 40, 10);
+                // Обычные товары - просто emoji
+                this.ctx.font = '48px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(pkg.emoji, pkg.x + pkg.width / 2, pkg.y + pkg.height - 10);
             }
         });
         
-        // Перетаскиваемая посылка (рисуем последней)
+        // Перетаскиваемый товар (рисуем последней)
         if (this.draggedPackage) {
             const pkg = this.draggedPackage;
-            this.ctx.fillStyle = pkg.color;
-            
-            if (pkg.shape === 'square') {
-                this.ctx.fillRect(pkg.x, pkg.y, pkg.width, pkg.height);
-            } else if (pkg.shape === 'circle') {
-                this.ctx.beginPath();
-                this.ctx.arc(pkg.x + pkg.width / 2, pkg.y + pkg.height / 2, pkg.width / 2, 0, Math.PI * 2);
-                this.ctx.fill();
-            }
-            
-            this.ctx.strokeStyle = '#fff';
-            this.ctx.lineWidth = 4;
-            if (pkg.shape === 'square') {
-                this.ctx.strokeRect(pkg.x, pkg.y, pkg.width, pkg.height);
-            } else {
-                this.ctx.stroke();
-            }
+            this.ctx.font = '52px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(pkg.emoji, pkg.x + pkg.width / 2, pkg.y + pkg.height - 5);
         }
     }
     
@@ -365,19 +340,6 @@ class Game2 {
         
         const scoreDisplay = document.getElementById('score-display');
         scoreDisplay.textContent = this.score;
-    }
-    
-    /**
-     * Нарисовать штрихкод
-     */
-    drawBarcode(x, y, width, height) {
-        this.ctx.fillStyle = '#000';
-        const barWidth = width / 8;
-        for (let i = 0; i < 8; i++) {
-            if (i % 2 === 0) {
-                this.ctx.fillRect(x + i * barWidth, y, barWidth, height);
-            }
-        }
     }
     
     /**

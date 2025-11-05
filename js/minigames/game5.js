@@ -19,7 +19,7 @@ class Game5 {
         
         this.score = 0;
         this.caught = 0;
-        this.requiredCaught = 5; // Нужно поймать 5 товаров
+        // Просто ловим ноутбуки - чем больше тем лучше!
         
         // Корзина
         this.basket = {
@@ -33,7 +33,7 @@ class Game5 {
         // Падающие товары
         this.items = [];
         this.spawnTimer = 0;
-        this.spawnInterval = 70; // Кадры между спавном - реже!
+        this.spawnInterval = 50; // Кадры между спавном - чаще!
         
         this.setupControls();
         
@@ -121,22 +121,12 @@ class Game5 {
         // Обновить UI
         this.updateUI();
         
-        // Проверить победу
-        if (this.caught >= this.requiredCaught) {
-            console.log('🏆 Поймано достаточно товаров!');
-            this.win();
-            return;
-        }
-        
         // Проверить время
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
             console.log('⏰ Время вышло! Поймано:', this.caught);
-            if (this.caught >= this.requiredCaught) {
-                this.win();
-            } else {
-                this.lose();
-            }
+            // Всегда побеждаем если время вышло (главное - не ловить плохие)
+            this.win();
             return;
         }
         
@@ -166,7 +156,7 @@ class Game5 {
             y: 150,
             width: 40,
             height: 40,
-            speed: 2 + Math.random() * 1, // Медленнее! 2-3 вместо 3-5
+            speed: 3.5 + Math.random() * 1.5, // Быстрее! 3.5-5
             emoji: emoji,
             isGood: isGood
         };
