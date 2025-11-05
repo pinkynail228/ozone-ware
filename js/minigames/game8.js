@@ -1,75 +1,81 @@
 /**
- * GAME 8 - Найди пару
- * Механика: Тапай на две одинаковые карты подряд
- * Длительность: 6 секунд
+ * GAME 8 - Адреса доставки 🏠
+ * Механика: Запомни адрес за 2 сек, потом выбери правильный из 3х
+ * Длительность: 7 секунд
+ * Стиль: Ozon брендинг - синие градиенты, память
  */
 
 class Game8 {
     constructor(canvas, ctx, gameManager) {
-        console.log('🃏 Game8: Инициализация...');
+        console.log('🏠 Game8: Инициализация...');
         
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
         
-        this.gameTime = 6;
+        this.gameTime = 7;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
         
         this.score = 0;
-        this.pairs = 0;
-        this.requiredPairs = 3; // Нужно найти 3 пары
+        this.correctCount = 0;
+        this.requiredCorrect = 3; // Нужно 3 правильных
         
-        // Карты
-        this.cards = [];
-        this.firstCard = null;
-        this.secondCard = null;
-        this.lockInput = false;
+        // Состояния
+        this.state = 'showing'; // showing, choosing
+        this.showTimer = 0;
+        this.showDuration = 120; // 2 секунды
         
-        this.createCards();
+        // Адреса
+        this.streets = ['Ленина', 'Пушкина', 'Гагарина', 'Мира', 'Советская', 'Кирова'];
+        this.currentAddress = null;
+        this.options = [];
+        
+        this.generateAddress();
         this.setupControls();
         
         console.log('✅ Game8: Готов');
     }
     
-    createCards() {
-        const emojis = ['📱', '💻', '🎮', '⚡', '💎', '🎁'];
-        const selectedEmojis = emojis.slice(0, this.requiredPairs);
+    generateAddress() {
+        const street = this.streets[Math.floor(Math.random() * this.streets.length)];
+        const house = Math.floor(Math.random() * 99) + 1;
+        const apt = Math.floor(Math.random() * 150) + 1;
         
-        // Создать пары
-        const cardEmojis = [...selectedEmojis, ...selectedEmojis];
+        this.currentAddress = {
+            street: street,
+            house: house,
+            apt: apt,
+            full: `${street}, ${house}, кв. ${apt}`
+        };
         
-        // Перемешать
-        for (let i = cardEmojis.length - 1; i > 0; i--) {
+        // Создать варианты (2 неправильных + 1 правильный)
+        this.options = [this.currentAddress.full];
+        
+        // Неправильный вариант 1 - другая улица
+        const wrongStreet1 = this.streets.filter(s => s !== street)[Math.floor(Math.random() * (this.streets.length - 1))];
+        this.options.push(`${wrongStreet1}, ${house}, кв. ${apt}`);
+        
+        // Неправильный вариант 2 - другой номер дома
+        const wrongHouse = house + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 10) + 1);
+        this.options.push(`${street}, ${wrongHouse}, кв. ${apt}`);
+        
+        // Перемешать варианты
+        for (let i = this.options.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [cardEmojis[i], cardEmojis[j]] = [cardEmojis[j], cardEmojis[i]];
+            [this.options[i], this.options[j]] = [this.options[j], this.options[i]];
         }
         
-        // Создать карты в сетке 3x2
-        let index = 0;
-        for (let row = 0; row < 2; row++) {
-            for (let col = 0; col < 3; col++) {
-                this.cards.push({
-                    emoji: cardEmojis[index],
-                    x: col * 110 + 45,
-                    y: row * 130 + 350,
-                    width: 90,
-                    height: 110,
-                    revealed: false,
-                    matched: false,
-                    index: index
-                });
-                index++;
-            }
-        }
+        this.state = 'showing';
+        this.showTimer = 0;
         
-        console.log('🃏 Создано карт:', this.cards.length);
+        console.log('🏠 Адрес:', this.currentAddress.full);
     }
     
     setupControls() {
         this.tapHandler = (e) => {
-            if (!this.isRunning || this.lockInput) return;
+            if (!this.isRunning || this.state !== 'choosing') return;
             e.preventDefault();
             
             const touch = e.touches ? e.touches[0] : e;
@@ -77,21 +83,30 @@ class Game8 {
             const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
-            // Найти карту
-            for (const card of this.cards) {
-                if (card.matched || card.revealed) continue;
+            // Проверить тап по вариантам (3 кнопки)
+            const buttonHeight = 70;
+            const buttonSpacing = 20;
+            const startY = 400;
+            
+            for (let i = 0; i < 3; i++) {
+                const buttonY = startY + i * (buttonHeight + buttonSpacing);
                 
-                if (x >= card.x && x <= card.x + card.width &&
-                    y >= card.y && y <= card.y + card.height) {
+                if (y >= buttonY && y <= buttonY + buttonHeight) {
+                    const selected = this.options[i];
                     
-                    console.log('🃏 Открыта карта:', card.emoji);
-                    card.revealed = true;
-                    
-                    if (!this.firstCard) {
-                        this.firstCard = card;
-                    } else if (!this.secondCard) {
-                        this.secondCard = card;
-                        this.checkMatch();
+                    if (selected === this.currentAddress.full) {
+                        console.log('✅ Правильный адрес!');
+                        this.correctCount++;
+                        this.score += 30;
+                        
+                        if (this.correctCount >= this.requiredCorrect) {
+                            setTimeout(() => this.win(), 300);
+                        } else {
+                            this.generateAddress();
+                        }
+                    } else {
+                        console.log('❌ Неправильный адрес!');
+                        this.lose();
                     }
                     break;
                 }
@@ -100,36 +115,6 @@ class Game8 {
         
         this.canvas.addEventListener('touchstart', this.tapHandler);
         this.canvas.addEventListener('mousedown', this.tapHandler);
-    }
-    
-    checkMatch() {
-        this.lockInput = true;
-        
-        setTimeout(() => {
-            if (!this.isRunning) return; // Если игра остановлена, не продолжать
-            
-            if (this.firstCard.emoji === this.secondCard.emoji) {
-                console.log('✅ ПАРА НАЙДЕНА!');
-                this.firstCard.matched = true;
-                this.secondCard.matched = true;
-                this.pairs++;
-                this.score += 30;
-                
-                if (this.pairs >= this.requiredPairs) {
-                    this.isRunning = false; // Остановить игру
-                    setTimeout(() => this.win(), 300);
-                    return; // Не разблокировывать input
-                }
-            } else {
-                console.log('❌ НЕ ПАРА!');
-                this.firstCard.revealed = false;
-                this.secondCard.revealed = false;
-            }
-            
-            this.firstCard = null;
-            this.secondCard = null;
-            this.lockInput = false;
-        }, 500);
     }
     
     removeControls() {
@@ -156,28 +141,56 @@ class Game8 {
     update() {
         if (!this.isRunning) return;
         
-        // Фон
+        // Фон Ozon - синий градиент
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#0f2027');
-        gradient.addColorStop(0.5, '#203a43');
-        gradient.addColorStop(1, '#2c5364');
+        gradient.addColorStop(0, '#001f3f');
+        gradient.addColorStop(1, '#005bff');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Заголовок
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 28px Courier New';
+        this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('НАЙДИ ПАРЫ!', this.canvas.width / 2, 100);
+        this.ctx.fillText('АДРЕСА ДОСТАВКИ 🏠', this.canvas.width / 2, 80);
         
-        this.ctx.font = '18px Courier New';
-        this.ctx.fillText(`Пар найдено: ${this.pairs}/${this.requiredPairs}`, this.canvas.width / 2, 135);
+        this.ctx.font = '16px Arial';
+        this.ctx.fillText(`Правильно: ${this.correctCount}/${this.requiredCorrect}`, this.canvas.width / 2, 115);
         
-        this.ctx.font = '14px Courier New';
-        this.ctx.fillText('Тапай на две одинаковые карты', this.canvas.width / 2, 165);
-        
-        // Отрисовать карты
-        this.drawCards();
+        // Логика состояний
+        if (this.state === 'showing') {
+            // Показываем адрес
+            this.showTimer++;
+            
+            this.ctx.font = '18px Arial';
+            this.ctx.fillText('ЗАПОМНИ АДРЕС:', this.canvas.width / 2, 180);
+            
+            // Адрес большим шрифтом
+            this.ctx.fillStyle = '#00ff88';
+            this.ctx.font = 'bold 20px Courier New';
+            const lines = this.wrapText(this.currentAddress.full, 300);
+            lines.forEach((line, i) => {
+                this.ctx.fillText(line, this.canvas.width / 2, 250 + i * 30);
+            });
+            
+            // Таймер
+            const remaining = Math.max(0, (this.showDuration - this.showTimer) / 60);
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = '48px Arial';
+            this.ctx.fillText(Math.ceil(remaining), this.canvas.width / 2, 400);
+            
+            if (this.showTimer >= this.showDuration) {
+                this.state = 'choosing';
+            }
+        } else {
+            // Выбор адреса
+            this.ctx.font = '18px Arial';
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillText('ВЫБЕРИ ПРАВИЛЬНЫЙ:', this.canvas.width / 2, 180);
+            
+            // Кнопки с вариантами
+            this.drawOptions();
+        }
         
         // Обновить UI
         this.updateUI();
@@ -185,8 +198,8 @@ class Game8 {
         // Проверить время
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
-            console.log('⏰ Время вышло! Пар:', this.pairs);
-            if (this.pairs >= this.requiredPairs) {
+            console.log('⏰ Время вышло!');
+            if (this.correctCount >= this.requiredCorrect) {
                 this.win();
             } else {
                 this.lose();
@@ -197,37 +210,52 @@ class Game8 {
         this.gameLoop = requestAnimationFrame(() => this.update());
     }
     
-    drawCards() {
-        this.cards.forEach(card => {
-            // Фон карты
-            if (card.matched) {
-                this.ctx.fillStyle = '#2ecc71'; // Зелёный для найденных
-            } else if (card.revealed) {
-                this.ctx.fillStyle = '#fff';
+    wrapText(text, maxWidth) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        words.forEach(word => {
+            const testLine = currentLine + (currentLine ? ' ' : '') + word;
+            const metrics = this.ctx.measureText(testLine);
+            if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
             } else {
-                this.ctx.fillStyle = '#3498db'; // Синий для закрытых
+                currentLine = testLine;
             }
-            this.ctx.fillRect(card.x, card.y, card.width, card.height);
+        });
+        if (currentLine) lines.push(currentLine);
+        return lines;
+    }
+    
+    drawOptions() {
+        const buttonHeight = 70;
+        const buttonSpacing = 20;
+        const startY = 400;
+        const buttonWidth = 340;
+        const buttonX = (this.canvas.width - buttonWidth) / 2;
+        
+        this.options.forEach((option, i) => {
+            const y = startY + i * (buttonHeight + buttonSpacing);
+            
+            // Фон кнопки
+            this.ctx.fillStyle = '#0066ff';
+            this.ctx.fillRect(buttonX, y, buttonWidth, buttonHeight);
             
             // Обводка
-            this.ctx.strokeStyle = card.revealed || card.matched ? '#000' : '#fff';
+            this.ctx.strokeStyle = '#00bfff';
             this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(card.x, card.y, card.width, card.height);
+            this.ctx.strokeRect(buttonX, y, buttonWidth, buttonHeight);
             
-            // Содержимое
-            if (card.revealed || card.matched) {
-                // Показать emoji
-                this.ctx.font = 'bold 48px Courier New';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillStyle = card.matched ? '#fff' : '#000';
-                this.ctx.fillText(card.emoji, card.x + card.width / 2, card.y + card.height / 2 + 15);
-            } else {
-                // Вопросительный знак
-                this.ctx.font = 'bold 48px Courier New';
-                this.ctx.fillStyle = '#fff';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('?', card.x + card.width / 2, card.y + card.height / 2 + 15);
-            }
+            // Текст
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = 'bold 16px Courier New';
+            this.ctx.textAlign = 'center';
+            const lines = this.wrapText(option, 320);
+            lines.forEach((line, li) => {
+                this.ctx.fillText(line, this.canvas.width / 2, y + 30 + li * 20);
+            });
         });
     }
     
