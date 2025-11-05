@@ -2,7 +2,7 @@
 
 # 🚀 Быстрый деплой на Vercel
 
-echo "🎮 Ozone WarioWare - Деплой на Vercel"
+echo "🎮 OzonWare - Деплой на Vercel"
 echo "======================================"
 echo ""
 

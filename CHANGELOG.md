@@ -1,4 +1,4 @@
-# 📝 Changelog Ozone WarioWare
+# 📝 Changelog Ozone OzonWare
 
 ## [1.0.0] - 2025-11-05
 

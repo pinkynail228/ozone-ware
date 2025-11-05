@@ -12,14 +12,14 @@ git init
 git add .
 
 # Коммит
-git commit -m "Ozone WarioWare v2.1 - 8 игр готовы"
+git commit -m "OzonWare v2.1 - 8 игр готовы"
 ```
 
 ### Шаг 2: Залить на GitHub
 
 ```bash
 # Создать репозиторий на github.com, потом:
-git remote add origin https://github.com/ВАШ_USERNAME/ozone-warioware.git
+git remote add origin https://github.com/ВАШ_USERNAME/ozonware.git
 git branch -M main
 git push -u origin main
 ```
@@ -40,7 +40,7 @@ git push -u origin main
 ### ✅ Готово! 
 Vercel автоматически задеплоит проект и даст ссылку типа:
 ```
-https://ozone-warioware.vercel.app
+https://ozonware.vercel.app
 ```
 
 ---
@@ -210,7 +210,7 @@ git push -u origin main
 
 После деплоя получишь ссылку типа:
 ```
-https://ozone-warioware-xyz123.vercel.app
+https://ozonware-xyz123.vercel.app
 ```
 
 Можно:

@@ -101,4 +101,4 @@ window.addEventListener('unhandledrejection', (e) => {
     console.error('❌ Необработанный промис:', e.reason);
 });
 
-console.log('✅ main.js загружен');
+console.log('🎮 OzonWare: Загрузка...');
