@@ -20,14 +20,18 @@ class Game3 {
         this.score = 0;
         this.foundCorrect = false;
         
-        // Типы товаров (emoji)
+        // Типы товаров маркетплейса (emoji)
         this.itemTypes = [
             { emoji: '📱', name: 'ТЕЛЕФОН' },
             { emoji: '💻', name: 'НОУТБУК' },
             { emoji: '📺', name: 'ТЕЛЕВИЗОР' },
             { emoji: '🎧', name: 'НАУШНИКИ' },
             { emoji: '⌚', name: 'ЧАСЫ' },
-            { emoji: '📷', name: 'КАМЕРА' }
+            { emoji: '📷', name: 'КАМЕРА' },
+            { emoji: '👕', name: 'ОДЕЖДА' },
+            { emoji: '👟', name: 'КРОССОВКИ' },
+            { emoji: '🎮', name: 'КОНСОЛЬ' },
+            { emoji: '📚', name: 'КНИГА' }
         ];
         
         // Выбрать целевой товар

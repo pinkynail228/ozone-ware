@@ -174,7 +174,7 @@ class Game6 {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 28px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('БЫСТРАЯ МАТЕМАТИКА!', this.canvas.width / 2, 100);
+        this.ctx.fillText('ПОСЧИТАЙ ТОВАРЫ! 🛒', this.canvas.width / 2, 100);
         
         this.ctx.font = '18px Courier New';
         this.ctx.fillText(`Решено: ${this.solved}/${this.requiredSolved}`, this.canvas.width / 2, 135);
@@ -185,7 +185,7 @@ class Game6 {
             this.ctx.fillText(this.currentProblem.text, this.canvas.width / 2, 300);
             
             this.ctx.font = 'bold 48px Courier New';
-            this.ctx.fillText('= ?', this.canvas.width / 2, 380);
+            this.ctx.fillText('= ? ₽', this.canvas.width / 2, 380);
         }
         
         // Варианты ответов

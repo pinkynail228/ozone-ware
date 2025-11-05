@@ -320,6 +320,9 @@ class Game2 {
                 } else {
                     this.ctx.stroke();
                 }
+                
+                // Штрихкод на посылке
+                this.drawBarcode(pkg.x + 10, pkg.y + pkg.height - 15, 40, 10);
             }
         });
         
@@ -362,6 +365,19 @@ class Game2 {
         
         const scoreDisplay = document.getElementById('score-display');
         scoreDisplay.textContent = this.score;
+    }
+    
+    /**
+     * Нарисовать штрихкод
+     */
+    drawBarcode(x, y, width, height) {
+        this.ctx.fillStyle = '#000';
+        const barWidth = width / 8;
+        for (let i = 0; i < 8; i++) {
+            if (i % 2 === 0) {
+                this.ctx.fillRect(x + i * barWidth, y, barWidth, height);
+            }
+        }
     }
     
     /**

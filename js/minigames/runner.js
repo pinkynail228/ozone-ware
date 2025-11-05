@@ -266,10 +266,10 @@ class RunnerGame {
     }
     
     /**
-     * Спавн препятствия (как в Chrome Dino)
+     * Спавн препятствия - тематика доставки маркетплейса
      */
     spawnObstacle() {
-        const types = ['dog', 'fence', 'box'];
+        const types = ['box', 'cart', 'pallet', 'cone'];
         const type = types[Math.floor(Math.random() * types.length)];
         
         let obstacle = {
@@ -278,21 +278,26 @@ class RunnerGame {
             y: 630, // На земле
         };
         
-        if (type === 'dog') {
-            // Собачка - узкая и низкая
-            obstacle.width = 25;
-            obstacle.height = 30;
-            obstacle.emoji = '🐶';
-        } else if (type === 'fence') {
-            // Забор - узкий и высокий
-            obstacle.width = 20;
-            obstacle.height = 40;
-            obstacle.color = '#8B4513';
-        } else {
-            // Коробка - квадратная
+        if (type === 'box') {
+            // Коробка с товаром
             obstacle.width = 30;
             obstacle.height = 30;
             obstacle.emoji = '📦';
+        } else if (type === 'cart') {
+            // Тележка с товарами
+            obstacle.width = 28;
+            obstacle.height = 32;
+            obstacle.emoji = '🛒';
+        } else if (type === 'pallet') {
+            // Паллета с грузом
+            obstacle.width = 35;
+            obstacle.height = 25;
+            obstacle.color = '#CD853F';
+        } else {
+            // Дорожный конус
+            obstacle.width = 20;
+            obstacle.height = 35;
+            obstacle.emoji = '🚧';
         }
         
         this.obstacles.push(obstacle);
@@ -300,25 +305,27 @@ class RunnerGame {
     }
     
     /**
-     * Отрисовать препятствия (собачки, заборы, коробки)
+     * Отрисовать препятствия (тематика маркетплейса)
      */
     drawObstacles() {
         this.obstacles.forEach(obs => {
             if (obs.emoji) {
-                // Emoji препятствия (собачка или коробка)
+                // Emoji препятствия (коробки, тележки, конусы)
                 this.ctx.font = '32px Arial';
                 this.ctx.textAlign = 'center';
                 this.ctx.fillText(obs.emoji, obs.x + obs.width / 2, obs.y + obs.height - 5);
-            } else if (obs.type === 'fence') {
-                // Забор (пиксель-арт)
+            } else if (obs.type === 'pallet') {
+                // Паллета (пиксель-арт)
                 this.ctx.fillStyle = obs.color;
-                // Вертикальные планки
-                this.ctx.fillRect(obs.x, obs.y, 5, obs.height);
-                this.ctx.fillRect(obs.x + 7, obs.y, 5, obs.height);
-                this.ctx.fillRect(obs.x + 14, obs.y, 5, obs.height);
-                // Горизонтальные
-                this.ctx.fillRect(obs.x, obs.y + 10, obs.width, 4);
-                this.ctx.fillRect(obs.x, obs.y + 25, obs.width, 4);
+                // Основание паллеты
+                this.ctx.fillRect(obs.x, obs.y + obs.height - 10, obs.width, 10);
+                // Планки паллеты
+                for (let i = 0; i < 3; i++) {
+                    this.ctx.fillRect(obs.x + i * 12, obs.y + obs.height - 20, 10, 8);
+                }
+                // Груз сверху
+                this.ctx.fillStyle = '#8B4513';
+                this.ctx.fillRect(obs.x + 5, obs.y, obs.width - 10, obs.height - 20);
             }
         });
     }
