@@ -14,10 +14,58 @@
     <div id="game-container">
         <!-- Экран загрузки -->
         <div id="loading-screen" class="screen active">
-            <div class="logo">🎮</div>
-            <h1>OZONWARE</h1>
-            <p>Нажми, чтобы начать!</p>
-            <div class="tap-hint">👆 TAP</div>
+            <!-- Анимированный фон -->
+            <div class="particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+            
+            <!-- Пульсирующие круги -->
+            <div class="pulse-circles">
+                <div class="pulse-circle"></div>
+                <div class="pulse-circle"></div>
+                <div class="pulse-circle"></div>
+            </div>
+            
+            <!-- Контент -->
+            <div class="splash-content">
+                <div class="logo-container">
+                    <div class="logo-glow"></div>
+                    <div class="logo">🎮</div>
+                </div>
+                
+                <h1 class="glitch" data-text="OZONWARE">OZONWARE</h1>
+                
+                <div class="subtitle">
+                    <span class="letter">M</span>
+                    <span class="letter">I</span>
+                    <span class="letter">N</span>
+                    <span class="letter">I</span>
+                    <span class="letter">-</span>
+                    <span class="letter">G</span>
+                    <span class="letter">A</span>
+                    <span class="letter">M</span>
+                    <span class="letter">E</span>
+                    <span class="letter">S</span>
+                </div>
+                
+                <p class="press-start">Нажми, чтобы начать!</p>
+                <div class="tap-hint">👆 TAP</div>
+                
+                <div class="stats">
+                    <div class="stat">8 ИГР</div>
+                    <div class="stat-divider">•</div>
+                    <div class="stat">5-7 СЕК</div>
+                    <div class="stat-divider">•</div>
+                    <div class="stat">ХАОС</div>
+                </div>
+            </div>
         </div>
 
         <!-- Экран выбора игры / Промежуточный -->

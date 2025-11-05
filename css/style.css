@@ -66,31 +66,203 @@ body {
 
 /* === ЭКРАН ЗАГРУЗКИ === */
 #loading-screen {
-    background: linear-gradient(135deg, #0066ff, #0099ff);
+    background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
     text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Анимированные частицы */
+.particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: float 3s infinite ease-in-out;
+}
+
+.particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 3s; }
+.particle:nth-child(2) { left: 20%; animation-delay: 0.5s; animation-duration: 4s; }
+.particle:nth-child(3) { left: 30%; animation-delay: 1s; animation-duration: 3.5s; }
+.particle:nth-child(4) { left: 40%; animation-delay: 1.5s; animation-duration: 4.5s; }
+.particle:nth-child(5) { left: 60%; animation-delay: 2s; animation-duration: 3s; }
+.particle:nth-child(6) { left: 70%; animation-delay: 2.5s; animation-duration: 4s; }
+.particle:nth-child(7) { left: 80%; animation-delay: 3s; animation-duration: 3.5s; }
+.particle:nth-child(8) { left: 90%; animation-delay: 3.5s; animation-duration: 4.5s; }
+
+/* Пульсирующие круги */
+.pulse-circles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pulse-circle {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulseExpand 2s ease-out infinite;
+}
+
+.pulse-circle:nth-child(1) { animation-delay: 0s; }
+.pulse-circle:nth-child(2) { animation-delay: 0.7s; }
+.pulse-circle:nth-child(3) { animation-delay: 1.4s; }
+
+/* Контент splash screen */
+.splash-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Логотип с свечением */
+.logo-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.logo-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
 }
 
 #loading-screen .logo {
-    font-size: 80px;
-    animation: pulse 1.5s infinite;
+    font-size: 100px;
+    animation: logoSpin 4s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
 }
 
+/* Глитч эффект на заголовке */
 #loading-screen h1 {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: bold;
     margin: 20px 0;
-    text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+    text-shadow: 
+        3px 3px 0 #ff006e,
+        -3px -3px 0 #3a86ff,
+        0 0 20px rgba(255, 255, 255, 0.5);
+    animation: glitchText 3s infinite;
+    position: relative;
 }
 
-#loading-screen p {
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff006e;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #3a86ff;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+
+/* Subtitle с анимированными буквами */
+.subtitle {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 30px;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.letter {
+    display: inline-block;
+    animation: letterBounce 1s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.letter:nth-child(1) { animation-delay: 0.1s; }
+.letter:nth-child(2) { animation-delay: 0.2s; }
+.letter:nth-child(3) { animation-delay: 0.3s; }
+.letter:nth-child(4) { animation-delay: 0.4s; }
+.letter:nth-child(5) { animation-delay: 0.5s; }
+.letter:nth-child(6) { animation-delay: 0.6s; }
+.letter:nth-child(7) { animation-delay: 0.7s; }
+.letter:nth-child(8) { animation-delay: 0.8s; }
+.letter:nth-child(9) { animation-delay: 0.9s; }
+.letter:nth-child(10) { animation-delay: 1s; }
+
+/* Press start */
+.press-start {
     font-size: 20px;
     margin: 20px 0;
+    animation: blink 1.5s infinite;
 }
 
 .tap-hint {
-    font-size: 40px;
-    margin-top: 40px;
+    font-size: 50px;
+    margin-top: 20px;
     animation: bounce 1s infinite;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+/* Статистика */
+.stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+.stat {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    animation: statPulse 2s ease-in-out infinite;
+}
+
+.stat:nth-child(1) { animation-delay: 0s; }
+.stat:nth-child(3) { animation-delay: 0.3s; }
+.stat:nth-child(5) { animation-delay: 0.6s; }
+
+.stat-divider {
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
 }
 
 /* === ЭКРАН ПЕРЕХОДА === */
@@ -291,6 +463,168 @@ button:active {
     0% { transform: scale(0); }
     60% { transform: scale(1.2); }
     100% { transform: scale(1); }
+}
+
+/* === НОВЫЕ АНИМАЦИИ ДЛЯ SPLASH SCREEN === */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+    0% { 
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% { 
+        transform: translateY(-100px) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes pulseExpand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+}
+
+@keyframes logoSpin {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        transform: rotate(-10deg) scale(1.1);
+    }
+    75% {
+        transform: rotate(10deg) scale(1.1);
+    }
+}
+
+@keyframes glitchText {
+    0%, 90%, 100% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+}
+
+@keyframes glitch-anim {
+    0% {
+        clip: rect(42px, 9999px, 44px, 0);
+    }
+    5% {
+        clip: rect(12px, 9999px, 59px, 0);
+    }
+    10% {
+        clip: rect(48px, 9999px, 29px, 0);
+    }
+    15% {
+        clip: rect(42px, 9999px, 73px, 0);
+    }
+    20% {
+        clip: rect(63px, 9999px, 27px, 0);
+    }
+    25% {
+        clip: rect(34px, 9999px, 55px, 0);
+    }
+    30% {
+        clip: rect(86px, 9999px, 73px, 0);
+    }
+    35% {
+        clip: rect(20px, 9999px, 20px, 0);
+    }
+    40% {
+        clip: rect(26px, 9999px, 60px, 0);
+    }
+    45% {
+        clip: rect(88px, 9999px, 94px, 0);
+    }
+    50% {
+        clip: rect(84px, 9999px, 50px, 0);
+    }
+    55% {
+        clip: rect(13px, 9999px, 45px, 0);
+    }
+    60% {
+        clip: rect(67px, 9999px, 61px, 0);
+    }
+    65% {
+        clip: rect(74px, 9999px, 49px, 0);
+    }
+    70% {
+        clip: rect(75px, 9999px, 6px, 0);
+    }
+    75% {
+        clip: rect(2px, 9999px, 82px, 0);
+    }
+    80% {
+        clip: rect(30px, 9999px, 72px, 0);
+    }
+    85% {
+        clip: rect(25px, 9999px, 53px, 0);
+    }
+    90% {
+        clip: rect(58px, 9999px, 65px, 0);
+    }
+    95% {
+        clip: rect(35px, 9999px, 34px, 0);
+    }
+    100% {
+        clip: rect(32px, 9999px, 42px, 0);
+    }
+}
+
+@keyframes letterBounce {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.2);
+    }
+}
+
+@keyframes blink {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes statPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
 }
 
 /* === АДАПТАЦИЯ ПОД МАЛЕНЬКИЕ ЭКРАНЫ === */
