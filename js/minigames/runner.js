@@ -34,9 +34,9 @@ class RunnerGame {
         
         // Препятствия
         this.obstacles = [];
-        this.obstacleSpeed = 5;
+        this.obstacleSpeed = 3; // Замедлили с 5 до 3
         this.obstacleSpawnTimer = 0;
-        this.obstacleSpawnInterval = 80; // Кадры между спавном
+        this.obstacleSpawnInterval = 120; // Увеличили с 80 до 120 - реже препятствия
         
         // Фон (симуляция движения)
         this.backgroundOffset = 0;

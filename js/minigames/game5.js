@@ -1,6 +1,6 @@
 /**
- * GAME 5 - Поймай товары
- * Механика: Двигай корзину (тап или драг) чтобы ловить падающие товары
+ * GAME 5 - Поймай ноутбуки
+ * Механика: Двигай корзину, лови ТОЛЬКО ноутбуки 💻
  * Длительность: 6 секунд
  */
 
@@ -94,7 +94,7 @@ class Game5 {
         this.ctx.fillStyle = '#000';
         this.ctx.font = 'bold 24px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('ПОЙМАЙ ТОВАРЫ!', this.canvas.width / 2, 80);
+        this.ctx.fillText('ПОЙМАЙ НОУТБУКИ 💻', this.canvas.width / 2, 80);
         
         this.ctx.font = '18px Courier New';
         this.ctx.fillText(`Поймано: ${this.caught}/${this.requiredCaught}`, this.canvas.width / 2, 110);
@@ -144,17 +144,25 @@ class Game5 {
     }
     
     spawnItem() {
-        const emojis = ['📱', '💻', '📦', '🎁', '⚡', '💎'];
+        // Ноутбуки (хорошие) и другие предметы (плохие)
+        const goodItems = ['💻']; // Только ноутбуки!
+        const badItems = ['📱', '📦', '🎁', '⚡', '💎'];
+        
+        // 40% шанс ноутбука
+        const isGood = Math.random() < 0.4;
+        const emoji = isGood ? goodItems[0] : badItems[Math.floor(Math.random() * badItems.length)];
+        
         const item = {
             x: Math.random() * (this.canvas.width - 40),
             y: 150,
             width: 40,
             height: 40,
             speed: 3 + Math.random() * 2,
-            emoji: emojis[Math.floor(Math.random() * emojis.length)]
+            emoji: emoji,
+            isGood: isGood
         };
         this.items.push(item);
-        console.log('📦 Товар спавнится на x:', item.x);
+        console.log('📦 Предмет спавнится:', emoji, 'Good:', isGood);
     }
     
     updateItems() {
@@ -167,9 +175,16 @@ class Game5 {
                 item.y <= this.basket.y + this.basket.height &&
                 item.x + item.width >= this.basket.x &&
                 item.x <= this.basket.x + this.basket.width) {
-                console.log('✅ Поймал товар!');
-                this.caught++;
-                this.score += 20;
+                
+                // Считаем ТОЛЬКО ноутбуки!
+                if (item.isGood) {
+                    console.log('✅ Поймал ноутбук!');
+                    this.caught++;
+                    this.score += 20;
+                } else {
+                    console.log('❌ Это не ноутбук!');
+                    // Можно штраф, но пока просто не считаем
+                }
                 this.items.splice(i, 1);
                 continue;
             }

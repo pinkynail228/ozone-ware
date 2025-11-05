@@ -19,7 +19,7 @@ class Game6 {
         
         this.score = 0;
         this.solved = 0;
-        this.requiredSolved = 3; // Нужно решить 3 примера
+        this.requiredSolved = 1; // Нужно решить 1 пример
         
         // Текущий пример
         this.currentProblem = null;
