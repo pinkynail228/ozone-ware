@@ -60,8 +60,8 @@ function setupEventListeners() {
     const gameoverRestartBtn = document.getElementById('gameover-restart-btn');
     if (gameoverRestartBtn) {
         gameoverRestartBtn.addEventListener('click', () => {
-            console.log('🔁 Нажата кнопка: Начать заново после Game Over');
-            gameManager.restart();
+            console.log('🏁 Нажата кнопка: Вернуться на заставку');
+            gameManager.showStartScreen();
         });
     }
     
