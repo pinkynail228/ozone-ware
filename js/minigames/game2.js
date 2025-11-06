@@ -52,6 +52,12 @@ class Game2 {
             active: false,
             startX: 0
         };
+        this.cardAnimation = {
+            active: false,
+            direction: null,
+            onComplete: null
+        };
+        this.cardAnimationSpeed = 28;
 
         this.setupControls();
 
@@ -117,7 +123,7 @@ class Game2 {
 
     setupControls() {
         this.pointerDownHandler = (e) => {
-            if (!this.isRunning || !this.currentItem) return;
+            if (!this.isRunning || !this.currentItem || this.cardAnimation.active) return;
             e.preventDefault();
 
             const { x } = this.getPointerPosition(e);
@@ -127,7 +133,7 @@ class Game2 {
         };
 
         this.pointerMoveHandler = (e) => {
-            if (!this.isRunning || !this.dragState.active) return;
+            if (!this.isRunning || !this.dragState.active || this.cardAnimation.active) return;
             e.preventDefault();
 
             const { x } = this.getPointerPosition(e);
@@ -135,7 +141,7 @@ class Game2 {
         };
 
         this.pointerUpHandler = (e) => {
-            if (!this.isRunning || !this.dragState.active) return;
+            if (!this.isRunning || !this.dragState.active || this.cardAnimation.active) return;
             e.preventDefault();
 
             const deltaX = this.cardOffsetX;
@@ -179,24 +185,33 @@ class Game2 {
     }
 
     handleSwipe(direction) {
-        if (!this.currentItem) return;
+        if (!this.currentItem || this.cardAnimation.active) return;
 
         console.log(`➡️ Свайп ${direction === 'right' ? 'ВПРАВО' : 'ВЛЕВО'}:`, this.currentItem.name);
 
-        if (direction === 'right') {
-            if (this.currentItem.category === this.targetCategory) {
-                this.collectCurrentItem();
+        const action = () => {
+            if (direction === 'right') {
+                if (this.currentItem.category === this.targetCategory) {
+                    this.collectCurrentItem();
+                } else {
+                    this.fail('Неправильный товар попал в корзину');
+                }
             } else {
-                this.fail('Неправильный товар попал в корзину');
+                if (this.currentItem.category === this.targetCategory) {
+                    this.fail('Пропустил нужный товар');
+                } else {
+                    if (this.sound) this.sound.playEffect('dropBad', 0.5);
+                    this.advanceItem();
+                }
             }
-        } else {
-            if (this.currentItem.category === this.targetCategory) {
-                this.fail('Пропустил нужный товар');
-            } else {
-                if (this.sound) this.sound.playEffect('dropBad', 0.5);
-                this.advanceItem();
-            }
-        }
+        };
+
+        if (this.sound) this.sound.playEffect('transition', 0.5);
+        this.cardAnimation = {
+            active: true,
+            direction,
+            onComplete: action
+        };
     }
 
     collectCurrentItem() {
@@ -249,7 +264,10 @@ class Game2 {
         this.ctx.fillStyle = '#14213D';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        this.updateCardAnimation();
+
         this.drawHeader();
+        this.drawBins();
         this.drawCard();
         this.drawBasket();
 
@@ -280,13 +298,51 @@ class Game2 {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.textAlign = 'center';
         this.ctx.font = 'bold 26px Arial';
-        this.ctx.fillText('СОРТИРОВКА ПО КАТЕГОРИИ', this.canvas.width / 2, 80);
+        this.ctx.fillText('СОРТИРОВКА ПО КАТЕГОРИИ', this.canvas.width / 2, 70);
 
         this.ctx.font = '18px Arial';
-        this.ctx.fillText(`Тебе нужно: ${this.targetLabel}`, this.canvas.width / 2, 120);
+        this.ctx.fillText(`Собирай: ${this.targetLabel}`, this.canvas.width / 2, 110);
 
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('Свайпай 👉 — добавить, 👈 — пропустить', this.canvas.width / 2, 150);
+        this.ctx.fillText('Перетащи карточку в КОРЗИНУ справа или МУСОРКУ слева', this.canvas.width / 2, 140);
+
+        this.ctx.font = '15px Arial';
+        this.ctx.fillStyle = '#00ff9d';
+        this.ctx.fillText('4 товара за 6 секунд', this.canvas.width / 2, 165);
+        this.ctx.fillStyle = '#FFFFFF';
+    }
+
+    drawBins() {
+        const binWidth = 140;
+        const binHeight = 180;
+        const top = 190;
+        const leftX = 30;
+        const rightX = this.canvas.width - binWidth - 30;
+
+        const draggingRight = (this.cardAnimation.active && this.cardAnimation.direction === 'right') || (this.dragState.active && this.cardOffsetX > 40);
+        const draggingLeft = (this.cardAnimation.active && this.cardAnimation.direction === 'left') || (this.dragState.active && this.cardOffsetX < -40);
+
+        const drawBin = (x, icon, label, highlight, accentColor) => {
+            this.ctx.save();
+            this.ctx.globalAlpha = highlight ? 1 : 0.5;
+            this.ctx.fillStyle = '#1F2A44';
+            this.ctx.fillRect(x, top, binWidth, binHeight);
+            this.ctx.strokeStyle = accentColor;
+            this.ctx.lineWidth = highlight ? 5 : 3;
+            this.ctx.strokeRect(x, top, binWidth, binHeight);
+
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = '60px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(icon, x + binWidth / 2, top + 80);
+
+            this.ctx.font = 'bold 16px Arial';
+            this.ctx.fillText(label, x + binWidth / 2, top + binHeight - 20);
+            this.ctx.restore();
+        };
+
+        drawBin(leftX, '🗑️', 'МУСОРКА', draggingLeft, '#ff6b81');
+        drawBin(rightX, '🧺', 'КОРЗИНА', draggingRight, '#00ff9d');
     }
 
     drawCard() {
@@ -378,6 +434,28 @@ class Game2 {
         document.getElementById('timer-text').textContent = Math.ceil(remaining);
         document.getElementById('timer-fill').style.width = (remaining / this.gameTime * 100) + '%';
         document.getElementById('score-display').textContent = this.score;
+    }
+
+    updateCardAnimation() {
+        if (!this.cardAnimation.active) return;
+
+        const directionMultiplier = this.cardAnimation.direction === 'right' ? 1 : -1;
+        this.cardOffsetX += directionMultiplier * this.cardAnimationSpeed;
+
+        if (Math.abs(this.cardOffsetX) > this.canvas.width / 2 + 200) {
+            const onComplete = this.cardAnimation.onComplete;
+            this.cardAnimation = {
+                active: false,
+                direction: null,
+                onComplete: null
+            };
+            if (onComplete) {
+                onComplete();
+            }
+            if (this.isRunning) {
+                this.cardOffsetX = 0;
+            }
+        }
     }
 
     win() {
