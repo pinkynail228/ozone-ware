@@ -114,9 +114,6 @@ class GameManager {
             case 'game10':
                 this.currentGame = new Game10(this.canvas, this.ctx, this);
                 break;
-            case 'game11':
-                this.currentGame = new Game11(this.canvas, this.ctx, this);
-                break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
                 return;
@@ -162,6 +159,7 @@ class GameManager {
         document.getElementById('game-instruction').textContent = instructions[gameName] || 'Начинай!';
         document.getElementById('game-number-display').textContent = this.gamesCompleted + 1;
         
+        this.renderLives();
         this.showScreen('transition');
         
         // Обратный отсчет
@@ -285,16 +283,23 @@ class GameManager {
     }
 
     renderLives() {
-        const livesDisplay = document.getElementById('lives-display');
-        if (!livesDisplay) return;
+        const containers = [
+            document.getElementById('lives-display'),
+            document.getElementById('transition-lives')
+        ];
 
-        livesDisplay.innerHTML = '';
-        for (let i = 0; i < this.maxLives; i++) {
-            const span = document.createElement('span');
-            span.className = 'life' + (i < this.lives ? '' : ' inactive');
-            span.textContent = '❤️';
-            livesDisplay.appendChild(span);
-        }
+        containers.forEach(container => {
+            if (!container) return;
+
+            container.innerHTML = '';
+            for (let i = 0; i < this.maxLives; i++) {
+                const span = document.createElement('span');
+                const isActive = i < this.lives;
+                span.className = 'life' + (isActive ? ' active' : ' inactive');
+                span.textContent = '❤️';
+                container.appendChild(span);
+            }
+        });
     }
 
     calculateReward(rawScore = 0) {
