@@ -1,95 +1,125 @@
 /**
- * GAME MANAGER - Управляет потоком игры
- * Отвечает за переключение экранов, счет, рандомизацию мини-игр
+ * GAME MANAGER - Управляет потоком игры, сериями мини-игр и системой жизней
  */
 
 class GameManager {
     constructor() {
         console.log('🎮 GameManager: Инициализация...');
-        
-        // Состояние игры
+
+        // Основное состояние
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game10'];
-        this.playedGames = [];
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game10'];
+        this.playedGames = [];
+
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
 
-        // DOM элементы
+        // DOM элементы экранов
         this.screens = {
             loading: document.getElementById('loading-screen'),
             transition: document.getElementById('transition-screen'),
             game: document.getElementById('game-screen'),
-            result: document.getElementById('result-screen')
+            result: document.getElementById('result-screen'),
+            gameover: document.getElementById('gameover-screen')
         };
-        
+
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
-        
+
+        // HUD элементы
+        this.transitionEmojiEl = document.getElementById('transition-emoji');
+        this.transitionTaglineEl = document.getElementById('transition-tagline');
+        this.countdownEl = document.getElementById('countdown-number');
+
+        this.resultIconEl = document.getElementById('result-icon');
+        this.resultTitleEl = document.getElementById('result-title');
+        this.lastEarnedEl = document.getElementById('last-earned');
+        this.finalScoreEl = document.getElementById('final-score');
+        this.gamesCompletedEl = document.getElementById('games-completed');
+
+        this.gameoverEmojiEl = document.getElementById('gameover-emoji');
+        this.gameoverTitleEl = document.getElementById('gameover-title');
+        this.gameoverSubtitleEl = document.getElementById('gameover-subtitle');
+        this.gameoverScoreEl = document.getElementById('gameover-score');
+        this.gameoverGamesEl = document.getElementById('gameover-games');
+
+        // Звук
+        this.sound = new window.SoundManager();
+
         // Debug
         this.debugPanel = document.getElementById('debug-panel');
         this.debugInfo = document.getElementById('debug-info');
-        this.debugMode = false; // Включить для отладки
-        
+        this.debugMode = false;
+
+        // Переходы
+        this.countdownInterval = null;
+        this.transitionData = {
+            runner: { emoji: '🚴‍♂️', tagline: 'УСПЕЙ ДОСТАВИТЬ!' },
+            game2: { emoji: '🧺', tagline: 'РЗБРОСЬ ПО КАТЕГОРИЯМ!' },
+            game3: { emoji: '🔍', tagline: 'НАШЁЛ? ТАПАЙ!' },
+            game5: { emoji: '💻', tagline: 'ЛОВИ ТОЛЬКО НОУТБУКИ!' },
+            game6: { emoji: '🧮', tagline: 'РЕШАЙ МГНОВЕННО!' },
+            game7: { emoji: '🛒', tagline: 'СБЕРИ ВСЁ ПО СПИСКУ!' },
+            game8: { emoji: '📦', tagline: 'НЕ ЗАБУДЬ АДРЕС!' },
+            game10: { emoji: '⚖️', tagline: 'ВЫБЕРИ ПРАВИЛЬНЫЙ ВЕС!' }
+        };
+
         this.updateScore(0);
         this.renderLives();
+        this.showScreen('loading');
 
         console.log('✅ GameManager: Готов');
     }
-    
-    /**
-     * Показать определенный экран
-     */
+
     showScreen(screenName) {
         console.log(`🖥️ Переключение на экран: ${screenName}`);
-        
+
         Object.values(this.screens).forEach(screen => {
-            screen.classList.remove('active');
+            if (screen) screen.classList.remove('active');
         });
-        
-        if (this.screens[screenName]) {
-            this.screens[screenName].classList.add('active');
+
+        if (this.countdownInterval && screenName !== 'transition') {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+
+        const target = this.screens[screenName];
+        if (target) {
+            target.classList.add('active');
+        }
+
+        if (screenName === 'game' || screenName === 'transition') {
+            this.sound.startGameplayLoop();
+        } else {
+            this.sound.stopGameplayLoop();
         }
     }
-    
-    /**
-     * Выбрать случайную мини-игру
-     */
+
     getRandomGame() {
-        // Если все игры сыграны, сбросить
         if (this.playedGames.length >= this.gamesList.length) {
             this.playedGames = [];
-            console.log('🔄 Все игры сыграны, сброс списка');
+            console.log('🔄 Все игры сыграны, список обновлён');
         }
-        
-        // Получить неиграные игры
-        const availableGames = this.gamesList.filter(
-            game => !this.playedGames.includes(game)
-        );
-        
-        // Случайный выбор
-        const randomIndex = Math.floor(Math.random() * availableGames.length);
-        const selectedGame = availableGames[randomIndex];
-        
-        this.playedGames.push(selectedGame);
-        
-        console.log(`🎲 Выбрана игра: ${selectedGame}`);
-        console.log(`📋 Сыграно игр: ${this.playedGames.length}/${this.gamesList.length}`);
-        
-        return selectedGame;
+
+        const available = this.gamesList.filter(game => !this.playedGames.includes(game));
+        const chosen = available[Math.floor(Math.random() * available.length)];
+        this.playedGames.push(chosen);
+
+        console.log(`🎲 Выбрана игра: ${chosen}`);
+        return chosen;
     }
-    
-    /**
-     * Запустить мини-игру
-     */
+
     startGame(gameName) {
         console.log(`▶️ Запуск игры: ${gameName}`);
-        
-        // Создать экземпляр игры
-        switch(gameName) {
+
+        this.sound.enable();
+        this.sound.playEffect('transition');
+
+        switch (gameName) {
             case 'runner':
                 this.currentGame = new RunnerGame(this.canvas, this.ctx, this);
                 break;
@@ -118,152 +148,163 @@ class GameManager {
                 console.error(`❌ Неизвестная игра: ${gameName}`);
                 return;
         }
-        
-        // Показать экран игры
+
         this.showScreen('game');
-        
-        // Запустить игру
         this.currentGame.start();
     }
-    
-    /**
-     * Показать экран перехода с обратным отсчетом
-     */
+
     showTransition(gameName, callback) {
         console.log(`⏳ Переход к игре: ${gameName}`);
-        
-        // Установить название игры
+
         const titles = {
-            'runner': 'КУРЬЕР-РАННЕР',
-            'game2': 'СОРТИРОВКА',
-            'game3': 'НАЙДИ ТОВАР',
-            'game5': 'ПОЙМАЙ НОУТБУКИ',
-            'game6': 'ПОСЧИТАЙ ТОВАРЫ',
-            'game7': 'СБОРКА ЗАКАЗА',
-            'game8': 'АДРЕСА ДОСТАВКИ',
-            'game10': 'ВЕСЫ СКЛАДА'
+            runner: 'КУРЬЕР-РАННЕР',
+            game2: 'СОРТИРОВКА',
+            game3: 'НАЙДИ ТОВАР',
+            game5: 'ПОЙМАЙ НОУТБУКИ',
+            game6: 'ПОСЧИТАЙ ТОВАРЫ',
+            game7: 'СБОРКА ЗАКАЗА',
+            game8: 'АДРЕСА ДОСТАВКИ',
+            game10: 'ВЕСЫ СКЛАДА'
         };
-        
+
         const instructions = {
-            'runner': 'Тапай чтобы прыгать!',
-            'game2': 'Одежда vs Техника!',
-            'game3': 'Тапай на правильный!',
-            'game5': 'Лови только ноутбуки 💻',
-            'game6': 'Реши пример!',
-            'game7': 'Собери товары из списка!',
-            'game8': 'Запомни адрес за 2 сек!',
-            'game10': 'Выбери категорию веса!'
+            runner: 'Тапай чтобы прыгать!',
+            game2: 'Одежда vs Техника!',
+            game3: 'Тапай на правильный!',
+            game5: 'Лови только ноутбуки 💻',
+            game6: 'Реши пример!',
+            game7: 'Собери товары из списка!',
+            game8: 'Запомни адрес за 2 сек!',
+            game10: 'Выбери категорию веса!'
         };
-        
+
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
         document.getElementById('game-instruction').textContent = instructions[gameName] || 'Начинай!';
         document.getElementById('game-number-display').textContent = this.gamesCompleted + 1;
-        
+
+        const transitionInfo = this.transitionData[gameName] || { emoji: '🎮', tagline: 'ВПЕРЁД ЗА ХАОСОМ!' };
+        if (this.transitionEmojiEl) this.transitionEmojiEl.textContent = transitionInfo.emoji;
+        if (this.transitionTaglineEl) this.transitionTaglineEl.textContent = transitionInfo.tagline;
+
         this.renderLives();
         this.showScreen('transition');
-        
-        // Обратный отсчет
+
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+
         let count = 3;
-        const countdownEl = document.getElementById('countdown-number');
-        countdownEl.textContent = count; // Показать начальное значение
-        
-        const countdownInterval = setInterval(() => {
+        if (this.countdownEl) this.countdownEl.textContent = count;
+
+        this.countdownInterval = setInterval(() => {
             count--;
-            
-            if (count <= 0) {
-                clearInterval(countdownInterval);
-                callback();
-            } else {
-                countdownEl.textContent = count; // Показать только если > 0
+            if (count > 0) {
+                this.sound.playEffect('countdown');
             }
-        }, 1000);
+            if (count <= 0) {
+                clearInterval(this.countdownInterval);
+                this.countdownInterval = null;
+                this.sound.playEffect('countdownFinal');
+                callback();
+            } else if (this.countdownEl) {
+                this.countdownEl.textContent = count;
+            }
+        }, 900); // чуть быстрее, чтобы добавить драйва
     }
-    
-    /**
-     * Завершение мини-игры
-     */
-    endGame(success, score) {
-        console.log(`🏁 Игра завершена: ${success ? 'УСПЕХ' : 'ПРОВАЛ'}, очки: ${score}`);
-        
+
+    endGame(success, rawScore) {
+        console.log(`🏁 Игра завершена: ${success ? 'УСПЕХ' : 'ПРОВАЛ'}, очки: ${rawScore}`);
+
         if (this.currentGame) {
             this.currentGame.stop();
             this.currentGame = null;
         }
 
         if (success) {
-            const reward = this.calculateReward(score);
+            const reward = this.calculateReward(rawScore);
             this.lastEarned = reward;
             this.gamesCompleted++;
             this.updateScore(reward);
-            this.renderLives();
             this.showResult(true);
+            this.sound.playEffect('success');
         } else {
             this.lastEarned = 0;
             this.handleMistake();
         }
     }
-    
-    /**
-     * Показать экран результата
-     */
+
     showResult(success) {
-        const resultIcon = document.getElementById('result-icon');
-        const resultTitle = document.getElementById('result-title');
-        const lastEarnedEl = document.getElementById('last-earned');
-        if (lastEarnedEl) {
-            lastEarnedEl.textContent = this.lastEarned;
-        }
-        const finalScoreEl = document.getElementById('final-score');
-        if (finalScoreEl) {
-            finalScoreEl.textContent = this.totalScore;
-        }
-        const gamesCompletedEl = document.getElementById('games-completed');
-        if (gamesCompletedEl) {
-            gamesCompletedEl.textContent = this.gamesCompleted;
-        }
-        
+        if (!this.resultIconEl || !this.resultTitleEl) return;
+
         if (success) {
-            resultIcon.textContent = '✅';
-            resultTitle.textContent = 'УСПЕХ!';
+            this.resultIconEl.textContent = '✅';
+            this.resultTitleEl.textContent = 'УСПЕХ! Новая победа';
             this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
+            document.getElementById('next-game-btn').textContent = 'Следующая игра';
         } else {
-            resultIcon.textContent = '❌';
-            resultTitle.textContent = `ОШИБКА! Осталось ❤️ ${this.lives}`;
+            this.resultIconEl.textContent = '💥';
+            this.resultTitleEl.textContent = `Ошибка! Осталось ❤️ ${this.lives}`;
             this.screens.result.style.background = 'linear-gradient(135deg, #d63031, #ff7675)';
+            document.getElementById('next-game-btn').textContent = 'Продолжить смену';
         }
 
+        if (this.lastEarnedEl) this.lastEarnedEl.textContent = this.lastEarned;
+        if (this.finalScoreEl) this.finalScoreEl.textContent = this.totalScore;
+        if (this.gamesCompletedEl) this.gamesCompletedEl.textContent = this.gamesCompleted;
+
         this.showScreen('result');
-        
-        console.log(`📊 Общий счет: ${this.totalScore}, Игр пройдено: ${this.gamesCompleted}`);
+        this.renderLives();
+
+        console.log(`📊 Общий счет: ${this.totalScore}, Игр пройдено: ${this.gamesCompleted}, Жизней: ${this.lives}`);
     }
-    
-    /**
-     * Следующая игра
-     */
+
     nextGame() {
-        console.log('➡️ Переход к следующей игре');
         const gameName = this.getRandomGame();
-        this.showTransition(gameName, () => {
-            this.startGame(gameName);
-        });
+        this.showTransition(gameName, () => this.startGame(gameName));
     }
-    
-    /**
-     * Начать заново
-     */
+
     restart() {
-        console.log('🔄 Перезапуск игры');
+        console.log('🔄 Новая смена');
         this.startRun();
     }
-    
-    /**
-     * Обновить debug информацию
-     */
-    updateDebug(info) {
-        if (this.debugMode && this.debugPanel) {
-            this.debugPanel.classList.add('active');
-            this.debugInfo.innerHTML = info;
+
+    startRun() {
+        this.resetState();
+        this.nextGame();
+    }
+
+    showStartScreen() {
+        this.resetState();
+        this.showScreen('loading');
+        const pressStart = document.querySelector('.press-start');
+        if (pressStart) {
+            pressStart.textContent = this.defaultPressStartText;
         }
+    }
+
+    handleMistake() {
+        this.lives = Math.max(0, this.lives - 1);
+        this.renderLives();
+        this.sound.playEffect('lifeLost');
+
+        if (this.lives <= 0) {
+            this.showGameOver();
+        } else {
+            this.showResult(false);
+        }
+    }
+
+    showGameOver() {
+        console.log('💔 Жизни кончились — показываем экран отдыха.');
+
+        if (this.gameoverEmojiEl) this.gameoverEmojiEl.textContent = '😴';
+        if (this.gameoverTitleEl) this.gameoverTitleEl.textContent = 'Сотрудник ПВЗ устал';
+        if (this.gameoverSubtitleEl) this.gameoverSubtitleEl.textContent = 'Ему нужен перерыв. Начни смену заново!';
+        if (this.gameoverScoreEl) this.gameoverScoreEl.textContent = this.totalScore;
+        if (this.gameoverGamesEl) this.gameoverGamesEl.textContent = this.gamesCompleted;
+
+        this.showScreen('gameover');
+        this.sound.stopGameplayLoop();
     }
 
     updateScore(amount = 0) {
@@ -276,10 +317,7 @@ class GameManager {
             scoreDisplay.textContent = this.totalScore;
         }
 
-        const finalScoreEl = document.getElementById('final-score');
-        if (finalScoreEl) {
-            finalScoreEl.textContent = this.totalScore;
-        }
+        if (this.finalScoreEl) this.finalScoreEl.textContent = this.totalScore;
     }
 
     renderLives() {
@@ -290,12 +328,11 @@ class GameManager {
 
         containers.forEach(container => {
             if (!container) return;
-
             container.innerHTML = '';
             for (let i = 0; i < this.maxLives; i++) {
                 const span = document.createElement('span');
-                const isActive = i < this.lives;
-                span.className = 'life' + (isActive ? ' active' : ' inactive');
+                const active = i < this.lives;
+                span.className = 'life' + (active ? ' active' : ' inactive');
                 span.textContent = '❤️';
                 container.appendChild(span);
             }
@@ -308,32 +345,6 @@ class GameManager {
         return Math.round(base * multiplier);
     }
 
-    handleMistake() {
-        this.lives = Math.max(0, this.lives - 1);
-        this.renderLives();
-
-        if (this.lives <= 0) {
-            this.handleGameOver();
-        } else {
-            this.showResult(false);
-        }
-    }
-
-    handleGameOver() {
-        console.log('💔 Жизни закончились. Возврат на главный экран.');
-
-        this.showScreen('loading');
-        const pressStart = document.querySelector('.press-start');
-        if (pressStart) {
-            pressStart.textContent = 'Жизни закончились! Нажми, чтобы начать заново';
-        }
-
-        this.resetState();
-        if (typeof window.enableStartOverlay === 'function') {
-            window.enableStartOverlay();
-        }
-    }
-
     resetState() {
         this.totalScore = 0;
         this.gamesCompleted = 0;
@@ -343,24 +354,14 @@ class GameManager {
         this.updateScore(0);
         this.renderLives();
 
-        const lastEarnedEl = document.getElementById('last-earned');
-        if (lastEarnedEl) {
-            lastEarnedEl.textContent = this.lastEarned;
-        }
+        if (this.lastEarnedEl) this.lastEarnedEl.textContent = this.lastEarned;
     }
 
-    startRun() {
-        if (typeof window.disableStartOverlay === 'function') {
-            window.disableStartOverlay();
+    updateDebug(info) {
+        if (this.debugMode && this.debugPanel) {
+            this.debugPanel.classList.add('active');
+            this.debugInfo.innerHTML = info;
         }
-
-        const pressStart = document.querySelector('.press-start');
-        if (pressStart) {
-            pressStart.textContent = this.defaultPressStartText;
-        }
-
-        this.resetState();
-        this.nextGame();
     }
 }
 

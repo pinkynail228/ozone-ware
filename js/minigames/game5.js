@@ -11,6 +11,7 @@ class Game5 {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
+        this.sound = gameManager.sound;
         
         this.gameTime = 6;
         this.startTime = null;
@@ -33,7 +34,7 @@ class Game5 {
         // Падающие товары
         this.items = [];
         this.spawnTimer = 0;
-        this.spawnInterval = 50; // Кадры между спавном - чаще!
+        this.spawnInterval = 30; // Кадры между спавном - динамичнее!
         
         this.setupControls();
         
@@ -71,6 +72,7 @@ class Game5 {
         console.log('▶️ Game5: Старт');
         this.isRunning = true;
         this.startTime = Date.now();
+        if (this.sound) this.sound.playEffect('start');
         this.update();
     }
     
@@ -157,12 +159,13 @@ class Game5 {
             y: 150,
             width: 40,
             height: 40,
-            speed: 3.5 + Math.random() * 1.5, // Быстрее! 3.5-5
+            speed: 5 + Math.random() * 2, // Быстрее! 5-7
             emoji: emoji,
             isGood: isGood
         };
         this.items.push(item);
         console.log('📦 Предмет спавнится:', emoji, 'Good:', isGood);
+        if (this.sound) this.sound.playEffect(isGood ? 'dropGood' : 'dropBad', 0.7);
     }
     
     updateItems() {
@@ -181,9 +184,11 @@ class Game5 {
                     console.log('✅ Поймал ноутбук!');
                     this.caught++;
                     this.score += 20;
+                    if (this.sound) this.sound.playEffect('collectGood');
                 } else {
                     console.log('❌ Это не ноутбук!');
                     // Можно штраф, но пока просто не считаем
+                    if (this.sound) this.sound.playEffect('collectBad');
                 }
                 this.items.splice(i, 1);
                 continue;

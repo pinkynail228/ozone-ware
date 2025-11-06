@@ -12,7 +12,7 @@ class Game2 {
         this.ctx = ctx;
         this.gameManager = gameManager;
         
-        this.gameTime = 7;
+        this.gameTime = 8;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
@@ -248,7 +248,11 @@ class Game2 {
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
             console.log('⏰ Время вышло!');
-            this.lose();
+            if (this.sortedPackages >= this.totalPackages) {
+                this.win();
+            } else {
+                this.lose();
+            }
             return;
         }
         

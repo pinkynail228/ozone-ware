@@ -59,7 +59,7 @@
                 <div class="tap-hint">👆 TAP</div>
                 
                 <div class="stats">
-                    <div class="stat">9 ИГР</div>
+                    <div class="stat">8 ИГР</div>
                     <div class="stat-divider">•</div>
                     <div class="stat">6-7 СЕК</div>
                     <div class="stat-divider">•</div>
@@ -73,14 +73,6 @@
             <div class="game-number">ИГРА #<span id="game-number-display">1</span></div>
             <h2 id="game-title">КУРЬЕР-РАННЕР</h2>
             <p id="game-instruction">Тапай чтобы прыгать!</p>
-            <div class="transition-card">
-                <div class="transition-emoji" id="transition-emoji">🚀</div>
-                <div class="transition-tagline" id="transition-tagline">Вперёд за хаосом!</div>
-            </div>
-            <div class="transition-hud">
-                <span class="transition-label">ЖИЗНИ</span>
-                <div class="transition-lives" id="transition-lives"></div>
-            </div>
             <div class="countdown">
                 <span id="countdown-number">3</span>
             </div>
@@ -98,6 +90,7 @@
                     <span class="timer-text" id="timer-text">10</span>
                 </div>
                 <div class="score">Очки: <span id="score-display">0</span></div>
+                <div class="lives" id="lives-display"></div>
             </div>
         </div>
 
@@ -106,11 +99,26 @@
             <div class="result-icon" id="result-icon">✅</div>
             <h2 id="result-title">УСПЕХ!</h2>
             <div class="result-stats">
+                <p>За игру: <span id="last-earned">0</span></p>
                 <p>Очки: <span id="final-score">0</span></p>
                 <p>Игр пройдено: <span id="games-completed">0</span></p>
             </div>
             <button id="next-game-btn" class="btn-primary">Следующая игра</button>
             <button id="restart-btn" class="btn-secondary">Начать заново</button>
+        </div>
+
+        <!-- Экран полного проигрыша -->
+        <div id="gameover-screen" class="screen">
+            <div class="gameover-card">
+                <div class="gameover-emoji" id="gameover-emoji">😵‍💫</div>
+                <h2 id="gameover-title">Сотрудник ПВЗ устал</h2>
+                <p id="gameover-subtitle">Ему нужен перерыв. Начни смену заново!</p>
+                <div class="gameover-stats">
+                    <p>Очки за смену: <span id="gameover-score">0</span></p>
+                    <p>Игр пройдено: <span id="gameover-games">0</span></p>
+                </div>
+                <button id="gameover-restart-btn" class="btn-secondary">Вернуться на заставку</button>
+            </div>
         </div>
     </div>
 
@@ -120,6 +128,7 @@
     </div>
 
     <!-- Скрипты -->
+    <script src="js/sound-manager.js"></script>
     <script src="js/game-manager.js"></script>
     <script src="js/minigames/runner.js"></script>
     <script src="js/minigames/game2.js"></script>
@@ -129,7 +138,6 @@
     <script src="js/minigames/game7.js"></script>
     <script src="js/minigames/game8.js"></script>
     <script src="js/minigames/game10.js"></script>
-    <script src="js/minigames/game11.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

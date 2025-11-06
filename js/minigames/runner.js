@@ -11,6 +11,7 @@ class RunnerGame {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
+        this.sound = gameManager.sound;
         
         // Игровые параметры
         this.gameTime = 7; // 7 секунд
@@ -25,8 +26,8 @@ class RunnerGame {
             width: 40,
             height: 60,
             velocityY: 0,
-            gravity: 1.0, // Уменьшили гравитацию
-            jumpPower: -20, // Увеличили силу прыжка для более высокого прыжка
+            gravity: 1.2,
+            jumpPower: -22,
             isJumping: false,
             groundY: 600,
             color: '#0066ff' // Синий цвет Ozone
@@ -34,13 +35,13 @@ class RunnerGame {
         
         // Препятствия
         this.obstacles = [];
-        this.obstacleSpeed = 3; // Замедлили с 5 до 3
+        this.obstacleSpeed = 6;
         this.obstacleSpawnTimer = 0;
-        this.obstacleSpawnInterval = 120; // Увеличили с 80 до 120 - реже препятствия
+        this.obstacleSpawnInterval = 80;
         
         // Фон (симуляция движения)
         this.backgroundOffset = 0;
-        this.backgroundSpeed = 3;
+        this.backgroundSpeed = 6;
         
         // Счет
         this.score = 0;
@@ -64,7 +65,7 @@ class RunnerGame {
         
         this.canvas.addEventListener('touchstart', this.jumpHandler);
         this.canvas.addEventListener('mousedown', this.jumpHandler);
-        
+
         console.log('🎮 Управление: Тап/клик = прыжок');
     }
     
@@ -87,6 +88,7 @@ class RunnerGame {
             this.player.velocityY = this.player.jumpPower;
             this.player.isJumping = true;
             console.log('🦘 Прыжок!');
+            if (this.sound) this.sound.playEffect('jump');
         }
     }
     
@@ -249,94 +251,84 @@ class RunnerGame {
             this.spawnObstacle();
             this.obstacleSpawnTimer = 0;
         }
-        
+
         // Двигать препятствия
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             const obs = this.obstacles[i];
             obs.x -= this.obstacleSpeed;
-            
+
             // Удалить за экраном
             if (obs.x + obs.width < 0) {
                 this.obstacles.splice(i, 1);
                 this.score += 10; // Очки за пройденное препятствие
             }
         }
-        
+
         this.distanceTraveled += this.obstacleSpeed;
     }
-    
+
     /**
      * Спавн препятствия - тематика доставки маркетплейса
      */
     spawnObstacle() {
         const types = ['box', 'cart', 'pallet', 'cone'];
         const type = types[Math.floor(Math.random() * types.length)];
-        
-        let obstacle = {
+
+        const obstacle = {
             x: this.canvas.width,
-            type: type,
-            y: 630, // На земле
+            type,
+            y: 630 // На земле
         };
-        
+
         if (type === 'box') {
-            // Коробка с товаром
             obstacle.width = 30;
             obstacle.height = 30;
             obstacle.emoji = '📦';
         } else if (type === 'cart') {
-            // Тележка с товарами
             obstacle.width = 28;
             obstacle.height = 32;
             obstacle.emoji = '🛒';
         } else if (type === 'pallet') {
-            // Паллета с грузом
             obstacle.width = 35;
             obstacle.height = 25;
             obstacle.color = '#CD853F';
         } else {
-            // Дорожный конус
             obstacle.width = 20;
             obstacle.height = 35;
             obstacle.emoji = '🚧';
         }
-        
+
         this.obstacles.push(obstacle);
         console.log(`🚧 Препятствие: ${type} на x=${obstacle.x}`);
+        if (this.sound) this.sound.playEffect('conveyorTick', 0.6);
     }
-    
+
     /**
      * Отрисовать препятствия (тематика маркетплейса)
      */
     drawObstacles() {
         this.obstacles.forEach(obs => {
             if (obs.emoji) {
-                // Emoji препятствия (коробки, тележки, конусы)
                 this.ctx.font = '32px Arial';
                 this.ctx.textAlign = 'center';
                 this.ctx.fillText(obs.emoji, obs.x + obs.width / 2, obs.y + obs.height - 5);
             } else if (obs.type === 'pallet') {
-                // Паллета (пиксель-арт)
                 this.ctx.fillStyle = obs.color;
-                // Основание паллеты
                 this.ctx.fillRect(obs.x, obs.y + obs.height - 10, obs.width, 10);
-                // Планки паллеты
                 for (let i = 0; i < 3; i++) {
                     this.ctx.fillRect(obs.x + i * 12, obs.y + obs.height - 20, 10, 8);
                 }
-                // Груз сверху
                 this.ctx.fillStyle = '#8B4513';
                 this.ctx.fillRect(obs.x + 5, obs.y, obs.width - 10, obs.height - 20);
             }
         });
     }
-    
+
     /**
      * Проверить коллизии (более прощающие как в Chrome Dino)
      */
     checkCollisions() {
         const p = this.player;
-        
-        // Уменьшенный hitbox для более прощающих коллизий
         const hitboxPadding = 5;
         const playerHitbox = {
             x: p.x + hitboxPadding,
@@ -344,9 +336,8 @@ class RunnerGame {
             width: p.width - hitboxPadding * 2,
             height: p.height - hitboxPadding * 2
         };
-        
+
         for (const obs of this.obstacles) {
-            // AABB коллизия с уменьшенным hitbox
             if (playerHitbox.x < obs.x + obs.width &&
                 playerHitbox.x + playerHitbox.width > obs.x &&
                 playerHitbox.y + playerHitbox.height > obs.y &&
@@ -357,28 +348,25 @@ class RunnerGame {
             }
         }
     }
-    
+
     /**
      * Обновить UI (таймер)
      */
     updateUI() {
         const elapsed = (Date.now() - this.startTime) / 1000;
         const remaining = Math.max(0, this.gameTime - elapsed);
-        
-        // Таймер
+
         const timerText = document.getElementById('timer-text');
         timerText.textContent = Math.ceil(remaining);
-        
-        // Полоса таймера
+
         const timerFill = document.getElementById('timer-fill');
         const percentage = (remaining / this.gameTime) * 100;
         timerFill.style.width = percentage + '%';
-        
-        // Счет
+
         const scoreDisplay = document.getElementById('score-display');
         scoreDisplay.textContent = this.score;
     }
-    
+
     /**
      * Победа
      */
@@ -386,14 +374,16 @@ class RunnerGame {
         console.log('🏆 УСПЕХ! Игра пройдена');
         this.stop();
         this.gameManager.endGame(true, this.score);
+        if (this.sound) this.sound.playEffect('success');
     }
-    
+
     /**
      * Проигрыш
      */
     lose() {
         console.log('💀 ПРОВАЛ! Столкновение');
         this.stop();
+        if (this.sound) this.sound.playEffect('fail');
         this.gameManager.endGame(false, 0);
     }
 }
