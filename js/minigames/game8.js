@@ -12,6 +12,7 @@ class Game8 {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
+        this.sound = gameManager.sound;
         
         this.gameTime = 7;
         this.startTime = null;
@@ -19,11 +20,10 @@ class Game8 {
         this.gameLoop = null;
         
         this.score = 0;
-        this.correctCount = 0;
-        this.requiredCorrect = 3; // Нужно 3 правильных
+        this.hasAnswered = false;
         
         // Состояния
-        this.state = 'showing'; // showing, choosing
+        this.state = 'showing'; // showing, choosing, finished
         this.showTimer = 0;
         this.showDuration = 120; // 2 секунды
         
@@ -69,13 +69,14 @@ class Game8 {
         
         this.state = 'showing';
         this.showTimer = 0;
+        this.hasAnswered = false;
         
         console.log('🏠 Адрес:', this.currentAddress.full);
     }
     
     setupControls() {
         this.tapHandler = (e) => {
-            if (!this.isRunning || this.state !== 'choosing') return;
+            if (!this.isRunning || this.state !== 'choosing' || this.hasAnswered) return;
             e.preventDefault();
             
             const touch = e.touches ? e.touches[0] : e;
@@ -94,18 +95,17 @@ class Game8 {
                 if (y >= buttonY && y <= buttonY + buttonHeight) {
                     const selected = this.options[i];
                     
+                    this.hasAnswered = true;
+                    this.state = 'finished';
+                    
                     if (selected === this.currentAddress.full) {
                         console.log('✅ Правильный адрес!');
-                        this.correctCount++;
-                        this.score += 30;
-                        
-                        if (this.correctCount >= this.requiredCorrect) {
-                            setTimeout(() => this.win(), 300);
-                        } else {
-                            this.generateAddress();
-                        }
+                        this.score = 120;
+                        if (this.sound) this.sound.playEffect('collectGood');
+                        setTimeout(() => this.win(), 250);
                     } else {
                         console.log('❌ Неправильный адрес!');
+                        if (this.sound) this.sound.playEffect('collectBad');
                         this.lose();
                     }
                     break;
@@ -126,6 +126,7 @@ class Game8 {
         console.log('▶️ Game8: Старт');
         this.isRunning = true;
         this.startTime = Date.now();
+        if (this.sound) this.sound.playEffect('start', 0.8);
         this.update();
     }
     
@@ -152,11 +153,11 @@ class Game8 {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('АДРЕСА ДОСТАВКИ 🏠', this.canvas.width / 2, 80);
+        this.ctx.fillText('АДРЕС ДОСТАВКИ 🏠', this.canvas.width / 2, 80);
         
         this.ctx.font = '16px Arial';
-        this.ctx.fillText(`Правильно: ${this.correctCount}/${this.requiredCorrect}`, this.canvas.width / 2, 115);
-        
+        this.ctx.fillText('Запомни адрес и выбери его из списка', this.canvas.width / 2, 115);
+
         // Логика состояний
         if (this.state === 'showing') {
             // Показываем адрес
@@ -181,12 +182,14 @@ class Game8 {
             
             if (this.showTimer >= this.showDuration) {
                 this.state = 'choosing';
+                if (this.sound) this.sound.playEffect('transition', 0.7);
             }
         } else {
-            // Выбор адреса
+            // Выбор адреса или ожидание результата
             this.ctx.font = '18px Arial';
             this.ctx.fillStyle = '#fff';
-            this.ctx.fillText('ВЫБЕРИ ПРАВИЛЬНЫЙ:', this.canvas.width / 2, 180);
+            const prompt = this.state === 'finished' ? 'ПРОВЕРЬ РЕЗУЛЬТАТ' : 'ВЫБЕРИ ПРАВИЛЬНЫЙ:';
+            this.ctx.fillText(prompt, this.canvas.width / 2, 180);
             
             // Кнопки с вариантами
             this.drawOptions();
@@ -199,11 +202,13 @@ class Game8 {
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
             console.log('⏰ Время вышло!');
-            if (this.correctCount >= this.requiredCorrect) {
-                this.win();
-            } else {
-                this.lose();
+            if (this.hasAnswered) {
+                return;
             }
+            this.hasAnswered = true;
+            this.state = 'finished';
+            if (this.sound) this.sound.playEffect('fail');
+            this.lose();
             return;
         }
         
@@ -269,13 +274,13 @@ class Game8 {
     }
     
     win() {
-        console.log('🏆 УСПЕХ! Все пары найдены');
+        console.log('🏆 УСПЕХ! Адрес найден');
         this.stop();
         this.gameManager.endGame(true, this.score);
     }
     
     lose() {
-        console.log('💀 ПРОВАЛ! Не успел найти все пары');
+        console.log('💀 ПРОВАЛ! Адрес не совпал');
         this.stop();
         this.gameManager.endGame(false, 0);
     }

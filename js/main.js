@@ -55,6 +55,15 @@ function setupEventListeners() {
         console.log('🔄 Нажата кнопка: Начать заново');
         gameManager.restart();
     });
+
+    // Кнопка на экране Game Over
+    const gameoverRestartBtn = document.getElementById('gameover-restart-btn');
+    if (gameoverRestartBtn) {
+        gameoverRestartBtn.addEventListener('click', () => {
+            console.log('🔁 Нажата кнопка: Начать заново после Game Over');
+            gameManager.restart();
+        });
+    }
     
     // Debug: Нажатие D для включения debug панели
     document.addEventListener('keydown', (e) => {

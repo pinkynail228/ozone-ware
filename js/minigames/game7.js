@@ -12,6 +12,7 @@ class Game7 {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
+        this.sound = gameManager.sound;
         
         this.gameTime = 7;
         this.startTime = null;
@@ -36,9 +37,9 @@ class Game7 {
         
         // Конвейер товаров
         this.conveyor = [];
-        this.conveyorSpeed = 2;
+        this.conveyorSpeed = 4;
         this.spawnTimer = 0;
-        this.spawnInterval = 60;
+        this.spawnInterval = 30;
         
         this.setupControls();
         
@@ -51,8 +52,8 @@ class Game7 {
         
         let emoji;
         
-        // 70% шанс спавна нужного товара (если есть несобранные)
-        if (neededItems.length > 0 && Math.random() < 0.7) {
+        // 85% шанс спавна нужного товара (если есть несобранные)
+        if (neededItems.length > 0 && Math.random() < 0.85) {
             emoji = neededItems[Math.floor(Math.random() * neededItems.length)];
         } else {
             // Спавн отвлекающего товара
@@ -68,6 +69,10 @@ class Game7 {
             size: 50,
             needed: this.shoppingList.includes(emoji) && !this.collected.has(emoji)
         });
+
+        if (this.sound) {
+            this.sound.playEffect(neededItems.includes(emoji) ? 'dropGood' : 'dropBad', 0.6);
+        }
     }
     
     setupControls() {
@@ -90,6 +95,7 @@ class Game7 {
                         console.log('✅ Собрал нужный товар:', item.emoji);
                         this.collected.add(item.emoji);
                         this.score += 30;
+                        if (this.sound) this.sound.playEffect('collectGood');
                         this.conveyor.splice(i, 1);
                         
                         // Проверить победу
@@ -98,6 +104,7 @@ class Game7 {
                         }
                     } else {
                         console.log('❌ Собрал НЕ нужный товар!');
+                        if (this.sound) this.sound.playEffect('collectBad');
                         this.lose();
                     }
                     break;
