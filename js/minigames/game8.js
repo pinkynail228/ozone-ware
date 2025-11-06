@@ -33,9 +33,48 @@ class Game8 {
         this.options = [];
         
         this.generateAddress();
+        this.wobbleTime = 0;
+        this.confetti = this.createConfetti();
         this.setupControls();
         
         console.log('✅ Game8: Готов');
+    }
+
+    createConfetti() {
+        const colors = ['#ff006e', '#ffd166', '#3a86ff', '#06d6a0', '#ffbe0b'];
+        const pieces = [];
+        for (let i = 0; i < 28; i++) {
+            pieces.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                speed: 0.6 + Math.random() * 1.3,
+                size: 4 + Math.random() * 5,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+        return pieces;
+    }
+
+    updateConfetti() {
+        for (const piece of this.confetti) {
+            piece.y += piece.speed;
+            piece.x += Math.sin(piece.y * 0.05) * 0.7;
+            if (piece.y > this.canvas.height + 20) {
+                piece.y = -10;
+                piece.x = Math.random() * this.canvas.width;
+            }
+        }
+    }
+
+    drawConfetti() {
+        for (const piece of this.confetti) {
+            this.ctx.save();
+            this.ctx.fillStyle = piece.color;
+            this.ctx.translate(piece.x, piece.y);
+            this.ctx.rotate(piece.y * 0.02);
+            this.ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size / 2);
+            this.ctx.restore();
+        }
     }
     
     generateAddress() {
@@ -142,21 +181,38 @@ class Game8 {
     update() {
         if (!this.isRunning) return;
         
+        this.wobbleTime += 0.08;
+        this.updateConfetti();
+
         // Фон Ozon - синий градиент
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#001f3f');
-        gradient.addColorStop(1, '#005bff');
+        gradient.addColorStop(0, '#001133');
+        gradient.addColorStop(0.5, '#002f87');
+        gradient.addColorStop(1, '#004aed');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.35;
+        this.drawConfetti();
+        this.ctx.restore();
         
         // Заголовок
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('АДРЕС ДОСТАВКИ 🏠', this.canvas.width / 2, 80);
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 80);
+        this.ctx.rotate(Math.sin(this.wobbleTime) * 0.05);
+        this.ctx.fillText('АДРЕС ДОСТАВКИ 🏠', 0, 0);
+        this.ctx.restore();
         
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('Запомни адрес и выбери его из списка', this.canvas.width / 2, 115);
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 115);
+        this.ctx.rotate(Math.sin(this.wobbleTime * 1.1) * 0.04);
+        this.ctx.fillText('Запомни адрес и выбери его из списка', 0, 0);
+        this.ctx.restore();
 
         // Логика состояний
         if (this.state === 'showing') {
@@ -171,14 +227,22 @@ class Game8 {
             this.ctx.font = 'bold 20px Courier New';
             const lines = this.wrapText(this.currentAddress.full, 300);
             lines.forEach((line, i) => {
-                this.ctx.fillText(line, this.canvas.width / 2, 250 + i * 30);
+                this.ctx.save();
+                this.ctx.translate(this.canvas.width / 2, 250 + i * 30);
+                this.ctx.rotate(Math.sin(this.wobbleTime * 1.4 + i) * 0.05);
+                this.ctx.fillText(line, 0, 0);
+                this.ctx.restore();
             });
             
             // Таймер
             const remaining = Math.max(0, (this.showDuration - this.showTimer) / 60);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '48px Arial';
-            this.ctx.fillText(Math.ceil(remaining), this.canvas.width / 2, 400);
+            this.ctx.save();
+            this.ctx.translate(this.canvas.width / 2, 400);
+            this.ctx.rotate(Math.sin(this.wobbleTime * 1.8) * 0.1);
+            this.ctx.fillText(Math.ceil(remaining), 0, 0);
+            this.ctx.restore();
             
             if (this.showTimer >= this.showDuration) {
                 this.state = 'choosing';
@@ -189,7 +253,11 @@ class Game8 {
             this.ctx.font = '18px Arial';
             this.ctx.fillStyle = '#fff';
             const prompt = this.state === 'finished' ? 'ПРОВЕРЬ РЕЗУЛЬТАТ' : 'ВЫБЕРИ ПРАВИЛЬНЫЙ:';
-            this.ctx.fillText(prompt, this.canvas.width / 2, 180);
+            this.ctx.save();
+            this.ctx.translate(this.canvas.width / 2, 180);
+            this.ctx.rotate(Math.sin(this.wobbleTime * 1.3) * 0.05);
+            this.ctx.fillText(prompt, 0, 0);
+            this.ctx.restore();
             
             // Кнопки с вариантами
             this.drawOptions();

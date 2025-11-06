@@ -40,10 +40,50 @@ class Game7 {
         this.conveyorSpeed = 4;
         this.spawnTimer = 0;
         this.spawnInterval = 30;
-        
+        this.wobbleTime = 0;
+        this.conveyorOffset = 0;
+        this.confetti = this.createConfetti();
+
         this.setupControls();
         
         console.log('✅ Game7: Готов. Список:', this.shoppingList);
+    }
+    
+    createConfetti() {
+        const colors = ['#ff006e', '#ffd166', '#3a86ff', '#06d6a0', '#ffbe0b'];
+        const pieces = [];
+        for (let i = 0; i < 30; i++) {
+            pieces.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                speed: 0.5 + Math.random() * 1.5,
+                size: 4 + Math.random() * 4,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+        return pieces;
+    }
+
+    updateConfetti() {
+        for (const piece of this.confetti) {
+            piece.y += piece.speed;
+            piece.x += Math.sin(piece.y * 0.04) * 0.6;
+            if (piece.y > this.canvas.height + 20) {
+                piece.y = -10;
+                piece.x = Math.random() * this.canvas.width;
+            }
+        }
+    }
+
+    drawConfetti() {
+        for (const piece of this.confetti) {
+            this.ctx.save();
+            this.ctx.fillStyle = piece.color;
+            this.ctx.translate(piece.x, piece.y);
+            this.ctx.rotate(piece.y * 0.02);
+            this.ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size / 2);
+            this.ctx.restore();
+        }
     }
     
     spawnItem() {
@@ -67,7 +107,8 @@ class Game7 {
             x: this.canvas.width,
             y: 400,
             size: 50,
-            needed: this.shoppingList.includes(emoji) && !this.collected.has(emoji)
+            needed: this.shoppingList.includes(emoji) && !this.collected.has(emoji),
+            spawnTime: Date.now()
         });
 
         if (this.sound) {
@@ -141,27 +182,45 @@ class Game7 {
         if (!this.isRunning) return;
         
         // Фон Ozon - синий градиент
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#003d82');
-        gradient.addColorStop(1, '#005bff');
+        this.wobbleTime += 0.08;
+        this.conveyorOffset += this.conveyorSpeed * 0.6;
+        this.updateConfetti();
+
+        const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+        gradient.addColorStop(0, '#001b4d');
+        gradient.addColorStop(0.5, '#002f87');
+        gradient.addColorStop(1, '#0130a3');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.35;
+        this.drawConfetti();
+        this.ctx.restore();
+
         // Заголовок
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('СОБЕРИ ЗАКАЗ 🛒', this.canvas.width / 2, 80);
-        
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 80);
+        this.ctx.rotate(Math.sin(this.wobbleTime) * 0.05);
+        this.ctx.fillText('СОБЕРИ ЗАКАЗ 🛒', 0, 0);
+        this.ctx.restore();
+
         // Список товаров
         this.ctx.font = '18px Arial';
-        this.ctx.fillText('СПИСОК:', this.canvas.width / 2, 130);
-        
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 130);
+        this.ctx.rotate(Math.sin(this.wobbleTime * 1.2) * 0.05);
+        this.ctx.fillText('СПИСОК:', 0, 0);
+        this.ctx.restore();
+
         let offsetX = (this.canvas.width - this.shoppingList.length * 70) / 2;
         this.shoppingList.forEach((item, index) => {
             const x = offsetX + index * 70 + 35;
             const y = 180;
-            
+
             // Фон товара
             if (this.collected.has(item)) {
                 this.ctx.fillStyle = '#00ff88';
@@ -171,11 +230,15 @@ class Game7 {
                 this.ctx.fill();
                 this.ctx.globalAlpha = 1;
             }
-            
+
             // Emoji
+            this.ctx.save();
+            this.ctx.translate(x, y + 15);
+            this.ctx.rotate(Math.sin(this.wobbleTime * 1.4 + index) * 0.12);
             this.ctx.font = '48px Arial';
-            this.ctx.fillText(item, x, y + 15);
-            
+            this.ctx.fillText(item, 0, 0);
+            this.ctx.restore();
+
             // Галочка если собрано
             if (this.collected.has(item)) {
                 this.ctx.fillStyle = '#00ff00';
@@ -185,21 +248,40 @@ class Game7 {
         });
         
         // Конвейер
-        this.ctx.fillStyle = '#333';
-        this.ctx.globalAlpha = 0.5;
-        this.ctx.fillRect(0, 370, this.canvas.width, 80);
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 410);
+        this.ctx.rotate(Math.sin(this.wobbleTime * 0.8) * 0.04);
+        this.ctx.translate(-this.canvas.width / 2, -410);
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.globalAlpha = 0.55;
+        this.ctx.fillRect(-40, 370, this.canvas.width + 80, 80);
         this.ctx.globalAlpha = 1;
-        
+
         // Линии конвейера
         this.ctx.strokeStyle = '#666';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.moveTo(0, 375);
         this.ctx.lineTo(this.canvas.width, 375);
-        this.ctx.moveTo(0, 445);
-        this.ctx.lineTo(this.canvas.width, 445);
+        this.ctx.moveTo(-40, 445);
+        this.ctx.lineTo(this.canvas.width + 40, 445);
         this.ctx.stroke();
-        
+        this.ctx.restore();
+
+        // Декоративная лента
+        this.ctx.save();
+        this.ctx.strokeStyle = '#ffbe0b';
+        this.ctx.lineWidth = 6;
+        this.ctx.globalAlpha = 0.35;
+        this.ctx.beginPath();
+        const beltWave = Math.sin(this.wobbleTime * 0.9) * 10;
+        this.ctx.moveTo(-60, 355 + beltWave);
+        for (let x = -60; x <= this.canvas.width + 60; x += 40) {
+            this.ctx.lineTo(x, 360 + beltWave + Math.sin((x + this.conveyorOffset) * 0.1) * 6);
+        }
+        this.ctx.stroke();
+        this.ctx.restore();
+
         // Спавн товаров
         this.spawnTimer++;
         if (this.spawnTimer >= this.spawnInterval) {
@@ -211,19 +293,27 @@ class Game7 {
         for (let i = this.conveyor.length - 1; i >= 0; i--) {
             const item = this.conveyor[i];
             item.x -= this.conveyorSpeed;
-            
+
             // Удалить если уехал
             if (item.x + item.size < 0) {
                 this.conveyor.splice(i, 1);
                 continue;
             }
-            
+
             // Отрисовать товар
+            this.ctx.save();
+            const elapsed = (Date.now() - item.spawnTime) / 160;
+            const bounce = Math.sin(elapsed) * 6;
+            this.ctx.translate(item.x + item.size / 2, item.y + item.size / 2 + bounce);
+            this.ctx.rotate(Math.sin(elapsed * 0.6) * 0.15);
+            const scale = 1 + Math.sin(elapsed * 1.2) * 0.08;
+            this.ctx.scale(scale, scale);
             this.ctx.font = '50px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size - 10);
+            this.ctx.fillText(item.emoji, 0, item.size / 2 - 10);
+            this.ctx.restore();
         }
-        
+
         // Обновить UI
         this.updateUI();
         

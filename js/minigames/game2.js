@@ -58,10 +58,49 @@ class Game2 {
             onComplete: null
         };
         this.cardAnimationSpeed = 28;
+        this.wobbleTime = 0;
+        this.confetti = this.createConfetti();
 
         this.setupControls();
 
         console.log('✅ Game2: Готов. Цель:', this.targetLabel);
+    }
+
+    createConfetti() {
+        const colors = ['#ff006e', '#ffd166', '#3a86ff', '#06d6a0', '#ffbe0b'];
+        const pieces = [];
+        for (let i = 0; i < 26; i++) {
+            pieces.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                speed: 0.8 + Math.random() * 1.2,
+                size: 4 + Math.random() * 6,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+        return pieces;
+    }
+
+    updateConfetti() {
+        for (const piece of this.confetti) {
+            piece.y += piece.speed;
+            piece.x += Math.sin(piece.y * 0.05) * 0.5;
+            if (piece.y > this.canvas.height + 20) {
+                piece.y = -10;
+                piece.x = Math.random() * this.canvas.width;
+            }
+        }
+    }
+
+    drawConfetti() {
+        for (const piece of this.confetti) {
+            this.ctx.save();
+            this.ctx.fillStyle = piece.color;
+            this.ctx.translate(piece.x, piece.y);
+            this.ctx.rotate(piece.y * 0.02);
+            this.ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size / 2);
+            this.ctx.restore();
+        }
     }
 
     generateItemsQueue() {
@@ -261,8 +300,19 @@ class Game2 {
     update() {
         if (!this.isRunning) return;
 
-        this.ctx.fillStyle = '#14213D';
+        this.wobbleTime += 0.08;
+        this.updateConfetti();
+
+        const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+        gradient.addColorStop(0, '#120f34');
+        gradient.addColorStop(1, '#1b2a4b');
+        this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.45;
+        this.drawConfetti();
+        this.ctx.restore();
 
         this.updateCardAnimation();
 
@@ -297,19 +347,23 @@ class Game2 {
     drawHeader() {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.textAlign = 'center';
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 70);
+        this.ctx.rotate(Math.sin(this.wobbleTime) * 0.05);
         this.ctx.font = 'bold 26px Arial';
-        this.ctx.fillText('СОРТИРОВКА ПО КАТЕГОРИИ', this.canvas.width / 2, 70);
+        this.ctx.fillText('СОРТИРОВКА ПО КАТЕГОРИИ', 0, 0);
 
         this.ctx.font = '18px Arial';
-        this.ctx.fillText(`Собирай: ${this.targetLabel}`, this.canvas.width / 2, 110);
+        this.ctx.fillText(`Собирай: ${this.targetLabel}`, 0, 40);
 
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('Перетащи карточку в КОРЗИНУ справа или МУСОРКУ слева', this.canvas.width / 2, 140);
+        this.ctx.fillText('Перетащи карточку в КОРЗИНУ справа или МУСОРКУ слева', 0, 70);
 
         this.ctx.font = '15px Arial';
         this.ctx.fillStyle = '#00ff9d';
-        this.ctx.fillText('4 товара за 6 секунд', this.canvas.width / 2, 165);
+        this.ctx.fillText('4 товара за 6 секунд', 0, 95);
         this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.restore();
     }
 
     drawBins() {
@@ -322,8 +376,11 @@ class Game2 {
         const draggingRight = (this.cardAnimation.active && this.cardAnimation.direction === 'right') || (this.dragState.active && this.cardOffsetX > 40);
         const draggingLeft = (this.cardAnimation.active && this.cardAnimation.direction === 'left') || (this.dragState.active && this.cardOffsetX < -40);
 
-        const drawBin = (x, icon, label, highlight, accentColor) => {
+        const drawBin = (x, icon, label, highlight, accentColor, tilt) => {
             this.ctx.save();
+            this.ctx.translate(x + binWidth / 2, top + binHeight / 2);
+            this.ctx.rotate(tilt);
+            this.ctx.translate(-(x + binWidth / 2), -(top + binHeight / 2));
             this.ctx.globalAlpha = highlight ? 1 : 0.5;
             this.ctx.fillStyle = '#1F2A44';
             this.ctx.fillRect(x, top, binWidth, binHeight);
@@ -341,8 +398,9 @@ class Game2 {
             this.ctx.restore();
         };
 
-        drawBin(leftX, '🗑️', 'МУСОРКА', draggingLeft, '#ff6b81');
-        drawBin(rightX, '🧺', 'КОРЗИНА', draggingRight, '#00ff9d');
+        const wobble = Math.sin(this.wobbleTime * 1.3) * 0.08;
+        drawBin(leftX, '🗑️', 'МУСОРКА', draggingLeft, '#ff6b81', wobble * -1.2);
+        drawBin(rightX, '🧺', 'КОРЗИНА', draggingRight, '#00ff9d', wobble);
     }
 
     drawCard() {
@@ -361,7 +419,7 @@ class Game2 {
 
         this.ctx.save();
         this.ctx.translate(centerX, centerY);
-        this.ctx.rotate((this.cardOffsetX / 200) * 0.1);
+        this.ctx.rotate((this.cardOffsetX / 200) * 0.12 + Math.sin(this.wobbleTime * 1.8) * 0.05);
         this.ctx.translate(-centerX, -centerY);
 
         this.ctx.fillStyle = '#1F2A44';
@@ -369,6 +427,14 @@ class Game2 {
         this.ctx.lineWidth = 4;
         this.ctx.fillRect(left, top, width, height);
         this.ctx.strokeRect(left, top, width, height);
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.18;
+        this.ctx.fillStyle = '#00fffa';
+        this.ctx.beginPath();
+        this.ctx.ellipse(centerX, top + height - 30, 90, 25, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
 
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '72px Arial';
@@ -406,11 +472,16 @@ class Game2 {
         const totalWidth = this.requiredItems * slotWidth + (this.requiredItems - 1) * spacing;
         let startX = (this.canvas.width - totalWidth) / 2 + slotWidth / 2;
 
+        const wobble = Math.sin(this.wobbleTime * 1.5) * 0.04;
         for (let i = 0; i < this.requiredItems; i++) {
             const item = this.collectedItems[i];
+            this.ctx.save();
+            const slotX = startX + i * (slotWidth + spacing);
+            this.ctx.translate(slotX, basketY + 20);
+            this.ctx.rotate(wobble * (i - 1));
             this.ctx.fillStyle = '#1F2A44';
             this.ctx.beginPath();
-            this.ctx.arc(startX + i * (slotWidth + spacing), basketY + 20, 28, 0, Math.PI * 2);
+            this.ctx.arc(0, 0, 28, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.strokeStyle = '#00b4d8';
             this.ctx.stroke();
@@ -418,8 +489,9 @@ class Game2 {
             if (item) {
                 this.ctx.font = '32px Arial';
                 this.ctx.fillStyle = '#fff';
-                this.ctx.fillText(item.emoji, startX + i * (slotWidth + spacing), basketY + 32);
+                this.ctx.fillText(item.emoji, 0, 12);
             }
+            this.ctx.restore();
         }
 
         this.ctx.font = '16px Arial';

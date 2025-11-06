@@ -1,3 +1,117 @@
+.floating-sprites {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.sprite {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+}
+
+.sprite.star {
+    top: 5%; left: 10%;
+    animation: spriteFloat 6s ease-in-out infinite;
+    color: #ffd166;
+}
+
+.sprite.cloud {
+    top: 20%; right: 6%;
+    animation: spriteFloat 8s ease-in-out infinite reverse;
+    color: #ffffff;
+}
+
+.sprite.bolt {
+    top: 60%; left: 5%;
+    animation: spriteSpin 4s linear infinite;
+    color: #ff006e;
+}
+
+.sprite.bubble {
+    bottom: 5%; right: 20%;
+    animation: spriteFloat 7s ease-in-out infinite;
+    color: #3a86ff;
+}
+
+#loading-screen,
+#transition-screen,
+#result-screen,
+#gameover-screen {
+    position: relative;
+    z-index: 2;
+}
+
+#game-screen {
+    z-index: 2;
+}
+
+.module-tilt {
+    transform: rotate(-3deg);
+}
+
+.module-tilt-alt {
+    transform: rotate(2deg);
+}
+
+#game-ui {
+    transform: rotate(-2deg);
+    z-index: 3;
+}
+
+.timer-bar {
+    transform: rotate(2deg);
+}
+
+.timer-text {
+    transform: translate(-50%, -50%) rotate(-2deg);
+}
+
+.lives {
+    transform: rotate(3deg);
+}
+
+.transition-hud {
+    transform: rotate(-3deg);
+}
+
+.transition-lives {
+    transform: rotate(4deg);
+}
+
+@keyframes screenShake {
+    0% { transform: rotate(-1deg) translate(0, 0); }
+    25% { transform: rotate(2deg) translate(2px, -2px); }
+    50% { transform: rotate(-3deg) translate(-3px, 1px); }
+    75% { transform: rotate(3deg) translate(2px, 2px); }
+    100% { transform: rotate(-2deg) translate(-2px, -1px); }
+}
+
+@keyframes cardTilt {
+    0% { transform: rotate(-4deg) scale(1); }
+    50% { transform: rotate(3deg) scale(1.03); }
+    100% { transform: rotate(-6deg) scale(1); }
+}
+
+@keyframes spriteFloat {
+    0% { transform: translateY(0) rotate(-5deg); opacity: 0.4; }
+    50% { transform: translateY(-30px) rotate(5deg); opacity: 0.8; }
+    100% { transform: translateY(0) rotate(-5deg); opacity: 0.4; }
+}
+
+@keyframes spriteSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
 /* ============================================
    OZONE WARIOWARE - MOBILE-FIRST STYLES
    Разрешение: 390x844 (вертикальное)
@@ -31,6 +145,8 @@ body {
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 50px rgba(0, 123, 255, 0.3);
+    border: 6px solid rgba(255, 255, 255, 0.2);
+    transform: rotate(-1deg);
 }
 
 /* На десктопе — черные полосы по бокам */
@@ -57,11 +173,13 @@ body {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    transform: rotate(-1deg);
 }
 
 .screen.active {
     opacity: 1;
     pointer-events: all;
+    animation: screenShake 3s linear infinite alternate;
 }
 
 .lives {
@@ -132,7 +250,8 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    transform: rotate(-2deg);
+    transform: rotate(-4deg);
+    animation: cardTilt 2s ease-in-out infinite alternate;
     border: 4px solid #fff;
     position: relative;
     overflow: hidden;
@@ -489,6 +608,10 @@ body {
 }
 
 /* === КНОПКИ === */
+#result-screen {
+    transform: rotate(2.5deg);
+}
+
 button {
     font-family: 'Courier New', monospace;
     font-size: 20px;
@@ -500,7 +623,9 @@ button {
     cursor: pointer;
     text-transform: uppercase;
     transition: transform 0.1s, box-shadow 0.1s;
-    touch-action: manipulation;
+    transform: rotate(-5deg);
+    position: relative;
+    overflow: hidden;
 }
 
 button:active {
@@ -511,6 +636,7 @@ button:active {
     background: #0066ff;
     color: #fff;
     box-shadow: 0 6px 0 #003d99;
+    transform: rotate(-6deg);
 }
 
 .btn-primary:active {
@@ -522,6 +648,7 @@ button:active {
     background: #ff6b35;
     color: #fff;
     box-shadow: 0 6px 0 #cc4420;
+    transform: rotate(4deg);
 }
 
 .btn-secondary:active {
