@@ -7,6 +7,21 @@ console.log('🚀 Инициализация Ozone WarioWare...');
 
 // Глобальные переменные
 let gameManager = null;
+let startListenersAttached = false;
+
+function addStartListeners(loadingScreen) {
+    if (!loadingScreen || startListenersAttached) return;
+    loadingScreen.addEventListener('click', startFirstGame, { passive: false });
+    loadingScreen.addEventListener('touchstart', startFirstGame, { passive: false });
+    startListenersAttached = true;
+}
+
+function removeStartListeners(loadingScreen) {
+    if (!loadingScreen || !startListenersAttached) return;
+    loadingScreen.removeEventListener('click', startFirstGame, { passive: false });
+    loadingScreen.removeEventListener('touchstart', startFirstGame, { passive: false });
+    startListenersAttached = false;
+}
 
 /**
  * Инициализация при загрузке страницы
@@ -39,8 +54,7 @@ function setupEventListeners() {
     
     // Экран загрузки - тап для старта
     const loadingScreen = document.getElementById('loading-screen');
-    loadingScreen.addEventListener('click', startFirstGame);
-    loadingScreen.addEventListener('touchstart', startFirstGame);
+    addStartListeners(loadingScreen);
     
     // Кнопка "Следующая игра"
     const nextGameBtn = document.getElementById('next-game-btn');
@@ -88,12 +102,16 @@ function startFirstGame(e) {
     
     // Убрать обработчики с экрана загрузки
     const loadingScreen = document.getElementById('loading-screen');
-    loadingScreen.removeEventListener('click', startFirstGame);
-    loadingScreen.removeEventListener('touchstart', startFirstGame);
-    
+    removeStartListeners(loadingScreen);
+
     // Запустить первую игру
     gameManager.nextGame();
 }
+
+window.addEventListener('ozon:start-screen', () => {
+    const loadingScreen = document.getElementById('loading-screen');
+    addStartListeners(loadingScreen);
+});
 
 /**
  * Обработка ошибок

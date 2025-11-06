@@ -280,6 +280,7 @@ class GameManager {
         if (pressStart) {
             pressStart.textContent = this.defaultPressStartText;
         }
+        window.dispatchEvent(new CustomEvent('ozon:start-screen'));
     }
 
     handleMistake() {
