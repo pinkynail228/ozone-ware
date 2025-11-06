@@ -11,9 +11,13 @@ class GameManager {
         this.currentGame = null;
         this.totalScore = 0;
         this.gamesCompleted = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game10', 'game11'];
+        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game10'];
         this.playedGames = [];
-        
+        this.maxLives = 4;
+        this.lives = this.maxLives;
+        this.lastEarned = 0;
+        this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
+
         // DOM элементы
         this.screens = {
             loading: document.getElementById('loading-screen'),
@@ -30,6 +34,9 @@ class GameManager {
         this.debugInfo = document.getElementById('debug-info');
         this.debugMode = false; // Включить для отладки
         
+        this.updateScore(0);
+        this.renderLives();
+
         console.log('✅ GameManager: Готов');
     }
     
@@ -137,8 +144,7 @@ class GameManager {
             'game6': 'ПОСЧИТАЙ ТОВАРЫ',
             'game7': 'СБОРКА ЗАКАЗА',
             'game8': 'АДРЕСА ДОСТАВКИ',
-            'game10': 'ВЕСЫ СКЛАДА',
-            'game11': 'ПРИЁМКА ТОВАРОВ'
+            'game10': 'ВЕСЫ СКЛАДА'
         };
         
         const instructions = {
@@ -149,8 +155,7 @@ class GameManager {
             'game6': 'Реши пример!',
             'game7': 'Собери товары из списка!',
             'game8': 'Запомни адрес за 2 сек!',
-            'game10': 'Выбери категорию веса!',
-            'game11': 'Свайп вверх/вниз!'
+            'game10': 'Выбери категорию веса!'
         };
         
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
@@ -182,27 +187,42 @@ class GameManager {
     endGame(success, score) {
         console.log(`🏁 Игра завершена: ${success ? 'УСПЕХ' : 'ПРОВАЛ'}, очки: ${score}`);
         
-        // Остановить игру
         if (this.currentGame) {
             this.currentGame.stop();
+            this.currentGame = null;
         }
-        
-        // Обновить счет
+
         if (success) {
-            this.totalScore += score;
+            const reward = this.calculateReward(score);
+            this.lastEarned = reward;
             this.gamesCompleted++;
+            this.updateScore(reward);
+            this.renderLives();
+            this.showResult(true);
+        } else {
+            this.lastEarned = 0;
+            this.handleMistake();
         }
-        
-        // Показать результат
-        this.showResult(success, score);
     }
     
     /**
      * Показать экран результата
      */
-    showResult(success, score) {
+    showResult(success) {
         const resultIcon = document.getElementById('result-icon');
         const resultTitle = document.getElementById('result-title');
+        const lastEarnedEl = document.getElementById('last-earned');
+        if (lastEarnedEl) {
+            lastEarnedEl.textContent = this.lastEarned;
+        }
+        const finalScoreEl = document.getElementById('final-score');
+        if (finalScoreEl) {
+            finalScoreEl.textContent = this.totalScore;
+        }
+        const gamesCompletedEl = document.getElementById('games-completed');
+        if (gamesCompletedEl) {
+            gamesCompletedEl.textContent = this.gamesCompleted;
+        }
         
         if (success) {
             resultIcon.textContent = '✅';
@@ -210,13 +230,10 @@ class GameManager {
             this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
         } else {
             resultIcon.textContent = '❌';
-            resultTitle.textContent = 'ПРОВАЛ!';
+            resultTitle.textContent = `ОШИБКА! Осталось ❤️ ${this.lives}`;
             this.screens.result.style.background = 'linear-gradient(135deg, #d63031, #ff7675)';
         }
-        
-        document.getElementById('final-score').textContent = this.totalScore;
-        document.getElementById('games-completed').textContent = this.gamesCompleted;
-        
+
         this.showScreen('result');
         
         console.log(`📊 Общий счет: ${this.totalScore}, Игр пройдено: ${this.gamesCompleted}`);
@@ -238,10 +255,7 @@ class GameManager {
      */
     restart() {
         console.log('🔄 Перезапуск игры');
-        this.totalScore = 0;
-        this.gamesCompleted = 0;
-        this.playedGames = [];
-        this.nextGame();
+        this.startRun();
     }
     
     /**
@@ -252,6 +266,96 @@ class GameManager {
             this.debugPanel.classList.add('active');
             this.debugInfo.innerHTML = info;
         }
+    }
+
+    updateScore(amount = 0) {
+        if (typeof amount === 'number' && amount !== 0) {
+            this.totalScore = Math.max(0, Math.round(this.totalScore + amount));
+        }
+
+        const scoreDisplay = document.getElementById('score-display');
+        if (scoreDisplay) {
+            scoreDisplay.textContent = this.totalScore;
+        }
+
+        const finalScoreEl = document.getElementById('final-score');
+        if (finalScoreEl) {
+            finalScoreEl.textContent = this.totalScore;
+        }
+    }
+
+    renderLives() {
+        const livesDisplay = document.getElementById('lives-display');
+        if (!livesDisplay) return;
+
+        livesDisplay.innerHTML = '';
+        for (let i = 0; i < this.maxLives; i++) {
+            const span = document.createElement('span');
+            span.className = 'life' + (i < this.lives ? '' : ' inactive');
+            span.textContent = '❤️';
+            livesDisplay.appendChild(span);
+        }
+    }
+
+    calculateReward(rawScore = 0) {
+        const base = Math.max(10, Math.round(rawScore));
+        const multiplier = 1 + this.gamesCompleted * 0.25;
+        return Math.round(base * multiplier);
+    }
+
+    handleMistake() {
+        this.lives = Math.max(0, this.lives - 1);
+        this.renderLives();
+
+        if (this.lives <= 0) {
+            this.handleGameOver();
+        } else {
+            this.showResult(false);
+        }
+    }
+
+    handleGameOver() {
+        console.log('💔 Жизни закончились. Возврат на главный экран.');
+
+        this.showScreen('loading');
+        const pressStart = document.querySelector('.press-start');
+        if (pressStart) {
+            pressStart.textContent = 'Жизни закончились! Нажми, чтобы начать заново';
+        }
+
+        this.resetState();
+        if (typeof window.enableStartOverlay === 'function') {
+            window.enableStartOverlay();
+        }
+    }
+
+    resetState() {
+        this.totalScore = 0;
+        this.gamesCompleted = 0;
+        this.playedGames = [];
+        this.lives = this.maxLives;
+        this.lastEarned = 0;
+        this.updateScore(0);
+        this.renderLives();
+
+        const lastEarnedEl = document.getElementById('last-earned');
+        if (lastEarnedEl) {
+            lastEarnedEl.textContent = this.lastEarned;
+        }
+    }
+
+    startRun() {
+        if (typeof window.disableStartOverlay === 'function') {
+            window.disableStartOverlay();
+        }
+
+        const pressStart = document.querySelector('.press-start');
+        if (pressStart) {
+            pressStart.textContent = this.defaultPressStartText;
+        }
+
+        this.resetState();
+        this.nextGame();
     }
 }
 
