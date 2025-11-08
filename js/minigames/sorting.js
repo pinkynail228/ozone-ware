@@ -323,6 +323,7 @@ class SortingGame {
     drawCard() {
         if (!this.currentItem) {
             this.ctx.font = '20px Arial';
+            this.ctx.textAlign = 'center';
             this.ctx.fillText('Товары закончились!', this.canvas.width / 2, this.cardPosition.y);
             return;
         }

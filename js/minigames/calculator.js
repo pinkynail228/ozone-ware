@@ -170,14 +170,11 @@ class CalculatorGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок
+        // Только счетчик
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 28px Courier New';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('ПОСЧИТАЙ ТОВАРЫ! 🛒', this.canvas.width / 2, 100);
-        
         this.ctx.font = '18px Courier New';
-        this.ctx.fillText(`Решено: ${this.solved}/${this.requiredSolved}`, this.canvas.width / 2, 135);
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`${this.solved}/${this.requiredSolved}`, this.canvas.width / 2, 60);
         
         // Пример
         if (this.currentProblem) {

@@ -138,14 +138,11 @@ class WeighingGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок
+        // Только счетчик
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 26px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('ВЕСЫ СКЛАДА ⚖️', this.canvas.width / 2, 70);
-        
         this.ctx.font = '16px Arial';
-        this.ctx.fillText(`Правильно: ${this.correct}/${this.requiredCorrect}`, this.canvas.width / 2, 105);
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`${this.correct}/${this.requiredCorrect}`, this.canvas.width / 2, 50);
         
         // Весы (визуал)
         this.drawScales();
@@ -162,10 +159,7 @@ class WeighingGame {
             this.ctx.fillText(`${this.currentItem.weight} кг`, this.canvas.width / 2, 320);
         }
         
-        // Инструкция
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '16px Arial';
-        this.ctx.fillText('ВЫБЕРИ КАТЕГОРИЮ:', this.canvas.width / 2, 400);
+        // Без инструкции
         
         // Кнопки выбора
         this.drawButtons();
