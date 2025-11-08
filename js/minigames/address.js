@@ -179,8 +179,9 @@ class AddressGame {
             // Выбор адреса или ожидание результата
             this.ctx.font = '18px Arial';
             this.ctx.fillStyle = '#fff';
+            this.ctx.textAlign = 'center';
             const prompt = this.state === 'finished' ? 'ПРОВЕРЬ РЕЗУЛЬТАТ' : 'ВЫБЕРИ ПРАВИЛЬНЫЙ:';
-            this.ctx.fillText(prompt, this.canvas.width / 2, 180);
+            this.ctx.fillText(prompt, this.canvas.width / 2, 150);
             
             // Кнопки с вариантами
             this.drawOptions();
@@ -228,13 +229,14 @@ class AddressGame {
     drawOptions() {
         const buttonHeight = 70;
         const buttonSpacing = 20;
-        const startY = 400;
+        const startY = 220;
         const buttonWidth = 340;
         const buttonX = (this.canvas.width - buttonWidth) / 2;
         
         this.options.forEach((option, i) => {
             const y = startY + i * (buttonHeight + buttonSpacing);
             
+            // 
             // Фон кнопки
             this.ctx.fillStyle = '#0066ff';
             this.ctx.fillRect(buttonX, y, buttonWidth, buttonHeight);
