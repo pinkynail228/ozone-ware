@@ -157,32 +157,21 @@ class GameManager {
         console.log(`⏳ Переход к игре: ${gameName}`);
 
         const titles = {
-            runner: 'КУРЬЕР-РАННЕР',
-            game2: 'СОРТИРОВКА',
-            game3: 'НАЙДИ ТОВАР',
-            game5: 'ПОЙМАЙ НОУТБУКИ',
-            game6: 'ПОСЧИТАЙ ТОВАРЫ',
-            game7: 'СБОРКА ЗАКАЗА',
-            game8: 'АДРЕСА ДОСТАВКИ',
-            game10: 'ВЕСЫ СКЛАДА'
-        };
-
-        const instructions = {
-            runner: 'Тапай чтобы прыгать!',
-            game2: 'Одежда vs Техника!',
-            game3: 'Тапай на правильный!',
-            game5: 'Лови только ноутбуки 💻',
-            game6: 'Реши пример!',
-            game7: 'Собери товары из списка!',
-            game8: 'Запомни адрес за 2 сек!',
-            game10: 'Выбери категорию веса!'
+            delivery: 'ДОСТАВКА',
+            sorting: 'СОРТИРОВКА',
+            finder: 'НАЙДИ ТОВАР',
+            catcher: 'ЛОВЕЦ ТОВАРОВ',
+            calculator: 'КАЛЬКУЛЯТОР',
+            shopping: 'СБОРКА ЗАКАЗА',
+            address: 'АДРЕСА ДОСТАВКИ',
+            weighing: 'ВЕСЫ СКЛАДА'
         };
 
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
-        document.getElementById('game-instruction').textContent = instructions[gameName] || 'Начинай!';
         document.getElementById('game-number-display').textContent = this.gamesCompleted + 1;
 
         const transitionInfo = this.transitionData[gameName] || { emoji: '🎮', tagline: 'ВПЕРЁД ЗА ХАОСОМ!' };
+        document.getElementById('game-instruction').textContent = transitionInfo.tagline;
         if (this.transitionEmojiEl) this.transitionEmojiEl.textContent = transitionInfo.emoji;
         if (this.transitionTaglineEl) this.transitionTaglineEl.textContent = transitionInfo.tagline;
 
