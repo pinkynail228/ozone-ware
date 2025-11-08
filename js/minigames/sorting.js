@@ -27,18 +27,18 @@ class SortingGame {
 
         this.itemPools = {
             clothes: [
-                { emoji: '👕', name: 'ФУТБОЛКА' },
-                { emoji: '👖', name: 'ДЖИНСЫ' },
-                { emoji: '👟', name: 'КРОССОВКИ' },
-                { emoji: '🧢', name: 'КЕПКА' },
-                { emoji: '🧥', name: 'КУРТКА' }
+                { emoji: '👕', name: 'ФУТБОЛКА', category: 'clothes' },
+                { emoji: '👖', name: 'ДЖИНСЫ', category: 'clothes' },
+                { emoji: '👟', name: 'КРОССОВКИ', category: 'clothes' },
+                { emoji: '🧢', name: 'КЕПКА', category: 'clothes' },
+                { emoji: '🧥', name: 'КУРТКА', category: 'clothes' }
             ],
             tech: [
-                { emoji: '📱', name: 'СМАРТФОН' },
-                { emoji: '💻', name: 'НОУТБУК' },
-                { emoji: '🎧', name: 'НАУШНИКИ' },
-                { emoji: '⌚', name: 'СМАРТ-ЧАСЫ' },
-                { emoji: '📷', name: 'КАМЕРА' }
+                { emoji: '📱', name: 'СМАРТФОН', category: 'tech' },
+                { emoji: '💻', name: 'НОУТБУК', category: 'tech' },
+                { emoji: '🎧', name: 'НАУШНИКИ', category: 'tech' },
+                { emoji: '⌚', name: 'СМАРТ-ЧАСЫ', category: 'tech' },
+                { emoji: '📷', name: 'КАМЕРА', category: 'tech' }
             ]
         };
 
@@ -280,11 +280,15 @@ class SortingGame {
     }
 
     drawHeader() {
-        // Минимальный прогресс
-        this.ctx.fillStyle = '#00ff9d';
+        // Цель и прогресс
+        this.ctx.fillStyle = '#fff';
         this.ctx.textAlign = 'center';
+        this.ctx.font = 'bold 24px Arial';
+        this.ctx.fillText(`СОБИРАЙ: ${this.targetLabel}`, this.canvas.width / 2, 30);
+        
+        this.ctx.fillStyle = '#00ff9d';
         this.ctx.font = '18px Arial';
-        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 40);
+        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 55);
     }
 
     drawBins() {
