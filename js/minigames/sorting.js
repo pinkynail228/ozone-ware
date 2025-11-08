@@ -50,8 +50,8 @@ class SortingGame {
         
         // Кнопки для управления
         this.buttons = {
-            take: { x: 280, y: 500, width: 80, height: 60 },
-            skip: { x: 30, y: 500, width: 80, height: 60 }
+            take: { x: 280, y: 420, width: 80, height: 60 },
+            skip: { x: 30, y: 420, width: 80, height: 60 }
         };
 
         this.setupControls();
