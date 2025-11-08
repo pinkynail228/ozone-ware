@@ -156,10 +156,10 @@ class Game11 {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 24px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('ПРИЁМКА ТОВАРОВ ✅❌', this.canvas.width / 2, 70);
+        this.ctx.fillText('ПРИЁМКА ТОВАРОВ ✅❌', this.canvas.width / 2, 110);
         
         this.ctx.font = '16px Arial';
-        this.ctx.fillText(`Обработано: ${this.processed}/${this.requiredProcessed}`, this.canvas.width / 2, 105);
+        this.ctx.fillText(`Обработано: ${this.processed}/${this.requiredProcessed}`, this.canvas.width / 2, 145);
         
         // Зоны принятия/отклонения
         this.drawZones();

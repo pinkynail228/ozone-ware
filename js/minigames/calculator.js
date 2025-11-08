@@ -174,7 +174,7 @@ class CalculatorGame {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '18px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(`${this.solved}/${this.requiredSolved}`, this.canvas.width / 2, 60);
+        this.ctx.fillText(`${this.solved}/${this.requiredSolved}`, this.canvas.width / 2, 120);
         
         // Пример
         if (this.currentProblem) {

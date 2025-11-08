@@ -188,14 +188,14 @@ class FinderGame {
                 this.ctx, 
                 this.targetItem.emoji, 
                 this.canvas.width / 2, 
-                100, 
+                140, 
                 60
             );
         } else {
             this.ctx.fillStyle = '#fff';
             this.ctx.font = 'bold 60px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 100);
+            this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 140);
         }
         
         // Отрисовать товары

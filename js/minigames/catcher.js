@@ -119,14 +119,14 @@ class CatcherGame {
                 this.ctx,
                 this.targetItem,
                 this.canvas.width / 2,
-                70,
+                110,
                 48
             );
         } else {
             this.ctx.fillStyle = '#000';
             this.ctx.font = 'bold 48px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.targetItem, this.canvas.width / 2, 70);
+            this.ctx.fillText(this.targetItem, this.canvas.width / 2, 110);
         }
         
         // Счетчик с эффектом
@@ -135,7 +135,7 @@ class CatcherGame {
         this.ctx.textAlign = 'center';
         this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
         this.ctx.shadowBlur = 4;
-        this.ctx.fillText(`Поймано: ${this.caught}`, this.canvas.width / 2, 100);
+        this.ctx.fillText(`Поймано: ${this.caught}`, this.canvas.width / 2, 150);
         this.ctx.shadowBlur = 0;
         
         // Спавн товаров
@@ -186,7 +186,7 @@ class CatcherGame {
         
         const item = {
             x: Math.random() * (this.canvas.width - 40),
-            y: 150,
+            y: 190,
             width: 40,
             height: 40,
             speed: 5 + Math.random() * 2, // Быстрее! 5-7

@@ -151,7 +151,7 @@ class ShoppingGame {
         let offsetX = (this.canvas.width - this.shoppingList.length * 70) / 2;
         this.shoppingList.forEach((item, index) => {
             const x = offsetX + index * 70 + 35;
-            const y = 120;
+            const y = 150;
             
             // Фон товара
             if (this.collected.has(item)) {

@@ -280,21 +280,20 @@ class SortingGame {
     }
 
     drawHeader() {
-        // Цель и прогресс
         this.ctx.fillStyle = '#fff';
         this.ctx.textAlign = 'center';
         this.ctx.font = 'bold 24px Arial';
-        this.ctx.fillText(`СОБИРАЙ: ${this.targetLabel}`, this.canvas.width / 2, 30);
-        
+        this.ctx.fillText(`СОБИРАЙ: ${this.targetLabel}`, this.canvas.width / 2, 90);
+
         this.ctx.fillStyle = '#00ff9d';
-        this.ctx.font = '18px Arial';
-        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 55);
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 125);
     }
 
     drawBins() {
         const binWidth = 140;
         const binHeight = 180;
-        const top = 190;
+        const top = 210;
         const leftX = 30;
         const rightX = this.canvas.width - binWidth - 30;
 
@@ -313,10 +312,10 @@ class SortingGame {
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '60px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(icon, x + binWidth / 2, top + 80);
+            this.ctx.fillText(icon, x + binWidth / 2, top + 90);
 
             this.ctx.font = 'bold 16px Arial';
-            this.ctx.fillText(label, x + binWidth / 2, top + binHeight - 20);
+            this.ctx.fillText(label, x + binWidth / 2, top + binHeight - 16);
             this.ctx.restore();
         };
 
