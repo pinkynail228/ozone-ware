@@ -158,10 +158,11 @@ class AddressGame {
             
             // Адрес большим шрифтом
             this.ctx.fillStyle = '#00ff88';
-            this.ctx.font = 'bold 20px Courier New';
-            const lines = this.wrapText(this.currentAddress.full, 300);
+            this.ctx.font = 'bold 18px Courier New';
+            this.ctx.textAlign = 'center';
+            const lines = this.wrapText(this.currentAddress.full, 350);
             lines.forEach((line, i) => {
-                this.ctx.fillText(line, this.canvas.width / 2, 250 + i * 30);
+                this.ctx.fillText(line, this.canvas.width / 2, 200 + i * 25);
             });
             
             // Таймер
