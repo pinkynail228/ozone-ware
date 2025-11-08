@@ -1,6 +1,6 @@
 /**
- * GAME 5 - Поймай ноутбуки
- * Механика: Двигай корзину, лови ТОЛЬКО ноутбуки 💻
+ * GAME 5 - Поймай нужный товар
+ * Механика: Двигай корзину, лови ТОЛЬКО нужный товар (рандомный каждый раз)
  * Длительность: 6 секунд
  */
 
@@ -20,7 +20,13 @@ class Game5 {
         
         this.score = 0;
         this.caught = 0;
-        // Просто ловим ноутбуки - чем больше тем лучше!
+        
+        // Рандомный целевой товар каждую игру
+        this.allItems = ['💻', '📱', '📷', '🎧', '⌚', '👕', '👟', '📚', '🎮'];
+        this.targetItem = this.allItems[Math.floor(Math.random() * this.allItems.length)];
+        this.targetName = this.getItemName(this.targetItem);
+        
+        console.log('🎯 Целевой товар:', this.targetItem, this.targetName);
         
         // Корзина
         this.basket = {
@@ -39,6 +45,21 @@ class Game5 {
         this.setupControls();
         
         console.log('✅ Game5: Готов');
+    }
+    
+    getItemName(emoji) {
+        const names = {
+            '💻': 'НОУТБУКИ',
+            '📱': 'ТЕЛЕФОНЫ', 
+            '📷': 'КАМЕРЫ',
+            '🎧': 'НАУШНИКИ',
+            '⌚': 'ЧАСЫ',
+            '👕': 'ОДЕЖДУ',
+            '👟': 'ОБУВЬ',
+            '📚': 'КНИГИ',
+            '🎮': 'КОНСОЛИ'
+        };
+        return names[emoji] || 'ТОВАРЫ';
     }
     
     setupControls() {
@@ -96,11 +117,11 @@ class Game5 {
         this.ctx.fillStyle = '#000';
         this.ctx.font = 'bold 24px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('ПОЙМАЙ НОУТБУКИ 💻', this.canvas.width / 2, 80);
+        this.ctx.fillText(`ПОЙМАЙ ${this.targetName} ${this.targetItem}`, this.canvas.width / 2, 80);
         
         // Убрали счетчик - просто ловим за время
         this.ctx.font = '16px Courier New';
-        this.ctx.fillText('Лови только 💻 ноутбуки!', this.canvas.width / 2, 110);
+        this.ctx.fillText(`Лови только ${this.targetItem} ${this.targetName.toLowerCase()}!`, this.canvas.width / 2, 110);
         
         // Спавн товаров
         this.spawnTimer++;
@@ -137,22 +158,12 @@ class Game5 {
     }
     
     spawnItem() {
-        // Товары маркетплейса: ноутбуки (хорошие) и другие категории (плохие)
-        const goodItems = ['💻']; // Только ноутбуки!
-        const badItems = [
-            '📱', // Телефоны
-            '📷', // Камеры
-            '🎧', // Наушники
-            '⌚', // Часы
-            '👕', // Одежда
-            '👟', // Обувь
-            '📚', // Книги
-            '🎮'  // Консоли
-        ];
+        // Все товары кроме целевого - плохие
+        const badItems = this.allItems.filter(item => item !== this.targetItem);
         
-        // 40% шанс ноутбука
+        // 40% шанс целевого товара
         const isGood = Math.random() < 0.4;
-        const emoji = isGood ? goodItems[0] : badItems[Math.floor(Math.random() * badItems.length)];
+        const emoji = isGood ? this.targetItem : badItems[Math.floor(Math.random() * badItems.length)];
         
         const item = {
             x: Math.random() * (this.canvas.width - 40),
