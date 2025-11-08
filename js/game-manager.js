@@ -13,7 +13,7 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['runner', 'game2', 'game3', 'game5', 'game6', 'game7', 'game8', 'game10'];
+        this.gamesList = ['delivery', 'sorting', 'game3', 'catcher', 'game6', 'shopping', 'address', 'game10'];
         this.playedGames = [];
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
@@ -58,13 +58,13 @@ class GameManager {
         // Переходы
         this.countdownInterval = null;
         this.transitionData = {
-            runner: { emoji: '🚴‍♂️', tagline: 'УСПЕЙ ДОСТАВИТЬ!' },
-            game2: { emoji: '🧺', tagline: 'РЗБРОСЬ ПО КАТЕГОРИЯМ!' },
+            delivery: { emoji: '🚴‍♂️', tagline: 'УСПЕЙ ДОСТАВИТЬ!' },
+            sorting: { emoji: '🧺', tagline: 'РАЗБРОСЬ ПО КАТЕГОРИЯМ!' },
             game3: { emoji: '🔍', tagline: 'НАШЁЛ? ТАПАЙ!' },
-            game5: { emoji: '💻', tagline: 'ЛОВИ ТОЛЬКО НОУТБУКИ!' },
+            catcher: { emoji: '💻', tagline: 'ЛОВИ НУЖНЫЙ ТОВАР!' },
             game6: { emoji: '🧮', tagline: 'РЕШАЙ МГНОВЕННО!' },
-            game7: { emoji: '🛒', tagline: 'СБЕРИ ВСЁ ПО СПИСКУ!' },
-            game8: { emoji: '📦', tagline: 'НЕ ЗАБУДЬ АДРЕС!' },
+            shopping: { emoji: '🛒', tagline: 'СОБЕРИ ВСЁ ПО СПИСКУ!' },
+            address: { emoji: '📦', tagline: 'НЕ ЗАБУДЬ АДРЕС!' },
             game10: { emoji: '⚖️', tagline: 'ВЫБЕРИ ПРАВИЛЬНЫЙ ВЕС!' }
         };
 
@@ -120,26 +120,26 @@ class GameManager {
         this.sound.playEffect('transition');
 
         switch (gameName) {
-            case 'runner':
-                this.currentGame = new RunnerGame(this.canvas, this.ctx, this);
+            case 'delivery':
+                this.currentGame = new DeliveryGame(this.canvas, this.ctx, this);
                 break;
-            case 'game2':
-                this.currentGame = new Game2(this.canvas, this.ctx, this);
+            case 'sorting':
+                this.currentGame = new SortingGame(this.canvas, this.ctx, this);
                 break;
             case 'game3':
                 this.currentGame = new Game3(this.canvas, this.ctx, this);
                 break;
-            case 'game5':
-                this.currentGame = new Game5(this.canvas, this.ctx, this);
+            case 'catcher':
+                this.currentGame = new CatcherGame(this.canvas, this.ctx, this);
                 break;
             case 'game6':
                 this.currentGame = new Game6(this.canvas, this.ctx, this);
                 break;
-            case 'game7':
-                this.currentGame = new Game7(this.canvas, this.ctx, this);
+            case 'shopping':
+                this.currentGame = new ShoppingGame(this.canvas, this.ctx, this);
                 break;
-            case 'game8':
-                this.currentGame = new Game8(this.canvas, this.ctx, this);
+            case 'address':
+                this.currentGame = new AddressGame(this.canvas, this.ctx, this);
                 break;
             case 'game10':
                 this.currentGame = new Game10(this.canvas, this.ctx, this);

@@ -4,7 +4,7 @@
  * Длительность: 10 секунд
  */
 
-class RunnerGame {
+class DeliveryGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🚴 RunnerGame: Инициализация...');
         

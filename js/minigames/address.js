@@ -5,7 +5,7 @@
  * Стиль: Ozon брендинг - синие градиенты, память
  */
 
-class Game8 {
+class AddressGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🏠 Game8: Инициализация...');
         

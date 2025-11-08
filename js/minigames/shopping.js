@@ -5,7 +5,7 @@
  * Стиль: Ozon брендинг - синие градиенты, крупные emoji
  */
 
-class Game7 {
+class ShoppingGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🛒 Game7: Инициализация...');
         

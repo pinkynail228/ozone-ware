@@ -4,7 +4,7 @@
  * Длительность: 6 секунд
  */
 
-class Game5 {
+class CatcherGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🛒 Game5: Инициализация...');
         
