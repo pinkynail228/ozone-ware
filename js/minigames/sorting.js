@@ -132,7 +132,7 @@ class SortingGame {
         };
 
         this.canvas.addEventListener('click', this.clickHandler);
-        this.canvas.addEventListener('touchend', this.clickHandler, { passive: false });
+        this.canvas.addEventListener('touchstart', this.clickHandler, { passive: false });
     }
 
     isPointInButton(x, y, button) {
@@ -159,7 +159,7 @@ class SortingGame {
 
     removeControls() {
         this.canvas.removeEventListener('click', this.clickHandler);
-        this.canvas.removeEventListener('touchend', this.clickHandler);
+        this.canvas.removeEventListener('touchstart', this.clickHandler);
     }
 
     getPointerPosition(e) {
