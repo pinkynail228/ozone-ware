@@ -47,17 +47,12 @@ class SortingGame {
         this.currentItem = this.itemsQueue[this.currentIndex] || null;
 
         this.cardPosition = { x: this.canvas.width / 2, y: 360 };
-        this.cardOffsetX = 0;
-        this.dragState = {
-            active: false,
-            startX: 0
+        
+        // Кнопки для управления
+        this.buttons = {
+            take: { x: 280, y: 500, width: 80, height: 60 },
+            skip: { x: 30, y: 500, width: 80, height: 60 }
         };
-        this.cardAnimation = {
-            active: false,
-            direction: null,
-            onComplete: null
-        };
-        this.cardAnimationSpeed = 28;
 
         this.setupControls();
 
@@ -122,57 +117,49 @@ class SortingGame {
     }
 
     setupControls() {
-        this.pointerDownHandler = (e) => {
-            if (!this.isRunning || !this.currentItem || this.cardAnimation.active) return;
+        this.clickHandler = (e) => {
+            if (!this.isRunning || !this.currentItem) return;
             e.preventDefault();
 
-            const { x } = this.getPointerPosition(e);
-            this.dragState.active = true;
-            this.dragState.startX = x;
-            this.cardOffsetX = 0;
-        };
-
-        this.pointerMoveHandler = (e) => {
-            if (!this.isRunning || !this.dragState.active || this.cardAnimation.active) return;
-            e.preventDefault();
-
-            const { x } = this.getPointerPosition(e);
-            this.cardOffsetX = Math.max(-150, Math.min(150, x - this.dragState.startX));
-        };
-
-        this.pointerUpHandler = (e) => {
-            if (!this.isRunning || !this.dragState.active || this.cardAnimation.active) return;
-            e.preventDefault();
-
-            const deltaX = this.cardOffsetX;
-            this.dragState.active = false;
-
-            if (Math.abs(deltaX) < 40) {
-                this.cardOffsetX = 0;
-                return;
+            const { x, y } = this.getPointerPosition(e);
+            
+            // Проверяем клик по кнопкам
+            if (this.isPointInButton(x, y, this.buttons.take)) {
+                this.handleTakeButton();
+            } else if (this.isPointInButton(x, y, this.buttons.skip)) {
+                this.handleSkipButton();
             }
-
-            const direction = deltaX > 0 ? 'right' : 'left';
-            this.handleSwipe(direction);
         };
 
-        this.canvas.addEventListener('touchstart', this.pointerDownHandler, { passive: false });
-        this.canvas.addEventListener('touchmove', this.pointerMoveHandler, { passive: false });
-        this.canvas.addEventListener('touchend', this.pointerUpHandler, { passive: false });
+        this.canvas.addEventListener('click', this.clickHandler);
+        this.canvas.addEventListener('touchend', this.clickHandler, { passive: false });
+    }
 
-        this.canvas.addEventListener('mousedown', this.pointerDownHandler);
-        this.canvas.addEventListener('mousemove', this.pointerMoveHandler);
-        this.canvas.addEventListener('mouseup', this.pointerUpHandler);
+    isPointInButton(x, y, button) {
+        return x >= button.x && x <= button.x + button.width &&
+               y >= button.y && y <= button.y + button.height;
+    }
+
+    handleTakeButton() {
+        if (this.currentItem.category === this.targetCategory) {
+            this.collectCurrentItem();
+        } else {
+            this.fail('Взял не тот товар');
+        }
+    }
+
+    handleSkipButton() {
+        if (this.currentItem.category === this.targetCategory) {
+            this.fail('Пропустил нужный товар');
+        } else {
+            if (this.sound) this.sound.playEffect('dropBad', 0.5);
+            this.advanceItem();
+        }
     }
 
     removeControls() {
-        this.canvas.removeEventListener('touchstart', this.pointerDownHandler);
-        this.canvas.removeEventListener('touchmove', this.pointerMoveHandler);
-        this.canvas.removeEventListener('touchend', this.pointerUpHandler);
-
-        this.canvas.removeEventListener('mousedown', this.pointerDownHandler);
-        this.canvas.removeEventListener('mousemove', this.pointerMoveHandler);
-        this.canvas.removeEventListener('mouseup', this.pointerUpHandler);
+        this.canvas.removeEventListener('click', this.clickHandler);
+        this.canvas.removeEventListener('touchend', this.clickHandler);
     }
 
     getPointerPosition(e) {
@@ -264,11 +251,9 @@ class SortingGame {
         this.ctx.fillStyle = '#14213D';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.updateCardAnimation();
-
         this.drawHeader();
-        this.drawBins();
         this.drawCard();
+        this.drawButtons();
         this.drawBasket();
 
         this.updateUI();
@@ -352,17 +337,12 @@ class SortingGame {
             return;
         }
 
-        const centerX = this.cardPosition.x + this.cardOffsetX;
+        const centerX = this.cardPosition.x;
         const centerY = this.cardPosition.y;
         const width = 260;
         const height = 200;
         const left = centerX - width / 2;
         const top = centerY - height / 2;
-
-        this.ctx.save();
-        this.ctx.translate(centerX, centerY);
-        this.ctx.rotate((this.cardOffsetX / 200) * 0.1);
-        this.ctx.translate(-centerX, -centerY);
 
         this.ctx.fillStyle = '#1F2A44';
         this.ctx.strokeStyle = this.currentItem.category === this.targetCategory ? '#00ff9d' : '#ff8fa3';
@@ -379,9 +359,7 @@ class SortingGame {
         this.ctx.fillText(this.currentItem.name, centerX, top + 150);
 
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('ЛЕВО = НЕТ    ПРАВО = ДА', centerX, top + height - 20);
-
-        this.ctx.restore();
+        this.ctx.fillText('Выбери: ВЗЯТЬ или НА СКЛАД', centerX, top + height - 20);
     }
 
     drawBasket() {
@@ -469,6 +447,34 @@ class SortingGame {
         console.log('💀 ПРОВАЛ! Ошибка в сортировке');
         this.stop();
         this.gameManager.endGame(false, 0);
+    }
+
+    drawButtons() {
+        // Кнопка "ВЗЯТЬ" (справа)
+        const takeBtn = this.buttons.take;
+        this.ctx.fillStyle = '#00ff9d';
+        this.ctx.fillRect(takeBtn.x, takeBtn.y, takeBtn.width, takeBtn.height);
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(takeBtn.x, takeBtn.y, takeBtn.width, takeBtn.height);
+        
+        this.ctx.fillStyle = '#000';
+        this.ctx.font = '16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('📦', takeBtn.x + takeBtn.width/2, takeBtn.y + 25);
+        this.ctx.fillText('ВЗЯТЬ', takeBtn.x + takeBtn.width/2, takeBtn.y + 45);
+
+        // Кнопка "НА СКЛАД" (слева)
+        const skipBtn = this.buttons.skip;
+        this.ctx.fillStyle = '#ff8fa3';
+        this.ctx.fillRect(skipBtn.x, skipBtn.y, skipBtn.width, skipBtn.height);
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(skipBtn.x, skipBtn.y, skipBtn.width, skipBtn.height);
+        
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillText('🏪', skipBtn.x + skipBtn.width/2, skipBtn.y + 25);
+        this.ctx.fillText('НА СКЛАД', skipBtn.x + skipBtn.width/2, skipBtn.y + 45);
     }
 }
 
