@@ -87,7 +87,7 @@ class AddressGame {
             // Проверить тап по вариантам (3 кнопки)
             const buttonHeight = 70;
             const buttonSpacing = 20;
-            const startY = 400;
+            const startY = 220;
             
             for (let i = 0; i < 3; i++) {
                 const buttonY = startY + i * (buttonHeight + buttonSpacing);
