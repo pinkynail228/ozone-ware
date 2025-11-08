@@ -232,8 +232,8 @@ class GameManager {
             this.resultTitleEl.textContent = 'УСПЕХ! Новая победа';
             this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
             document.getElementById('next-game-btn').textContent = 'Следующая игра';
-            if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Начать заново';
-            this.resultRestartAction = 'restart';
+            if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
+            this.resultRestartAction = 'exit';
         } else {
             this.resultIconEl.textContent = '💥';
             this.resultTitleEl.textContent = `Ошибка! Осталось ❤️ ${this.lives}`;
