@@ -13,7 +13,7 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'game3', 'catcher', 'game6', 'shopping', 'address', 'game10'];
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing'];
         this.playedGames = [];
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
@@ -60,12 +60,12 @@ class GameManager {
         this.transitionData = {
             delivery: { emoji: '🚴‍♂️', tagline: 'ТАПАЙ ДЛЯ ПРЫЖКА! ИЗБЕГАЙ ПРЕПЯТСТВИЙ!' },
             sorting: { emoji: '🧺', tagline: 'КНОПКИ: ВЗЯТЬ НУЖНОЕ, НА СКЛАД НЕНУЖНОЕ!' },
-            game3: { emoji: '🔍', tagline: 'НАШЁЛ? ТАПАЙ!' },
+            finder: { emoji: '🔍', tagline: 'НАЙДИ И ТАПАЙ НУЖНЫЙ ТОВАР!' },
             catcher: { emoji: '💻', tagline: 'ДВИГАЙ КОРЗИНУ! ЛОВИ ТОЛЬКО НУЖНЫЙ ТОВАР!' },
-            game6: { emoji: '🧮', tagline: 'РЕШАЙ МГНОВЕННО!' },
+            calculator: { emoji: '🧮', tagline: 'РЕШАЙ ПРИМЕРЫ! ТАПАЙ ПРАВИЛЬНЫЙ ОТВЕТ!' },
             shopping: { emoji: '🛒', tagline: 'ТАПАЙ ТОВАРЫ ИЗ СПИСКА НА КОНВЕЙЕРЕ!' },
             address: { emoji: '📦', tagline: 'ЗАПОМНИ АДРЕС И ВЫБЕРИ ЕГО ИЗ СПИСКА!' },
-            game10: { emoji: '⚖️', tagline: 'ВЫБЕРИ ПРАВИЛЬНЫЙ ВЕС!' }
+            weighing: { emoji: '⚖️', tagline: 'ВЗВЕСЬ ТОВАР! ВЫБЕРИ ПРАВИЛЬНУЮ КАТЕГОРИЮ!' }
         };
 
         this.updateScore(0);
@@ -126,14 +126,14 @@ class GameManager {
             case 'sorting':
                 this.currentGame = new SortingGame(this.canvas, this.ctx, this);
                 break;
-            case 'game3':
-                this.currentGame = new Game3(this.canvas, this.ctx, this);
+            case 'finder':
+                this.currentGame = new FinderGame(this.canvas, this.ctx, this);
                 break;
             case 'catcher':
                 this.currentGame = new CatcherGame(this.canvas, this.ctx, this);
                 break;
-            case 'game6':
-                this.currentGame = new Game6(this.canvas, this.ctx, this);
+            case 'calculator':
+                this.currentGame = new CalculatorGame(this.canvas, this.ctx, this);
                 break;
             case 'shopping':
                 this.currentGame = new ShoppingGame(this.canvas, this.ctx, this);
@@ -141,8 +141,8 @@ class GameManager {
             case 'address':
                 this.currentGame = new AddressGame(this.canvas, this.ctx, this);
                 break;
-            case 'game10':
-                this.currentGame = new Game10(this.canvas, this.ctx, this);
+            case 'weighing':
+                this.currentGame = new WeighingGame(this.canvas, this.ctx, this);
                 break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);

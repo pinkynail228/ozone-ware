@@ -4,7 +4,7 @@
  * Длительность: 5 секунд
  */
 
-class Game6 {
+class CalculatorGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🔢 Game6: Инициализация...');
         

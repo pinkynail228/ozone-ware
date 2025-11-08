@@ -5,7 +5,7 @@
  * Стиль: Ozon брендинг - синие градиенты, большие кнопки
  */
 
-class Game10 {
+class WeighingGame {
     constructor(canvas, ctx, gameManager) {
         console.log('⚖️ Game10: Инициализация...');
         

@@ -4,7 +4,7 @@
  * Длительность: 8 секунд
  */
 
-class Game3 {
+class FinderGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🎯 Game3: Инициализация...');
         
