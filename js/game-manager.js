@@ -40,6 +40,8 @@ class GameManager {
         this.lastEarnedEl = document.getElementById('last-earned');
         this.finalScoreEl = document.getElementById('final-score');
         this.gamesCompletedEl = document.getElementById('games-completed');
+        this.resultRestartBtn = document.getElementById('restart-btn');
+        this.resultRestartAction = 'restart';
 
         this.gameoverEmojiEl = document.getElementById('gameover-emoji');
         this.gameoverTitleEl = document.getElementById('gameover-title');
@@ -230,11 +232,15 @@ class GameManager {
             this.resultTitleEl.textContent = 'УСПЕХ! Новая победа';
             this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
             document.getElementById('next-game-btn').textContent = 'Следующая игра';
+            if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Начать заново';
+            this.resultRestartAction = 'restart';
         } else {
             this.resultIconEl.textContent = '💥';
             this.resultTitleEl.textContent = `Ошибка! Осталось ❤️ ${this.lives}`;
             this.screens.result.style.background = 'linear-gradient(135deg, #d63031, #ff7675)';
             document.getElementById('next-game-btn').textContent = 'Продолжить смену';
+            if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
+            this.resultRestartAction = 'exit';
         }
 
         if (this.lastEarnedEl) this.lastEarnedEl.textContent = this.lastEarned;
@@ -269,6 +275,8 @@ class GameManager {
         if (pressStart) {
             pressStart.textContent = this.defaultPressStartText;
         }
+        this.resultRestartAction = 'restart';
+        if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Начать заново';
         window.dispatchEvent(new CustomEvent('ozon:start-screen'));
     }
 
@@ -295,6 +303,16 @@ class GameManager {
 
         this.showScreen('gameover');
         this.sound.stopGameplayLoop();
+    }
+
+    handleResultRestart() {
+        if (this.resultRestartAction === 'exit') {
+            console.log('🚪 Завершение смены и возврат на стартовый экран');
+            this.showStartScreen();
+        } else {
+            console.log('🔄 Перезапуск смены с начала');
+            this.restart();
+        }
     }
 
     updateScore(amount = 0) {

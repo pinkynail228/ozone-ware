@@ -63,11 +63,11 @@ function setupEventListeners() {
         gameManager.nextGame();
     });
     
-    // Кнопка "Начать заново"
+    // Кнопка перезапуска/выхода со смены
     const restartBtn = document.getElementById('restart-btn');
     restartBtn.addEventListener('click', () => {
-        console.log('🔄 Нажата кнопка: Начать заново');
-        gameManager.restart();
+        console.log('🔁 Нажата кнопка: перезапуск/выход со смены');
+        gameManager.handleResultRestart();
     });
 
     // Кнопка на экране Game Over
