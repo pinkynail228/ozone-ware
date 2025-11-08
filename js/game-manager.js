@@ -311,22 +311,8 @@ class GameManager {
     }
 
     renderLives() {
-        const containers = [
-            document.getElementById('lives-display'),
-            document.getElementById('transition-lives')
-        ];
-
-        containers.forEach(container => {
-            if (!container) return;
-            container.innerHTML = '';
-            for (let i = 0; i < this.maxLives; i++) {
-                const span = document.createElement('span');
-                const active = i < this.lives;
-                span.className = 'life' + (active ? ' active' : ' inactive');
-                span.textContent = '❤️';
-                container.appendChild(span);
-            }
-        });
+        // Lives отключены - элементы удалены из HTML
+        return;
     }
 
     calculateReward(rawScore = 0) {
