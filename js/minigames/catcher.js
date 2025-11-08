@@ -148,8 +148,12 @@ class CatcherGame {
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
             console.log('⏰ Время вышло! Поймано:', this.caught);
-            // Всегда побеждаем если время вышло (главное - не ловить плохие)
-            this.win();
+            // Победа если поймали хотя бы 3 правильных товара
+            if (this.caught >= 3) {
+                this.win();
+            } else {
+                this.lose();
+            }
             return;
         }
         
