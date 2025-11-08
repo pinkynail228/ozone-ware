@@ -339,26 +339,16 @@ class SortingGame {
         const top = centerY - height / 2;
 
         this.ctx.fillStyle = '#1F2A44';
-        this.ctx.strokeStyle = this.currentItem.category === this.targetCategory ? '#00ff9d' : '#ff8fa3';
+        this.ctx.strokeStyle = '#00b4d8';
         this.ctx.lineWidth = 4;
         this.ctx.fillRect(left, top, width, height);
         this.ctx.strokeRect(left, top, width, height);
 
-        // Градиентный эмодзи товара
-        if (window.visualEffects) {
-            window.visualEffects.drawGradientEmoji(
-                this.ctx,
-                this.currentItem.emoji,
-                centerX,
-                top + 95,
-                72
-            );
-        } else {
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = '72px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.currentItem.emoji, centerX, top + 95);
-        }
+        // Эмодзи товара без подсказочных градиентов
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '72px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(this.currentItem.emoji, centerX, top + 95);
 
         // Название товара с эффектом
         this.ctx.fillStyle = '#fff';
@@ -402,19 +392,10 @@ class SortingGame {
             this.ctx.stroke();
 
             if (item) {
-                if (window.visualEffects) {
-                    window.visualEffects.drawGradientEmoji(
-                        this.ctx,
-                        item.emoji,
-                        startX + i * (slotWidth + spacing),
-                        basketY + 32,
-                        32
-                    );
-                } else {
-                    this.ctx.font = '32px Arial';
-                    this.ctx.fillStyle = '#fff';
-                    this.ctx.fillText(item.emoji, startX + i * (slotWidth + spacing), basketY + 32);
-                }
+                this.ctx.font = '32px Arial';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(item.emoji, startX + i * (slotWidth + spacing), basketY + 32);
             }
         }
 
