@@ -56,7 +56,7 @@ class FinderGame {
         const cols = 3;
         const itemSize = 70;
         const startX = 45;
-        const startY = 200;
+        const startY = 250;
         const spacingX = 105;
         const spacingY = 120;
         
