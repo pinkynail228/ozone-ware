@@ -147,20 +147,11 @@ class ShoppingGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 26px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('СОБЕРИ ЗАКАЗ 🛒', this.canvas.width / 2, 80);
-        
-        // Список товаров
-        this.ctx.font = '18px Arial';
-        this.ctx.fillText('СПИСОК:', this.canvas.width / 2, 130);
-        
+        // Только список товаров без заголовков
         let offsetX = (this.canvas.width - this.shoppingList.length * 70) / 2;
         this.shoppingList.forEach((item, index) => {
             const x = offsetX + index * 70 + 35;
-            const y = 180;
+            const y = 120;
             
             // Фон товара
             if (this.collected.has(item)) {
@@ -173,7 +164,9 @@ class ShoppingGame {
             }
             
             // Emoji
+            this.ctx.fillStyle = '#fff';
             this.ctx.font = '48px Arial';
+            this.ctx.textAlign = 'center';
             this.ctx.fillText(item, x, y + 15);
             
             // Галочка если собрано

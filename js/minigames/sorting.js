@@ -280,14 +280,11 @@ class SortingGame {
     }
 
     drawHeader() {
-        this.ctx.fillStyle = '#FFD700';
-        this.ctx.textAlign = 'center';
-        this.ctx.font = 'bold 24px Arial';
-        this.ctx.fillText(`СОБИРАЙ: ${this.targetLabel}`, this.canvas.width / 2, 60);
-        
-        this.ctx.font = '16px Arial';
+        // Минимальный прогресс
         this.ctx.fillStyle = '#00ff9d';
-        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 90);
+        this.ctx.textAlign = 'center';
+        this.ctx.font = '18px Arial';
+        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 40);
     }
 
     drawBins() {

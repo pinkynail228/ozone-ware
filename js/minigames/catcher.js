@@ -113,14 +113,11 @@ class CatcherGame {
         this.ctx.fillStyle = '#87ceeb';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок
+        // Только счетчик
         this.ctx.fillStyle = '#000';
-        this.ctx.font = 'bold 24px Courier New';
+        this.ctx.font = '20px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(`${this.targetItem} ${this.targetName}`, this.canvas.width / 2, 60);
-        
-        this.ctx.font = '18px Courier New';
-        this.ctx.fillText(`Поймано: ${this.caught}`, this.canvas.width / 2, 90);
+        this.ctx.fillText(`${this.caught}`, this.canvas.width / 2, 40);
         
         // Спавн товаров
         this.spawnTimer++;

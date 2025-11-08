@@ -182,18 +182,11 @@ class Game3 {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок с целевым товаром
+        // Только целевой товар без заголовка
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 28px Courier New';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('НАЙДИ:', this.canvas.width / 2, 80);
-        
-        // Целевой товар (большой)
         this.ctx.font = 'bold 60px Courier New';
-        this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 145);
-        
-        this.ctx.font = 'bold 20px Courier New';
-        this.ctx.fillText(this.targetItem.name, this.canvas.width / 2, 170);
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 100);
         
         // Отрисовать товары
         this.drawItems();

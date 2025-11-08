@@ -149,19 +149,12 @@ class AddressGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Заголовок
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 26px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('🏠 АДРЕС ДОСТАВКИ', this.canvas.width / 2, 60);
+        // Без заголовка
 
         // Логика состояний
         if (this.state === 'showing') {
             // Показываем адрес
             this.showTimer++;
-            
-            this.ctx.font = '18px Arial';
-            this.ctx.fillText('ЗАПОМНИ АДРЕС:', this.canvas.width / 2, 180);
             
             // Адрес большим шрифтом
             this.ctx.fillStyle = '#00ff88';
