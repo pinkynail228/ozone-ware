@@ -113,14 +113,30 @@ class CatcherGame {
         this.ctx.fillStyle = '#87ceeb';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Целевой товар и счетчик
-        this.ctx.fillStyle = '#000';
-        this.ctx.font = 'bold 48px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.targetItem, this.canvas.width / 2, 70);
+        // Целевой товар с градиентным эффектом
+        if (window.visualEffects) {
+            window.visualEffects.drawGradientEmoji(
+                this.ctx,
+                this.targetItem,
+                this.canvas.width / 2,
+                70,
+                48
+            );
+        } else {
+            this.ctx.fillStyle = '#000';
+            this.ctx.font = 'bold 48px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.targetItem, this.canvas.width / 2, 70);
+        }
         
-        this.ctx.font = '18px Arial';
+        // Счетчик с эффектом
+        this.ctx.fillStyle = '#000';
+        this.ctx.font = 'bold 18px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        this.ctx.shadowBlur = 4;
         this.ctx.fillText(`Поймано: ${this.caught}`, this.canvas.width / 2, 100);
+        this.ctx.shadowBlur = 0;
         
         // Спавн товаров
         this.spawnTimer++;
@@ -233,9 +249,19 @@ class CatcherGame {
     
     drawItems() {
         this.items.forEach(item => {
-            this.ctx.font = 'bold 36px Courier New';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(item.emoji, item.x + item.width / 2, item.y + item.height / 2 + 10);
+            if (window.visualEffects) {
+                window.visualEffects.drawGradientEmoji(
+                    this.ctx,
+                    item.emoji,
+                    item.x + item.width / 2,
+                    item.y + item.height / 2 + 10,
+                    36
+                );
+            } else {
+                this.ctx.font = 'bold 36px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(item.emoji, item.x + item.width / 2, item.y + item.height / 2 + 10);
+            }
         });
     }
     

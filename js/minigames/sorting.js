@@ -345,13 +345,30 @@ class SortingGame {
         this.ctx.fillRect(left, top, width, height);
         this.ctx.strokeRect(left, top, width, height);
 
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '72px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.currentItem.emoji, centerX, top + 95);
+        // Градиентный эмодзи товара
+        if (window.visualEffects) {
+            window.visualEffects.drawGradientEmoji(
+                this.ctx,
+                this.currentItem.emoji,
+                centerX,
+                top + 95,
+                72
+            );
+        } else {
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = '72px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.currentItem.emoji, centerX, top + 95);
+        }
 
+        // Название товара с эффектом
+        this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        this.ctx.shadowBlur = 4;
         this.ctx.fillText(this.currentItem.name, centerX, top + 150);
+        this.ctx.shadowBlur = 0;
     }
 
     drawBasket() {
@@ -386,9 +403,19 @@ class SortingGame {
             this.ctx.stroke();
 
             if (item) {
-                this.ctx.font = '32px Arial';
-                this.ctx.fillStyle = '#fff';
-                this.ctx.fillText(item.emoji, startX + i * (slotWidth + spacing), basketY + 32);
+                if (window.visualEffects) {
+                    window.visualEffects.drawGradientEmoji(
+                        this.ctx,
+                        item.emoji,
+                        startX + i * (slotWidth + spacing),
+                        basketY + 32,
+                        32
+                    );
+                } else {
+                    this.ctx.font = '32px Arial';
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.fillText(item.emoji, startX + i * (slotWidth + spacing), basketY + 32);
+                }
             }
         }
 

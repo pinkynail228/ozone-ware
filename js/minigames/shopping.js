@@ -163,11 +163,21 @@ class ShoppingGame {
                 this.ctx.globalAlpha = 1;
             }
             
-            // Emoji
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = '48px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(item, x, y + 15);
+            // Градиентный эмодзи
+            if (window.visualEffects) {
+                window.visualEffects.drawGradientEmoji(
+                    this.ctx,
+                    item,
+                    x,
+                    y + 15,
+                    48
+                );
+            } else {
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = '48px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(item, x, y + 15);
+            }
             
             // Галочка если собрано
             if (this.collected.has(item)) {
@@ -211,10 +221,20 @@ class ShoppingGame {
                 continue;
             }
             
-            // Отрисовать товар
-            this.ctx.font = '50px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size - 10);
+            // Отрисовать товар с градиентным эффектом
+            if (window.visualEffects) {
+                window.visualEffects.drawGradientEmoji(
+                    this.ctx,
+                    item.emoji,
+                    item.x + item.size / 2,
+                    item.y + item.size - 10,
+                    50
+                );
+            } else {
+                this.ctx.font = '50px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size - 10);
+            }
         }
         
         // Обновить UI

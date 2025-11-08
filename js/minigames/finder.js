@@ -182,11 +182,21 @@ class FinderGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Только целевой товар без заголовка
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 60px Courier New';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 100);
+        // Целевой товар с градиентным эффектом
+        if (window.visualEffects) {
+            window.visualEffects.drawGradientEmoji(
+                this.ctx, 
+                this.targetItem.emoji, 
+                this.canvas.width / 2, 
+                100, 
+                60
+            );
+        } else {
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = 'bold 60px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.targetItem.emoji, this.canvas.width / 2, 100);
+        }
         
         // Отрисовать товары
         this.drawItems();
@@ -245,17 +255,27 @@ class FinderGame {
                 item.height + 10
             );
             
-            // Emoji товара
+            // Emoji товара с градиентным эффектом
             const fontSize = 50 * item.scale;
-            this.ctx.font = `bold ${fontSize}px Courier New`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillStyle = '#fff';
-            this.ctx.fillText(
-                item.type.emoji, 
-                item.x + item.width / 2, 
-                item.y + item.height / 2 + wobble
-            );
+            if (window.visualEffects) {
+                window.visualEffects.drawGradientEmoji(
+                    this.ctx,
+                    item.type.emoji,
+                    item.x + item.width / 2,
+                    item.y + item.height / 2 + wobble,
+                    fontSize
+                );
+            } else {
+                this.ctx.font = `bold ${fontSize}px Arial`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.fillText(
+                    item.type.emoji, 
+                    item.x + item.width / 2, 
+                    item.y + item.height / 2 + wobble
+                );
+            }
         });
     }
     
