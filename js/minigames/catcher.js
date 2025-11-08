@@ -117,11 +117,10 @@ class CatcherGame {
         this.ctx.fillStyle = '#000';
         this.ctx.font = 'bold 24px Courier New';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(`ПОЙМАЙ ${this.targetName} ${this.targetItem}`, this.canvas.width / 2, 80);
+        this.ctx.fillText(`${this.targetItem} ${this.targetName}`, this.canvas.width / 2, 60);
         
-        // Убрали счетчик - просто ловим за время
-        this.ctx.font = '16px Courier New';
-        this.ctx.fillText(`Лови только ${this.targetItem} ${this.targetName.toLowerCase()}!`, this.canvas.width / 2, 110);
+        this.ctx.font = '18px Courier New';
+        this.ctx.fillText(`Поймано: ${this.caught}`, this.canvas.width / 2, 90);
         
         // Спавн товаров
         this.spawnTimer++;

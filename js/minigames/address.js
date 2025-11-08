@@ -153,10 +153,7 @@ class AddressGame {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = 'bold 26px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('АДРЕС ДОСТАВКИ 🏠', this.canvas.width / 2, 80);
-        
-        this.ctx.font = '16px Arial';
-        this.ctx.fillText('Запомни адрес и выбери его из списка', this.canvas.width / 2, 115);
+        this.ctx.fillText('🏠 АДРЕС ДОСТАВКИ', this.canvas.width / 2, 60);
 
         // Логика состояний
         if (this.state === 'showing') {

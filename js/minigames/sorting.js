@@ -280,21 +280,14 @@ class SortingGame {
     }
 
     drawHeader() {
-        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillStyle = '#FFD700';
         this.ctx.textAlign = 'center';
-        this.ctx.font = 'bold 26px Arial';
-        this.ctx.fillText('СОРТИРОВКА ПО КАТЕГОРИИ', this.canvas.width / 2, 70);
-
-        this.ctx.font = '18px Arial';
-        this.ctx.fillText(`Собирай: ${this.targetLabel}`, this.canvas.width / 2, 110);
-
+        this.ctx.font = 'bold 24px Arial';
+        this.ctx.fillText(`СОБИРАЙ: ${this.targetLabel}`, this.canvas.width / 2, 60);
+        
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('Нажимай кнопки: ВЗЯТЬ нужное или НА СКЛАД ненужное', this.canvas.width / 2, 140);
-
-        this.ctx.font = '15px Arial';
         this.ctx.fillStyle = '#00ff9d';
-        this.ctx.fillText('4 товара за 6 секунд', this.canvas.width / 2, 165);
-        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillText(`${this.collectedItems.length}/${this.requiredItems}`, this.canvas.width / 2, 90);
     }
 
     drawBins() {
@@ -357,9 +350,6 @@ class SortingGame {
 
         this.ctx.font = 'bold 20px Arial';
         this.ctx.fillText(this.currentItem.name, centerX, top + 150);
-
-        this.ctx.font = '14px Arial';
-        this.ctx.fillText('Выбери: ВЗЯТЬ или НА СКЛАД', centerX, top + height - 20);
     }
 
     drawBasket() {
