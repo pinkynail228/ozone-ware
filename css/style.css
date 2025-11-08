@@ -520,6 +520,13 @@ body {
     font-size: 24px;
 }
 
+.result-hearts {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 36px;
+    letter-spacing: 4px;
+}
+
 .result-stats p {
     margin: 10px 0;
 }

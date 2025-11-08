@@ -229,14 +229,15 @@ class GameManager {
 
         if (success) {
             this.resultIconEl.textContent = '✅';
-            this.resultTitleEl.textContent = 'Готово! Заказ уходит в ПВЗ';
+            this.resultTitleEl.innerHTML = 'Готово! Заказ уходит в ПВЗ';
             this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
             document.getElementById('next-game-btn').textContent = 'Следующая игра';
             if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
             this.resultRestartAction = 'exit';
         } else {
             this.resultIconEl.textContent = '💥';
-            this.resultTitleEl.textContent = `ПВЗ заметил ошибку. Осталось попыток: ❤️ ${this.lives}`;
+            const hearts = '❤️'.repeat(Math.max(0, this.lives)) || '❤️';
+            this.resultTitleEl.innerHTML = `ПВЗ заметил ошибку<br><span class="result-hearts">${hearts}</span>`;
             this.screens.result.style.background = 'linear-gradient(135deg, #d63031, #ff7675)';
             document.getElementById('next-game-btn').textContent = 'Продолжить смену';
             if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
