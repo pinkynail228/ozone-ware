@@ -187,7 +187,6 @@ class Game4 {
         
         document.getElementById('timer-text').textContent = Math.ceil(remaining);
         document.getElementById('timer-fill').style.width = (remaining / this.gameTime * 100) + '%';
-        document.getElementById('score-display').textContent = this.score;
     }
     
     win() {
