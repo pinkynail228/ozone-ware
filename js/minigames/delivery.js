@@ -362,8 +362,6 @@ class DeliveryGame {
         const timerFill = document.getElementById('timer-fill');
         const percentage = (remaining / this.gameTime) * 100;
         timerFill.style.width = percentage + '%';
-
-        scoreDisplay.textContent = this.score;
     }
 
     /**
