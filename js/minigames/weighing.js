@@ -142,7 +142,7 @@ class WeighingGame {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '16px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(`${this.correct}/${this.requiredCorrect}`, this.canvas.width / 2, 50);
+        this.ctx.fillText(`${this.correct}/${this.requiredCorrect}`, this.canvas.width / 2, 110);
         
         // Весы (визуал)
         this.drawScales();
