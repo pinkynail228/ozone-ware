@@ -13,7 +13,7 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing'];
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'scanner'];
         this.playedGames = [];
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
@@ -67,7 +67,8 @@ class GameManager {
             calculator: { emoji: '🧮', tagline: 'Реши пример и тапни правильный ответ' },
             shopping: { emoji: '🛒', tagline: 'Тапай товары из списка сверху на конвейере' },
             address: { emoji: '🏠', tagline: 'Запомни адрес, потом выбери его из списка' },
-            weighing: { emoji: '⚖️', tagline: 'Посмотри вес товара и выбери категорию' }
+            weighing: { emoji: '⚖️', tagline: 'Посмотри вес товара и выбери категорию' },
+            scanner: { emoji: '🔦', tagline: 'Попади лампой по посылке и тапни для скана' }
         };
 
         this.updateScore(0);
@@ -146,6 +147,9 @@ class GameManager {
             case 'weighing':
                 this.currentGame = new WeighingGame(this.canvas, this.ctx, this);
                 break;
+            case 'scanner':
+                this.currentGame = new ScannerGame(this.canvas, this.ctx, this);
+                break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
                 return;
@@ -167,6 +171,8 @@ class GameManager {
             shopping: 'Комплектация заказа',
             address: 'Адрес доставки',
             weighing: 'Взвешивание товара'
+            ,
+            scanner: 'Сканирование посылок'
         };
 
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
