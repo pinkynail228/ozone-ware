@@ -13,7 +13,7 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'scanner'];
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'trafficLight', 'inspection', 'scanner'];
         this.playedGames = [];
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
@@ -68,6 +68,8 @@ class GameManager {
             shopping: { emoji: '🛒', tagline: 'Тапай товары из списка сверху на конвейере' },
             address: { emoji: '🏠', tagline: 'Запомни адрес, потом выбери его из списка' },
             weighing: { emoji: '⚖️', tagline: 'Посмотри вес товара и выбери категорию' },
+            trafficLight: { emoji: '🚦', tagline: 'Лови зелёный и успей тапнуть' },
+            inspection: { emoji: '🧾', tagline: 'Вверх — целая, вниз — битая посылка' },
             scanner: { emoji: '🔦', tagline: 'Попади лампой по посылке и тапни для скана' }
         };
 
@@ -147,6 +149,12 @@ class GameManager {
             case 'weighing':
                 this.currentGame = new WeighingGame(this.canvas, this.ctx, this);
                 break;
+            case 'trafficLight':
+                this.currentGame = new TrafficLightGame(this.canvas, this.ctx, this);
+                break;
+            case 'inspection':
+                this.currentGame = new InspectionGame(this.canvas, this.ctx, this);
+                break;
             case 'scanner':
                 this.currentGame = new ScannerGame(this.canvas, this.ctx, this);
                 break;
@@ -170,8 +178,9 @@ class GameManager {
             calculator: 'Расчёт заказа',
             shopping: 'Комплектация заказа',
             address: 'Адрес доставки',
-            weighing: 'Взвешивание товара'
-            ,
+            weighing: 'Взвешивание товара',
+            trafficLight: 'Светофор на выдаче',
+            inspection: 'Приёмка товаров',
             scanner: 'Сканирование посылок'
         };
 
