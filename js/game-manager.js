@@ -15,6 +15,7 @@ class GameManager {
         this.lastEarned = 0;
         this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'trafficLight', 'inspection', 'scanner'];
         this.playedGames = [];
+        this.recentGames = [];
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
 
@@ -110,9 +111,24 @@ class GameManager {
             console.log('🔄 Все игры сыграны, список обновлён');
         }
 
-        const available = this.gamesList.filter(game => !this.playedGames.includes(game));
+        const recentBlock = this.recentGames.slice(-2);
+
+        let available = this.gamesList.filter(game => !this.playedGames.includes(game) && !recentBlock.includes(game));
+
+        if (available.length === 0) {
+            available = this.gamesList.filter(game => !recentBlock.includes(game));
+        }
+
+        if (available.length === 0) {
+            available = [...this.gamesList];
+        }
+
         const chosen = available[Math.floor(Math.random() * available.length)];
         this.playedGames.push(chosen);
+        this.recentGames.push(chosen);
+        if (this.recentGames.length > 2) {
+            this.recentGames.shift();
+        }
 
         console.log(`🎲 Выбрана игра: ${chosen}`);
         return chosen;
