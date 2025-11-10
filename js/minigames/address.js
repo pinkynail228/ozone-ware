@@ -14,7 +14,7 @@ class AddressGame {
         this.gameManager = gameManager;
         this.sound = gameManager.sound;
         
-        this.gameTime = 8;
+        this.gameTime = 7;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
@@ -25,7 +25,7 @@ class AddressGame {
         // Состояния
         this.state = 'showing'; // showing, choosing, finished
         this.showTimer = 0;
-        this.showDuration = 180; // 3 секунды - больше времени
+        this.showDuration = 120; // 2 секунды
         
         // Адреса
         this.streets = ['Ленина', 'Пушкина', 'Гагарина', 'Мира', 'Советская', 'Кирова'];
