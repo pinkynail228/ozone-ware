@@ -15,7 +15,7 @@ class InspectionGame {
         this.gameDuration = 6;
         this.minDropDelay = 1.15;
         this.maxDropDelay = 3.6;
-        this.fallDuration = 0.75;
+        this.fallDuration = 1.2; // Увеличиваем время падения
         this.reactionWindow = 420; // ms
 
         // Состояния
