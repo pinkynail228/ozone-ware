@@ -25,7 +25,7 @@
                 <div class="particle"></div>
                 <div class="particle"></div>
             </div>
-            
+
             <!-- Пульсирующие круги -->
             <div class="pulse-circles">
                 <div class="pulse-circle"></div>
@@ -57,6 +57,10 @@
                 
                 <p class="press-start">Начать смену</p>
                 <div class="tap-hint">👆 ТАПНИ</div>
+                <div class="start-actions">
+                    <button id="start-shift-btn" class="btn-primary">Начать смену</button>
+                    <button id="level-select-btn" class="btn-secondary">Уровни</button>
+                </div>
                 
                 <div class="stats">
                     <div class="stat">8 ЗАДАЧ</div>
@@ -76,6 +80,27 @@
             <div class="countdown">
                 <span id="countdown-number">3</span>
             </div>
+        </div>
+
+        <!-- Экран выбора уровней -->
+        <div id="level-select-screen" class="screen">
+            <div class="level-select-header">
+                <h2>Уровни</h2>
+                <p>Выбери задание, изучи описание и сыграй отдельно</p>
+            </div>
+            <div id="level-select-layout">
+                <div id="level-list" class="level-list"></div>
+                <div id="level-detail" class="level-detail hidden">
+                    <div id="level-detail-emoji" class="level-detail-emoji">🎮</div>
+                    <h3 id="level-detail-title">Выбери уровень слева</h3>
+                    <p id="level-detail-tagline" class="level-detail-tagline">Описание появится здесь.</p>
+                    <p id="level-detail-description" class="level-detail-description">Описание появится здесь.</p>
+                    <p id="level-detail-controls" class="level-detail-meta"></p>
+                    <p id="level-detail-duration" class="level-detail-meta"></p>
+                    <button id="play-level-btn" class="btn-primary" disabled>Играть</button>
+                </div>
+            </div>
+            <button id="level-back-btn" class="btn-secondary">Назад</button>
         </div>
 
         <!-- Экран игры -->
@@ -103,6 +128,30 @@
             </div>
             <button id="next-game-btn" class="btn-primary">Следующая игра</button>
             <button id="restart-btn" class="btn-secondary">Начать заново</button>
+        </div>
+
+        <!-- Экран результата уровня -->
+        <div id="level-result-screen" class="screen">
+            <div class="level-result-card">
+                <div class="result-icon" id="level-result-emoji">✅</div>
+                <h2 id="level-result-title">Задание выполнено</h2>
+                <p id="level-result-subtitle">Отлично справился!</p>
+                <div class="result-stats">
+                    <p>Очки за уровень: <span id="level-result-score">0</span></p>
+                </div>
+                <button id="level-result-back-btn" class="btn-primary">Назад к уровням</button>
+            </div>
+        </div>
+
+        <!-- Экран завершения смены -->
+        <div id="shift-complete-screen" class="screen">
+            <div class="result-icon">🏅</div>
+            <h2>Смена завершена!</h2>
+            <p class="shift-complete-subtitle">Все мини-игры пройдены. Отличная работа на ПВЗ!</p>
+            <div class="result-stats">
+                <p>Очки за смену: <span id="shift-final-score">0</span></p>
+            </div>
+            <button id="shift-finish-btn" class="btn-primary">Вернуться на заставку</button>
         </div>
 
         <!-- Экран полного проигрыша -->
@@ -137,7 +186,7 @@
     <script src="js/minigames/shopping.js"></script>
     <script src="js/minigames/address.js"></script>
     <script src="js/minigames/weighing.js"></script>
-    <script src="js/minigames/traffic-light.js"></script>
+    <script src="js/minigames/loading-dock.js"></script>
     <script src="js/minigames/inspection.js"></script>
     <script src="js/minigames/scanner.js"></script>
     <script src="js/main.js"></script>

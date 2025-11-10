@@ -13,9 +13,16 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'trafficLight', 'inspection', 'scanner'];
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner'];
         this.playedGames = [];
         this.recentGames = [];
+        this.currentGameKey = null;
+        this.mode = 'shift';
+        this.currentLevelKey = null;
+        this.levelMeta = null;
+        this.levelLastScore = 0;
+        this.shiftCompletedGames = new Set();
+        this.shiftFinished = false;
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
 
@@ -23,10 +30,108 @@ class GameManager {
         this.screens = {
             loading: document.getElementById('loading-screen'),
             transition: document.getElementById('transition-screen'),
+            levelSelect: document.getElementById('level-select-screen'),
             game: document.getElementById('game-screen'),
             result: document.getElementById('result-screen'),
+            levelResult: document.getElementById('level-result-screen'),
+            shiftComplete: document.getElementById('shift-complete-screen'),
             gameover: document.getElementById('gameover-screen')
         };
+
+        this.gameCatalog = {
+            delivery: {
+                title: 'Курьерская доставка',
+                emoji: '🚴‍♂️',
+                tagline: 'Тапай для прыжка! Избегай препятствия на пути',
+                description: 'Перепрыгивай коробки и конусы, чтобы успеть довезти заказ до ПВЗ.',
+                controls: 'Тап по экрану — прыжок.',
+                duration: '≈ 6 секунд'
+            },
+            sorting: {
+                title: 'Сортировка на складе',
+                emoji: '🧺',
+                tagline: 'Жми ВЗЯТЬ для нужного, НА СКЛАД для остального',
+                description: 'Раздели поток посылок: нужные отправь в заказ, остальные — обратно на склад.',
+                controls: 'Кнопки ВЗЯТЬ и НА СКЛАД.',
+                duration: '≈ 7 секунд'
+            },
+            finder: {
+                title: 'Поиск товара',
+                emoji: '🔍',
+                tagline: 'Тапни на товар который показан вверху экрана',
+                description: 'Найди товар из списка и не промахнись среди отвлекающих предметов.',
+                controls: 'Тап по нужному товару.',
+                duration: '≈ 7 секунд'
+            },
+            catcher: {
+                title: 'Приёмка на ПВЗ',
+                emoji: '📦',
+                tagline: 'Двигай корзину! Лови ТОЛЬКО показанный товар',
+                description: 'Катай контейнер по ленте и лови нужные коробки, избегая лишнего.',
+                controls: 'Свайп/перетаскивание по экрану — движение корзины.',
+                duration: '≈ 8 секунд'
+            },
+            calculator: {
+                title: 'Расчёт заказа',
+                emoji: '🧮',
+                tagline: 'Реши пример и тапни правильный ответ',
+                description: 'Считай быстрее всех — выбирай верный ответ до окончания таймера.',
+                controls: 'Тап по правильному числу.',
+                duration: '≈ 6 секунд'
+            },
+            shopping: {
+                title: 'Комплектация заказа',
+                emoji: '🛒',
+                tagline: 'Тапай товары из списка сверху на конвейере',
+                description: 'Собери заказ по списку — отмечай только нужные позиции на конвейере.',
+                controls: 'Тап по нужному товару.',
+                duration: '≈ 8 секунд'
+            },
+            address: {
+                title: 'Адрес доставки',
+                emoji: '🏠',
+                tagline: 'Запомни адрес, потом выбери его из списка',
+                description: 'Запомни адрес клиента и найди его среди похожих вариантов.',
+                controls: 'Тап по верному адресу.',
+                duration: '≈ 7 секунд'
+            },
+            weighing: {
+                title: 'Взвешивание товара',
+                emoji: '⚖️',
+                tagline: 'Посмотри вес товара и выбери категорию',
+                description: 'Определи тариф: выбери правильную весовую категорию для посылки.',
+                controls: 'Тап по нужной категории.',
+                duration: '≈ 6 секунд'
+            },
+            loadingDock: {
+                title: 'Погрузочная рампа',
+                emoji: '📦',
+                tagline: 'Тапай быстрее, заталкивай коробку в фургон',
+                description: 'Толкай коробку в кузов — быстрые тапы спасут смену!',
+                controls: 'Быстрые тапы по экрану.',
+                duration: '≈ 5 секунд'
+            },
+            inspection: {
+                title: 'Приёмка товаров',
+                emoji: '🧾',
+                tagline: 'Вверх — целая, вниз — битая посылка',
+                description: 'Проверяй посылки: чёткие свайпы решают судьбу партии.',
+                controls: 'Свайп вверх — целая, свайп вниз — брак.',
+                duration: '≈ 7 секунд'
+            },
+            scanner: {
+                title: 'Сканирование посылок',
+                emoji: '🔦',
+                tagline: 'Попади лампой по посылке и тапни для скана',
+                description: 'Води сканером по складу, подсвети штрихкод и подтвердите скан.',
+                controls: 'Перетаскивание лампы + тап для скана.',
+                duration: '≈ 7 секунд'
+            }
+        };
+
+        this.transitionData = Object.fromEntries(
+            Object.entries(this.gameCatalog).map(([key, meta]) => [key, { emoji: meta.emoji, tagline: meta.tagline }])
+        );
 
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
@@ -41,14 +146,34 @@ class GameManager {
         this.lastEarnedEl = document.getElementById('last-earned');
         this.finalScoreEl = document.getElementById('final-score');
         this.gamesCompletedEl = document.getElementById('games-completed');
+        this.shiftFinalScoreEl = document.getElementById('shift-final-score');
         this.resultRestartBtn = document.getElementById('restart-btn');
         this.resultRestartAction = 'restart';
+
+        this.levelListEl = document.getElementById('level-list');
+        this.levelDetailEl = document.getElementById('level-detail');
+        this.levelDetailEmojiEl = document.getElementById('level-detail-emoji');
+        this.levelDetailTitleEl = document.getElementById('level-detail-title');
+        this.levelDetailTaglineEl = document.getElementById('level-detail-tagline');
+        this.levelDetailDescriptionEl = document.getElementById('level-detail-description');
+        this.levelDetailControlsEl = document.getElementById('level-detail-controls');
+        this.levelDetailDurationEl = document.getElementById('level-detail-duration');
+        this.playLevelBtn = document.getElementById('play-level-btn');
+
+        this.levelResultEmojiEl = document.getElementById('level-result-emoji');
+        this.levelResultTitleEl = document.getElementById('level-result-title');
+        this.levelResultSubtitleEl = document.getElementById('level-result-subtitle');
+        this.levelResultScoreEl = document.getElementById('level-result-score');
 
         this.gameoverEmojiEl = document.getElementById('gameover-emoji');
         this.gameoverTitleEl = document.getElementById('gameover-title');
         this.gameoverSubtitleEl = document.getElementById('gameover-subtitle');
         this.gameoverScoreEl = document.getElementById('gameover-score');
         this.gameoverGamesEl = document.getElementById('gameover-games');
+
+        // Коллекции уровней
+        this.levelButtons = new Map();
+        this.levelActiveButton = null;
 
         // Звук
         this.sound = new window.SoundManager();
@@ -60,19 +185,11 @@ class GameManager {
 
         // Переходы
         this.countdownInterval = null;
-        this.transitionData = {
-            delivery: { emoji: '🚴‍♂️', tagline: 'Тапай для прыжка! Избегай препятствия на пути' },
-            sorting: { emoji: '🧺', tagline: 'Жми ВЗЯТЬ для нужного, НА СКЛАД для остального' },
-            finder: { emoji: '🔍', tagline: 'Тапни на товар который показан вверху экрана' },
-            catcher: { emoji: '📦', tagline: 'Двигай корзину! Лови ТОЛЬКО показанный товар' },
-            calculator: { emoji: '🧮', tagline: 'Реши пример и тапни правильный ответ' },
-            shopping: { emoji: '🛒', tagline: 'Тапай товары из списка сверху на конвейере' },
-            address: { emoji: '🏠', tagline: 'Запомни адрес, потом выбери его из списка' },
-            weighing: { emoji: '⚖️', tagline: 'Посмотри вес товара и выбери категорию' },
-            trafficLight: { emoji: '🚦', tagline: 'Лови зелёный и успей тапнуть' },
-            inspection: { emoji: '🧾', tagline: 'Вверх — целая, вниз — битая посылка' },
-            scanner: { emoji: '🔦', tagline: 'Попади лампой по посылке и тапни для скана' }
-        };
+
+        if (this.levelListEl) {
+            this.buildLevelSelect();
+            this.resetLevelSelection();
+        }
 
         this.updateScore(0);
         this.renderLives();
@@ -103,6 +220,145 @@ class GameManager {
         } else {
             this.sound.stopGameplayLoop();
         }
+    }
+
+    buildLevelSelect() {
+        if (!this.levelListEl) return;
+
+        this.levelListEl.innerHTML = '';
+        this.levelButtons.clear();
+        this.levelActiveButton = null;
+
+        Object.entries(this.gameCatalog).forEach(([key, meta]) => {
+            const button = document.createElement('button');
+            button.className = 'level-item';
+            button.innerHTML = `
+                <span class="level-emoji">${meta.emoji}</span>
+                <span class="level-name">${meta.title}</span>
+                <span class="level-duration">${meta.duration}</span>
+            `;
+            button.addEventListener('click', () => this.selectLevel(key));
+            this.levelListEl.appendChild(button);
+            this.levelButtons.set(key, button);
+        });
+
+        this.resetLevelSelection();
+    }
+
+    resetLevelSelection() {
+        this.currentLevelKey = null;
+        this.levelMeta = null;
+        this.levelLastScore = 0;
+
+        if (this.levelActiveButton) {
+            this.levelActiveButton.classList.remove('active');
+            this.levelActiveButton = null;
+        }
+
+        if (this.levelDetailEl) {
+            this.levelDetailEl.classList.add('hidden');
+        }
+
+        if (this.playLevelBtn) {
+            this.playLevelBtn.disabled = true;
+        }
+    }
+
+    selectLevel(levelKey) {
+        const meta = this.gameCatalog[levelKey];
+        if (!meta) {
+            console.warn(`⚠️ Нет данных для уровня ${levelKey}`);
+            return;
+        }
+
+        this.currentLevelKey = levelKey;
+        this.levelMeta = meta;
+
+        if (this.levelActiveButton) {
+            this.levelActiveButton.classList.remove('active');
+        }
+
+        const button = this.levelButtons.get(levelKey);
+        if (button) {
+            button.classList.add('active');
+            this.levelActiveButton = button;
+        }
+
+        if (this.levelDetailEl) {
+            this.levelDetailEl.classList.remove('hidden');
+        }
+        if (this.levelDetailEmojiEl) this.levelDetailEmojiEl.textContent = meta.emoji;
+        if (this.levelDetailTitleEl) this.levelDetailTitleEl.textContent = meta.title;
+        if (this.levelDetailTaglineEl) this.levelDetailTaglineEl.textContent = meta.tagline;
+        if (this.levelDetailDescriptionEl) this.levelDetailDescriptionEl.textContent = meta.description;
+        if (this.levelDetailControlsEl) this.levelDetailControlsEl.textContent = meta.controls ? `Управление: ${meta.controls}` : '';
+        if (this.levelDetailDurationEl) this.levelDetailDurationEl.textContent = meta.duration ? `Длительность: ${meta.duration}` : '';
+
+        if (this.playLevelBtn) {
+            this.playLevelBtn.disabled = false;
+        }
+    }
+
+    startShift() {
+        console.log('🏁 Запуск смены (режим shift)');
+        this.mode = 'shift';
+        this.startRun();
+    }
+
+    enterLevelSelect(preserveSelection = false) {
+        this.mode = 'level';
+        this.sound.stopGameplayLoop();
+        this.buildLevelSelect();
+
+        if (preserveSelection && this.currentLevelKey) {
+            this.selectLevel(this.currentLevelKey);
+        } else {
+            this.resetLevelSelection();
+        }
+
+        this.showScreen('levelSelect');
+    }
+
+    returnToLevelSelect() {
+        this.enterLevelSelect(true);
+    }
+
+    startLevel(levelKey) {
+        if (!this.gameCatalog[levelKey]) {
+            console.warn(`⚠️ Попытка запустить неизвестный уровень: ${levelKey}`);
+            return;
+        }
+
+        this.mode = 'level';
+        this.currentLevelKey = levelKey;
+        this.levelMeta = this.gameCatalog[levelKey];
+        this.levelLastScore = 0;
+
+        this.startGame(levelKey);
+    }
+
+    startSelectedLevel() {
+        if (!this.currentLevelKey) {
+            console.warn('⚠️ Уровень не выбран');
+            return;
+        }
+
+        this.startLevel(this.currentLevelKey);
+    }
+
+    showLevelResult(success) {
+        if (this.levelResultEmojiEl) this.levelResultEmojiEl.textContent = success ? '✅' : '💥';
+        if (this.levelResultTitleEl) this.levelResultTitleEl.textContent = success ? 'Задание выполнено' : 'Почти получилось';
+
+        const subtitle = success
+            ? 'Сотрудник доволен! Возвращайся к выбору уровней.'
+            : 'Попробуй ещё раз — уровень уже ждёт!';
+        if (this.levelResultSubtitleEl) this.levelResultSubtitleEl.textContent = subtitle;
+
+        if (this.levelResultScoreEl) this.levelResultScoreEl.textContent = this.levelLastScore;
+
+        this.sound.stopGameplayLoop();
+        this.showScreen('levelResult');
     }
 
     getRandomGame() {
@@ -165,8 +421,8 @@ class GameManager {
             case 'weighing':
                 this.currentGame = new WeighingGame(this.canvas, this.ctx, this);
                 break;
-            case 'trafficLight':
-                this.currentGame = new TrafficLightGame(this.canvas, this.ctx, this);
+            case 'loadingDock':
+                this.currentGame = new LoadingDockGame(this.canvas, this.ctx, this);
                 break;
             case 'inspection':
                 this.currentGame = new InspectionGame(this.canvas, this.ctx, this);
@@ -179,6 +435,7 @@ class GameManager {
                 return;
         }
 
+        this.currentGameKey = gameName;
         this.showScreen('game');
         this.currentGame.start();
     }
@@ -195,7 +452,7 @@ class GameManager {
             shopping: 'Комплектация заказа',
             address: 'Адрес доставки',
             weighing: 'Взвешивание товара',
-            trafficLight: 'Светофор на выдаче',
+            loadingDock: 'Погрузочная рампа',
             inspection: 'Приёмка товаров',
             scanner: 'Сканирование посылок'
         };
@@ -242,12 +499,32 @@ class GameManager {
             this.currentGame = null;
         }
 
+        const normalizedScore = typeof rawScore === 'number' ? Math.max(0, Math.round(rawScore)) : 0;
+
+        if (this.mode === 'level') {
+            this.levelLastScore = normalizedScore;
+            if (success) {
+                this.sound.playEffect('success');
+            } else {
+                this.sound.playEffect('lifeLost');
+            }
+            this.showLevelResult(success);
+            return;
+        }
+
         if (success) {
-            const reward = this.calculateReward(rawScore);
+            const reward = this.calculateReward(normalizedScore);
             this.lastEarned = reward;
             this.gamesCompleted++;
             this.updateScore(reward);
-            this.showResult(true);
+            if (this.currentGameKey) {
+                this.shiftCompletedGames.add(this.currentGameKey);
+            }
+            if (!this.shiftFinished && this.shiftCompletedGames.size >= this.gamesList.length) {
+                this.showShiftComplete();
+            } else {
+                this.showResult(true);
+            }
             this.sound.playEffect('success');
         } else {
             this.lastEarned = 0;
@@ -256,6 +533,11 @@ class GameManager {
     }
 
     showResult(success) {
+        if (this.mode !== 'shift') {
+            console.warn('⚠️ Показ результата доступен только в режиме смены');
+            return;
+        }
+
         if (!this.resultIconEl || !this.resultTitleEl) return;
 
         if (success) {
@@ -286,6 +568,11 @@ class GameManager {
     }
 
     nextGame() {
+        if (this.mode !== 'shift') {
+            console.warn('⚠️ Следующая игра доступна только в режиме смены');
+            return;
+        }
+
         const gameName = this.getRandomGame();
         this.showTransition(gameName, () => this.startGame(gameName));
     }
@@ -313,6 +600,13 @@ class GameManager {
     }
 
     handleMistake() {
+        if (this.mode === 'level') {
+            this.levelLastScore = 0;
+            this.sound.playEffect('lifeLost');
+            this.showLevelResult(false);
+            return;
+        }
+
         this.lives = Math.max(0, this.lives - 1);
         this.renderLives();
         this.sound.playEffect('lifeLost');
@@ -372,15 +666,36 @@ class GameManager {
     }
 
     resetState() {
+        this.mode = 'shift';
         this.totalScore = 0;
         this.gamesCompleted = 0;
         this.playedGames = [];
+        this.recentGames = [];
+        this.shiftCompletedGames.clear();
+        this.shiftFinished = false;
         this.lives = this.maxLives;
         this.lastEarned = 0;
+        this.currentGameKey = null;
+        this.currentLevelKey = null;
+        this.levelMeta = null;
+        this.levelLastScore = 0;
         this.updateScore(0);
         this.renderLives();
 
         if (this.lastEarnedEl) this.lastEarnedEl.textContent = this.lastEarned;
+
+        if (this.levelListEl) {
+            this.resetLevelSelection();
+        }
+    }
+
+    showShiftComplete() {
+        this.shiftFinished = true;
+        if (this.shiftFinalScoreEl) {
+            this.shiftFinalScoreEl.textContent = this.totalScore;
+        }
+        this.showScreen('shiftComplete');
+        this.sound.stopGameplayLoop();
     }
 
     updateDebug(info) {

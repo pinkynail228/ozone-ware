@@ -55,7 +55,21 @@ function setupEventListeners() {
     // Экран загрузки - тап для старта
     const loadingScreen = document.getElementById('loading-screen');
     addStartListeners(loadingScreen);
-    
+
+    const startShiftBtn = document.getElementById('start-shift-btn');
+    if (startShiftBtn) {
+        startShiftBtn.addEventListener('click', startFirstGame);
+    }
+
+    const levelSelectBtn = document.getElementById('level-select-btn');
+    if (levelSelectBtn) {
+        levelSelectBtn.addEventListener('click', () => {
+            console.log('🗂️ Нажата кнопка: Уровни');
+            removeStartListeners(loadingScreen);
+            gameManager.enterLevelSelect();
+        });
+    }
+
     // Кнопка "Следующая игра"
     const nextGameBtn = document.getElementById('next-game-btn');
     nextGameBtn.addEventListener('click', () => {
@@ -79,6 +93,39 @@ function setupEventListeners() {
         });
     }
     
+    const levelBackBtn = document.getElementById('level-back-btn');
+    if (levelBackBtn) {
+        levelBackBtn.addEventListener('click', () => {
+            console.log('⬅️ Нажата кнопка: Назад со списка уровней');
+            gameManager.showStartScreen();
+        });
+    }
+
+    const playLevelBtn = document.getElementById('play-level-btn');
+    if (playLevelBtn) {
+        playLevelBtn.addEventListener('click', () => {
+            console.log('▶️ Нажата кнопка: Играть уровень');
+            removeStartListeners(loadingScreen);
+            gameManager.startSelectedLevel();
+        });
+    }
+
+    const levelResultBackBtn = document.getElementById('level-result-back-btn');
+    if (levelResultBackBtn) {
+        levelResultBackBtn.addEventListener('click', () => {
+            console.log('↩️ Нажата кнопка: Назад к уровням');
+            gameManager.returnToLevelSelect();
+        });
+    }
+
+    const shiftFinishBtn = document.getElementById('shift-finish-btn');
+    if (shiftFinishBtn) {
+        shiftFinishBtn.addEventListener('click', () => {
+            console.log('🏁 Нажата кнопка: Завершить смену');
+            gameManager.showStartScreen();
+        });
+    }
+
     // Debug: Нажатие D для включения debug панели
     document.addEventListener('keydown', (e) => {
         if (e.key === 'd' || e.key === 'D') {
@@ -97,15 +144,18 @@ function setupEventListeners() {
  * Запустить первую игру
  */
 function startFirstGame(e) {
-    e.preventDefault();
-    console.log('🎮 СТАРТ ИГРЫ!');
-    
-    // Убрать обработчики с экрана загрузки
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+
+    console.log('🎮 Запуск смены!');
+
     const loadingScreen = document.getElementById('loading-screen');
     removeStartListeners(loadingScreen);
 
-    // Запустить первую игру
-    gameManager.nextGame();
+    if (gameManager) {
+        gameManager.startShift();
+    }
 }
 
 window.addEventListener('ozon:start-screen', () => {
