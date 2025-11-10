@@ -27,6 +27,7 @@ class InspectionGame {
         this.catchDeadline = null;
         this.animationFrame = null;
         this.isRunning = false;
+        this.lastFrameTime = null;
 
         // Геометрия сцены (изометрическая перспектива)
         this.groundY = this.canvas.height - 80;
@@ -133,6 +134,14 @@ class InspectionGame {
         if (!this.isRunning) return;
 
         const now = performance.now();
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = now;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((now - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = now;
+        }
 
         if (this.state === 'waiting' && now >= this.dropPlannedAt - 280) {
             this.beginWarning(now);
@@ -147,17 +156,17 @@ class InspectionGame {
         }
 
         if (this.worker.catchBounce > 0) {
-            this.worker.catchBounce *= 0.86;
+            this.worker.catchBounce *= Math.pow(0.86, deltaTime * 60);
         }
 
-        this.box.wobblePhase += 0.06;
+        this.box.wobblePhase += 0.06 * deltaTime * 60;
         if (this.state === 'warning') {
-            this.box.glow = Math.min(1, this.box.glow + 0.12);
+            this.box.glow = Math.min(1, this.box.glow + 0.12 * deltaTime * 60);
         } else {
-            this.box.glow = Math.max(0, this.box.glow - 0.08);
+            this.box.glow = Math.max(0, this.box.glow - 0.08 * deltaTime * 60);
         }
 
-        this.fx.shake *= 0.85;
+        this.fx.shake *= Math.pow(0.85, deltaTime * 60);
 
         this.updateTimer();
         this.render();
