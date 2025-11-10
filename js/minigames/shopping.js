@@ -1,8 +1,7 @@
 /**
- * GAME 7 - Сборка заказа 🛒
- * Механика: Тапай товары из списка на конвейере
- * Длительность: 7 секунд
- * Стиль: Ozon брендинг - синие градиенты, крупные emoji
+ * GAME 7 - Запоминание заказа 🛍️
+ * Механика: Запомни товары (2с) → собери с конвейера (5с)
+ * Фазы: Показ 2с + Конвейер 5с = 7с
  */
 
 class ShoppingGame {
@@ -14,65 +13,63 @@ class ShoppingGame {
         this.gameManager = gameManager;
         this.sound = gameManager.sound;
         
-        this.gameTime = 7;
+        this.showPhaseTime = 2; // 2 секунды показ
+        this.conveyorPhaseTime = 5; // 5 секунд конвейер
+        this.gameTime = this.showPhaseTime + this.conveyorPhaseTime;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.phase = 'show'; // 'show' или 'conveyor'
         
         this.score = 0;
         
-        // Список товаров для заказа (3 товара)
-        const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮'];
-        this.shoppingList = [];
-        for (let i = 0; i < 3; i++) {
-            const randomIndex = Math.floor(Math.random() * allItems.length);
-            const item = allItems[randomIndex];
-            if (!this.shoppingList.includes(item)) {
-                this.shoppingList.push(item);
-            } else {
-                i--; // Повторить итерацию
+        // Большой пул товаров
+        const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎸', '⌨️', '👗', '🧥', '👖', '🖥️'];
+        
+        // Случайные 3-4 товара для запоминания
+        this.itemsToRemember = [];
+        const count = 3 + Math.floor(Math.random() * 2); // 3 или 4
+        while (this.itemsToRemember.length < count) {
+            const item = allItems[Math.floor(Math.random() * allItems.length)];
+            if (!this.itemsToRemember.includes(item)) {
+                this.itemsToRemember.push(item);
             }
         }
-        this.collected = new Set();
         
-        // Конвейер товаров
+        this.collected = [];
+        this.fallingItems = []; // Анимация падения
+        
+        // Конвейер
         this.conveyor = [];
-        this.conveyorSpeed = 4;
+        this.conveyorSpeed = 3;
         this.spawnTimer = 0;
-        this.spawnInterval = 30;
+        this.spawnInterval = 40;
+        this.allPossibleItems = allItems;
         
         this.setupControls();
         
-        console.log('✅ Game7: Готов. Список:', this.shoppingList);
+        console.log('✅ Game7: Готов. Запомни:', this.itemsToRemember);
     }
     
     spawnItem() {
-        // Сначала ищем несобранные товары из списка
-        const neededItems = this.shoppingList.filter(item => !this.collected.has(item));
+        const uncollected = this.itemsToRemember.filter(item => !this.collected.includes(item));
         
         let emoji;
-        
-        // 85% шанс спавна нужного товара (если есть несобранные)
-        if (neededItems.length > 0 && Math.random() < 0.85) {
-            emoji = neededItems[Math.floor(Math.random() * neededItems.length)];
+        // 40% нужные, 60% ненужные
+        if (uncollected.length > 0 && Math.random() < 0.4) {
+            emoji = uncollected[Math.floor(Math.random() * uncollected.length)];
         } else {
-            // Спавн отвлекающего товара
-            const distractingItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎹']
-                .filter(item => !this.shoppingList.includes(item) || this.collected.has(item)); // Исключаем уже собранные нужные
-            emoji = distractingItems[Math.floor(Math.random() * distractingItems.length)];
+            const distractors = this.allPossibleItems.filter(item => !this.itemsToRemember.includes(item));
+            emoji = distractors[Math.floor(Math.random() * distractors.length)];
         }
         
         this.conveyor.push({
-            emoji: emoji,
+            emoji,
             x: this.canvas.width,
-            y: 400,
-            size: 50,
-            needed: this.shoppingList.includes(emoji) && !this.collected.has(emoji)
+            y: 350,
+            size: 60,
+            needed: this.itemsToRemember.includes(emoji) && !this.collected.includes(emoji)
         });
-
-        if (this.sound) {
-            this.sound.playEffect(neededItems.includes(emoji) ? 'dropGood' : 'dropBad', 0.6);
-        }
     }
     
     setupControls() {
@@ -85,25 +82,33 @@ class ShoppingGame {
             const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
-            // Проверить тап по товару на конвейере
+            if (this.phase !== 'conveyor') return; // Только во время конвейера
+            
+            // Проверить тап по товару
             for (let i = this.conveyor.length - 1; i >= 0; i--) {
                 const item = this.conveyor[i];
                 if (x > item.x && x < item.x + item.size &&
                     y > item.y && y < item.y + item.size) {
                     
                     if (item.needed) {
-                        console.log('✅ Собрал нужный товар:', item.emoji);
-                        this.collected.add(item.emoji);
-                        this.score += 30;
+                        console.log('✅ Собрал:', item.emoji);
+                        this.collected.push(item.emoji);
+                        this.score += 40;
                         if (this.sound) this.sound.playEffect('collectGood');
-                        this.conveyor.splice(i, 1);
                         
-                        // Проверить победу
-                        if (this.collected.size === this.shoppingList.length) {
-                            setTimeout(() => this.win(), 300);
-                        }
+                        // Анимация падения в корзину
+                        this.fallingItems.push({
+                            emoji: item.emoji,
+                            x: item.x,
+                            y: item.y,
+                            targetY: 650,
+                            rotation: 0,
+                            scale: 1
+                        });
+                        
+                        this.conveyor.splice(i, 1);
                     } else {
-                        console.log('❌ Собрал НЕ нужный товар!');
+                        console.log('❌ Тапнул ненужный!');
                         if (this.sound) this.sound.playEffect('collectBad');
                         this.lose();
                     }
@@ -140,111 +145,29 @@ class ShoppingGame {
     update() {
         if (!this.isRunning) return;
         
-        // Фон Ozon - синий градиент
+        const elapsed = (Date.now() - this.startTime) / 1000;
+        
+        // Фон Ozon фиолетовый
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#003d82');
-        gradient.addColorStop(1, '#005bff');
+        gradient.addColorStop(0, '#6B2FFF');
+        gradient.addColorStop(1, '#4B1FDD');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Только список товаров без заголовков
-        let offsetX = (this.canvas.width - this.shoppingList.length * 70) / 2;
-        this.shoppingList.forEach((item, index) => {
-            const x = offsetX + index * 70 + 35;
-            const y = 150;
-            
-            // Фон товара
-            if (this.collected.has(item)) {
-                this.ctx.fillStyle = '#00ff88';
-                this.ctx.globalAlpha = 0.3;
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, 30, 0, Math.PI * 2);
-                this.ctx.fill();
-                this.ctx.globalAlpha = 1;
+        // Переключение фаз
+        if (elapsed < this.showPhaseTime) {
+            this.phase = 'show';
+            this.drawShowPhase();
+        } else if (elapsed < this.gameTime) {
+            if (this.phase === 'show') {
+                this.phase = 'conveyor';
+                console.log('🔄 Фаза: Конвейер');
             }
-            
-            // Градиентный эмодзи
-            if (window.visualEffects) {
-                window.visualEffects.drawGradientEmoji(
-                    this.ctx,
-                    item,
-                    x,
-                    y + 15,
-                    48
-                );
-            } else {
-                this.ctx.fillStyle = '#fff';
-                this.ctx.font = '48px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText(item, x, y + 15);
-            }
-            
-            // Галочка если собрано
-            if (this.collected.has(item)) {
-                this.ctx.fillStyle = '#00ff00';
-                this.ctx.font = 'bold 24px Arial';
-                this.ctx.fillText('✓', x + 20, y - 15);
-            }
-        });
-        
-        // Конвейер
-        this.ctx.fillStyle = '#333';
-        this.ctx.globalAlpha = 0.5;
-        this.ctx.fillRect(0, 370, this.canvas.width, 80);
-        this.ctx.globalAlpha = 1;
-        
-        // Линии конвейера
-        this.ctx.strokeStyle = '#666';
-        this.ctx.lineWidth = 2;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, 375);
-        this.ctx.lineTo(this.canvas.width, 375);
-        this.ctx.moveTo(0, 445);
-        this.ctx.lineTo(this.canvas.width, 445);
-        this.ctx.stroke();
-        
-        // Спавн товаров
-        this.spawnTimer++;
-        if (this.spawnTimer >= this.spawnInterval) {
-            this.spawnItem();
-            this.spawnTimer = 0;
-        }
-        
-        // Обновить и отрисовать товары на конвейере
-        for (let i = this.conveyor.length - 1; i >= 0; i--) {
-            const item = this.conveyor[i];
-            item.x -= this.conveyorSpeed;
-            
-            // Удалить если уехал
-            if (item.x + item.size < 0) {
-                this.conveyor.splice(i, 1);
-                continue;
-            }
-            
-            // Отрисовать товар с градиентным эффектом
-            if (window.visualEffects) {
-                window.visualEffects.drawGradientEmoji(
-                    this.ctx,
-                    item.emoji,
-                    item.x + item.size / 2,
-                    item.y + item.size - 10,
-                    50
-                );
-            } else {
-                this.ctx.font = '50px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size - 10);
-            }
-        }
-        
-        // Обновить UI
-        this.updateUI();
-        
-        // Проверить время
-        const elapsed = (Date.now() - this.startTime) / 1000;
-        if (elapsed >= this.gameTime) {
-            console.log('⏰ Время вышло! Собрано:', this.collected.size);
-            if (this.collected.size === this.shoppingList.length) {
+            this.drawConveyorPhase();
+        } else {
+            // Время вышло
+            const remaining = this.itemsToRemember.length - this.collected.length;
+            if (remaining === 0) {
                 this.win();
             } else {
                 this.lose();
@@ -252,7 +175,99 @@ class ShoppingGame {
             return;
         }
         
+        this.updateUI();
         this.gameLoop = requestAnimationFrame(() => this.update());
+    }
+    
+    drawShowPhase() {
+        // Заголовок
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = 'bold 32px "Exo 2", sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fillText('ЗАПОМНИ ЗАКАЗ!', this.canvas.width/2, 100);
+        this.ctx.shadowBlur = 0;
+        
+        // Товары крупно
+        const spacing = 90;
+        const startX = (this.canvas.width - (this.itemsToRemember.length - 1) * spacing) / 2;
+        this.itemsToRemember.forEach((item, i) => {
+            this.ctx.font = '120px Arial';
+            this.ctx.fillText(item, startX + i * spacing, 380);
+        });
+    }
+    
+    drawConveyorPhase() {
+        // Заголовок
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.font = 'bold 24px "Exo 2", sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`Осталось: ${this.itemsToRemember.length - this.collected.length}`, this.canvas.width/2, 80);
+        
+        // Конвейер
+        this.ctx.fillStyle = '#3A2A6F';
+        this.ctx.fillRect(0, 320, this.canvas.width, 80);
+        
+        // Спавн и движение
+        this.spawnTimer++;
+        if (this.spawnTimer >= this.spawnInterval) {
+            this.spawnItem();
+            this.spawnTimer = 0;
+        }
+        
+        // Двигаем товары
+        for (let i = this.conveyor.length - 1; i >= 0; i--) {
+            const item = this.conveyor[i];
+            item.x -= this.conveyorSpeed;
+            
+            // Удаляем если уехал
+            if (item.x + item.size < 0) {
+                if (item.needed) {
+                    console.log('❌ Пропустил нужный:', item.emoji);
+                    this.lose();
+                    return;
+                }
+                this.conveyor.splice(i, 1);
+            }
+            
+            // Рисуем
+            this.ctx.font = '60px Arial';
+            this.ctx.fillStyle = '#fff';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(item.emoji, item.x + item.size/2, item.y + item.size/2 + 20);
+        }
+        
+        // Анимация падения
+        for (let i = this.fallingItems.length - 1; i >= 0; i--) {
+            const f = this.fallingItems[i];
+            f.y += 8;
+            f.rotation += 15;
+            f.scale -= 0.02;
+            
+            this.ctx.save();
+            this.ctx.translate(f.x, f.y);
+            this.ctx.rotate(f.rotation * Math.PI / 180);
+            this.ctx.scale(f.scale, f.scale);
+            this.ctx.font = '60px Arial';
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(f.emoji, 0, 20);
+            this.ctx.restore();
+            
+            if (f.y > f.targetY) {
+                this.fallingItems.splice(i, 1);
+            }
+        }
+        
+        // Корзина внизу
+        this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        this.ctx.fillRect(20, 620, this.canvas.width - 40, 80);
+        this.collected.forEach((item, i) => {
+            this.ctx.font = '50px Arial';
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillText(item, 60 + i * 70, 670);
+        });
     }
     
     updateUI() {
