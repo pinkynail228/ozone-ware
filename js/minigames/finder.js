@@ -16,6 +16,7 @@ class FinderGame {
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
         
         this.score = 0;
         this.foundCorrect = false;
@@ -172,8 +173,16 @@ class FinderGame {
     /**
      * Главный игровой цикл
      */
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
         
         // Очистить экран
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
