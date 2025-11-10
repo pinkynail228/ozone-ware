@@ -147,9 +147,13 @@ class ShoppingGame {
         if (!this.isRunning) return;
         
         // Delta time для независимости от FPS
-        if (!this.lastFrameTime) this.lastFrameTime = currentTime;
-        const deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
-        this.lastFrameTime = currentTime;
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60; // Первый кадр
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
         
         const elapsed = (Date.now() - this.startTime) / 1000;
         

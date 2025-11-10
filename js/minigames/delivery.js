@@ -124,9 +124,14 @@ class DeliveryGame {
         if (!this.isRunning) return;
         
         // Delta time для независимости от FPS
-        if (!this.lastFrameTime) this.lastFrameTime = currentTime;
-        const deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1); // макс 0.1с
-        this.lastFrameTime = currentTime;
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            // На первом кадре используем 1/60 секунды
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
         
         // Очистить экран
         this.ctx.fillStyle = '#87ceeb'; // Небо
