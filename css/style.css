@@ -346,17 +346,29 @@ body {
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
 }
 
-.start-actions {
+.start-top-bar {
     width: 100%;
-    max-width: 280px;
-    margin: 24px auto 0;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 18px 0;
 }
 
-.start-actions button {
-    width: 100%;
+.start-link {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.start-link:hover,
+.start-link:focus-visible {
+    color: #ffffff;
+    opacity: 1;
 }
 
 /* Статистика */
