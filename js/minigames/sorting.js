@@ -249,11 +249,17 @@ class SortingGame {
                     if (this.currentItem.category === this.targetCategory) {
                         this.collectCurrentItem();
                     } else {
-                        this.fail('Неправильный товар!');
+                        // Ошибка, но игра продолжается
+                        console.log('❌ Неправильный товар!');
+                        if (this.sound) this.sound.playEffect('dropBad', 0.5);
+                        this.advanceItem();
                     }
                 } else {
                     if (this.currentItem.category === this.targetCategory) {
-                        this.fail('Пропустил нужный товар!');
+                        // Пропустил нужный, но игра продолжается
+                        console.log('❌ Пропустил нужный товар!');
+                        if (this.sound) this.sound.playEffect('dropBad', 0.5);
+                        this.advanceItem();
                     } else {
                         if (this.sound) this.sound.playEffect('dropBad', 0.5);
                         this.advanceItem();
