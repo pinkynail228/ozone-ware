@@ -16,6 +16,7 @@ class TrafficLightGame {
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
         
         this.score = 0;
         this.requiredScore = 50; // Нужно набрать 50 очков
@@ -72,8 +73,16 @@ class TrafficLightGame {
         this.removeControls();
     }
     
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
         
         // Фон
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
@@ -96,7 +105,7 @@ class TrafficLightGame {
         this.ctx.fillText(`Очки: ${this.score}/${this.requiredScore}`, this.canvas.width / 2, 170);
         
         // Смена цвета светофора
-        this.lightChangeTimer++;
+        this.lightChangeTimer += deltaTime * 60;
         if (this.lightChangeTimer >= this.lightChangeInterval) {
             this.lightColor = Math.random() > 0.5 ? 'green' : 'red';
             this.lightChangeTimer = 0;
