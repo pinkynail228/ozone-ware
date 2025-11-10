@@ -313,6 +313,25 @@ body {
     text-align: center;
 }
 
+.start-link {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.start-link:hover,
+.start-link:focus-visible {
+    color: #ffffff;
+    opacity: 1;
+}
+
 /* Subtitle с анимированными буквами */
 .subtitle {
     display: flex;

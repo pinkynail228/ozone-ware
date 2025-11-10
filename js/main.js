@@ -56,6 +56,16 @@ function setupEventListeners() {
     const loadingScreen = document.getElementById('loading-screen');
     addStartListeners(loadingScreen);
 
+    const levelSelectLink = document.getElementById('level-select-link');
+    if (levelSelectLink) {
+        levelSelectLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('🗂️ Нажат линк: Уровни');
+            removeStartListeners(loadingScreen);
+            gameManager.enterLevelSelect();
+        });
+    }
+
 
     // Кнопка "Следующая игра"
     const nextGameBtn = document.getElementById('next-game-btn');
