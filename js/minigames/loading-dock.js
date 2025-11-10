@@ -22,8 +22,6 @@ class LoadingDockGame {
         this.tapCount = 0;
         this.score = 0;
 
-        this.canVibrate = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
-
         this.comboGlow = 0;
         this.shakeStrength = 0;
 
@@ -73,8 +71,6 @@ class LoadingDockGame {
         this.progress = Math.min(1, this.progress + this.pushPerTap);
         this.comboGlow = 1;
         this.shakeStrength = 6;
-
-        this.vibrate(15);
     }
 
     update() {
@@ -115,23 +111,12 @@ class LoadingDockGame {
 
         if (success) {
             console.log('🏆 LoadingDockGame: Коробка на погрузке!');
-            this.vibrate([45, 70, 45]);
             this.stop();
             this.gameManager.endGame(true, this.score);
         } else {
             console.log('⌛ LoadingDockGame: Не успели дотолкать.');
-            this.vibrate([140, 60, 140]);
             this.stop();
             this.gameManager.endGame(false, Math.round(progressRatio * 60));
-        }
-    }
-
-    vibrate(pattern) {
-        if (!this.canVibrate) return;
-        try {
-            navigator.vibrate(pattern);
-        } catch (error) {
-            console.warn('⚠️ LoadingDockGame: Vibration not permitted', error);
         }
     }
 
