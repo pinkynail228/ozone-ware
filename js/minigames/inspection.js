@@ -89,7 +89,7 @@ class InspectionGame {
         const now = performance.now();
         if (this.catchDeadline && now <= this.catchDeadline) {
             this.catchBox(now);
-        } else {
+        } else if (this.catchDeadline) {
             this.fail(false);
         }
     }
