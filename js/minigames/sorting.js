@@ -345,9 +345,9 @@ class SortingGame {
 
         this.gameManager.updateDebug(`
             Target: ${this.targetLabel}<br>
-            Collected: ${this.collectedItems.length}/${this.requiredItems}<br>
-            Score: ${this.score}<br>
-            Timeleft: ${(this.gameTime - elapsed).toFixed(1)}s
+            Collected: ${this.collectedCorrect}/${this.requiredItems}<br>
+            Combo: x${this.combo}<br>
+            Score: ${this.score}
         `);
 
         this.gameLoop = requestAnimationFrame(() => this.update());
@@ -425,38 +425,6 @@ class SortingGame {
         ctx.closePath();
     }
 
-    drawBins() {
-        const binWidth = 140;
-        const binHeight = 180;
-        const top = 210;
-        const leftX = 30;
-        const rightX = this.canvas.width - binWidth - 30;
-
-        const draggingRight = (this.cardAnimation.active && this.cardAnimation.direction === 'right') || (this.dragState.active && this.cardOffsetX > 40);
-        const draggingLeft = (this.cardAnimation.active && this.cardAnimation.direction === 'left') || (this.dragState.active && this.cardOffsetX < -40);
-
-        const drawBin = (x, icon, label, highlight, accentColor) => {
-            this.ctx.save();
-            this.ctx.globalAlpha = highlight ? 1 : 0.5;
-            this.ctx.fillStyle = '#1F2A44';
-            this.ctx.fillRect(x, top, binWidth, binHeight);
-            this.ctx.strokeStyle = accentColor;
-            this.ctx.lineWidth = highlight ? 5 : 3;
-            this.ctx.strokeRect(x, top, binWidth, binHeight);
-
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = '60px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(icon, x + binWidth / 2, top + 90);
-
-            this.ctx.font = 'bold 16px Arial';
-            this.ctx.fillText(label, x + binWidth / 2, top + binHeight - 16);
-            this.ctx.restore();
-        };
-
-        drawBin(leftX, '🗑️', 'МУСОРКА', draggingLeft, '#ff6b81');
-        drawBin(rightX, '🧺', 'КОРЗИНА', draggingRight, '#00ff9d');
-    }
 
     drawCard() {
         if (!this.currentItem) return;
@@ -557,27 +525,6 @@ class SortingGame {
         document.getElementById('timer-fill').style.width = (remaining / this.gameTime * 100) + '%';
     }
 
-    updateCardAnimation() {
-        if (!this.cardAnimation.active) return;
-
-        const directionMultiplier = this.cardAnimation.direction === 'right' ? 1 : -1;
-        this.cardOffsetX += directionMultiplier * this.cardAnimationSpeed;
-
-        if (Math.abs(this.cardOffsetX) > this.canvas.width / 2 + 200) {
-            const onComplete = this.cardAnimation.onComplete;
-            this.cardAnimation = {
-                active: false,
-                direction: null,
-                onComplete: null
-            };
-            if (onComplete) {
-                onComplete();
-            }
-            if (this.isRunning) {
-                this.cardOffsetX = 0;
-            }
-        }
-    }
 
     win() {
         console.log('🏆 УСПЕХ! Корзина заполнена');
