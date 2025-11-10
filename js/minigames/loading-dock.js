@@ -11,10 +11,11 @@ class LoadingDockGame {
         this.ctx = ctx;
         this.gameManager = gameManager;
 
-        this.gameTime = 4.5;
+        this.gameTime = 5;
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
 
         this.progress = 0; // 0..1
         this.renderedProgress = 0;
@@ -73,8 +74,16 @@ class LoadingDockGame {
         this.shakeStrength = 6;
     }
 
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
 
         const now = Date.now();
         const elapsed = (now - this.startTime) / 1000;
