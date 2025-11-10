@@ -15,20 +15,21 @@ class ShoppingGame {
         
         this.showPhaseTime = 2; // 2 секунды показ
         this.conveyorPhaseTime = 5; // 5 секунд конвейер
-        this.gameTime = this.showPhaseTime + this.conveyorPhaseTime;
+        this.gameTime = this.showPhaseTime + this.conveyorPhaseTime; // 7 секунд всего
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
         this.phase = 'show'; // 'show' или 'conveyor'
+        this.lastFrameTime = null; // Для delta time
         
         this.score = 0;
         
         // Большой пул товаров
         const allItems = ['📱', '💻', '🎧', '⌚', '👕', '👟', '📚', '🎮', '📷', '🎸', '⌨️', '👗', '🧥', '👖', '🖥️'];
         
-        // Случайные 3-4 товара для запоминания
+        // Всегда 3 товара для запоминания
         this.itemsToRemember = [];
-        const count = 3 + Math.floor(Math.random() * 2); // 3 или 4
+        const count = 3; // Ровно 3 товара
         while (this.itemsToRemember.length < count) {
             const item = allItems[Math.floor(Math.random() * allItems.length)];
             if (!this.itemsToRemember.includes(item)) {
@@ -142,8 +143,13 @@ class ShoppingGame {
         this.removeControls();
     }
     
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        // Delta time для независимости от FPS
+        if (!this.lastFrameTime) this.lastFrameTime = currentTime;
+        const deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+        this.lastFrameTime = currentTime;
         
         const elapsed = (Date.now() - this.startTime) / 1000;
         
@@ -163,7 +169,7 @@ class ShoppingGame {
                 this.phase = 'conveyor';
                 console.log('🔄 Фаза: Конвейер');
             }
-            this.drawConveyorPhase();
+            this.drawConveyorPhase(deltaTime);
         } else {
             // Время вышло
             const remaining = this.itemsToRemember.length - this.collected.length;
@@ -198,7 +204,7 @@ class ShoppingGame {
         });
     }
     
-    drawConveyorPhase() {
+    drawConveyorPhase(deltaTime) {
         // Заголовок
         this.ctx.fillStyle = '#FFD700';
         this.ctx.font = 'bold 24px "Exo 2", sans-serif';
@@ -209,17 +215,17 @@ class ShoppingGame {
         this.ctx.fillStyle = '#3A2A6F';
         this.ctx.fillRect(0, 320, this.canvas.width, 80);
         
-        // Спавн и движение
-        this.spawnTimer++;
+        // Спавн и движение (с delta time)
+        this.spawnTimer += deltaTime * 60;
         if (this.spawnTimer >= this.spawnInterval) {
             this.spawnItem();
             this.spawnTimer = 0;
         }
         
-        // Двигаем товары
+        // Двигаем товары (независимо от FPS)
         for (let i = this.conveyor.length - 1; i >= 0; i--) {
             const item = this.conveyor[i];
-            item.x -= this.conveyorSpeed;
+            item.x -= this.conveyorSpeed * deltaTime * 60;
             
             // Удаляем если уехал
             if (item.x + item.size < 0) {
