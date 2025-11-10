@@ -67,9 +67,9 @@ class ScannerGame {
         const emojis = ['📦', '🎁', '📚', '🎮', '🧳', '💡', '👟', '🎂', '🎸', '📱', '⌨️', '💍', '🕯️', '🎭', '🎨', '🧩'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
         
-        // Разная скорость + ускорение
-        const baseSpeed = this.baseSpeed * this.speedMultiplier;
-        const speed = baseSpeed + Math.random() * 2.5;
+        // Разная скорость + ускорение (ограничиваем максимум)
+        const baseSpeed = this.baseSpeed * Math.min(this.speedMultiplier, 2.0); // Макс x2
+        const speed = Math.min(baseSpeed + Math.random() * 2.5, 8.0); // Макс 8 пикс/кадр
         
         // Неожиданные изменения скорости
         const hasSpeedChange = Math.random() > 0.6;
@@ -313,7 +313,7 @@ class ScannerGame {
         
         // Неожиданное изменение скорости!
         if (crate.hasSpeedChange && !crate.speedChanged && crate.x > crate.speedChangePoint) {
-            crate.speed = crate.baseSpeed * crate.speedChangeFactor;
+            crate.speed = Math.min(crate.baseSpeed * crate.speedChangeFactor, 8.0); // Ограничиваем
             crate.speedChanged = true;
         }
 
