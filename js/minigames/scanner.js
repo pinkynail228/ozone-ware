@@ -17,6 +17,7 @@ class ScannerGame {
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
 
         this.requiredScans = 4;
         this.scanned = 0;
@@ -180,17 +181,25 @@ class ScannerGame {
         this.removeControls();
     }
 
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
 
         this.drawBackground();
         this.drawHeader();
-        this.drawScanningZone();
-        this.drawCrate();
+        this.drawScanningZone(deltaTime);
+        this.drawCrate(deltaTime);
         this.drawProgress();
 
         this.updateUI();
-        this.updateCratePosition();
+        this.updateCratePosition(deltaTime);
         if (!this.isRunning) return; // могло закончиться при обновлении позиции
 
         const elapsed = (Date.now() - this.startTime) / 1000;
@@ -234,22 +243,6 @@ class ScannerGame {
         this.ctx.font = 'bold 24px Arial';
         this.ctx.fillText('Сканируй посылки', this.canvas.width / 2, 90);
 
-        this.ctx.fillStyle = '#00ff9d';
-        this.ctx.font = '20px Arial';
-        this.ctx.fillText(`${this.scanned}/${this.requiredScans}`, this.canvas.width / 2, 125);
-    }
-
-    drawScanningZone() {
-        const zone = this.scanningZone;
-        this.ctx.save();
-
-        const zoneCenter = zone.x + zone.width / 2;
-        const highlight = this.currentCrate && Math.abs(this.currentCrate.x - zoneCenter) <= zone.width / 2;
-
-        this.ctx.fillStyle = highlight ? 'rgba(0, 255, 157, 0.18)' : 'rgba(255, 255, 255, 0.08)';
-        this.ctx.strokeStyle = highlight ? '#00ff9d' : '#3a7bd5';
-        this.ctx.lineWidth = 4;
-        this.drawRoundedRect(zone.x, zone.y, zone.width, zone.height, 20, true);
 
         this.ctx.setLineDash([12, 12]);
         this.ctx.strokeStyle = 'rgba(255,255,255,0.4)';
@@ -263,11 +256,11 @@ class ScannerGame {
         this.ctx.restore();
     }
 
-    drawCrate() {
+    drawCrate(deltaTime) {
         if (!this.currentCrate) return;
         
         const crate = this.currentCrate;
-        crate.wobble += 0.1;
+        crate.wobble += 0.15 * deltaTime * 60;
         const wobbleOffset = Math.sin(crate.wobble) * 3;
 
         this.ctx.fillStyle = '#0f172a';
@@ -313,7 +306,7 @@ class ScannerGame {
         }
     }
 
-    updateCratePosition() {
+    updateCratePosition(deltaTime) {
         if (!this.currentCrate) return;
         
         const crate = this.currentCrate;
@@ -324,7 +317,7 @@ class ScannerGame {
             crate.speedChanged = true;
         }
 
-        crate.x += crate.speed;
+        crate.x += crate.speed * deltaTime * 60;
 
         if (crate.x - crate.size / 2 > this.canvas.width + 60) {
             this.fail('Посылка проскочила сканер');
