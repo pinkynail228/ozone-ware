@@ -516,18 +516,19 @@ body {
     text-align: center;
 }
 
-#play-level-btn {
-    width: 100%;
-    margin-top: 12px;
-}
-
 #play-level-btn:disabled {
     opacity: 0.4;
     pointer-events: none;
 }
 
-#level-back-btn {
-    align-self: center;
+.level-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.level-actions button {
+    flex: 1 1 0;
 }
 
 .countdown {
