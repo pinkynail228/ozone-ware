@@ -33,14 +33,14 @@ class CalculatorGame {
     }
     
     generateProblem() {
-        // Генерируем от 5 до 12 коробок
-        this.correctCount = Math.floor(Math.random() * 8) + 5;
+        // Генерируем от 3 до 10 коробок
+        this.correctCount = Math.floor(Math.random() * 8) + 3;
         this.boxes = [];
         
         // Создаём стопку коробок (изометрическая пирамида)
-        const baseY = 500;
-        const boxHeight = 40;
-        const boxWidth = 50;
+        const baseY = 420;
+        const boxHeight = 45;
+        const boxWidth = 55;
         
         // Размещаем коробки слоями
         let placed = 0;
@@ -85,19 +85,19 @@ class CalculatorGame {
             [this.answers[i], this.answers[j]] = [this.answers[j], this.answers[i]];
         }
         
-        // ПОСЛЕ перемешивания установить координаты
+        // ПОСЛЕ перемешивания установить координаты (ниже)
         this.answers[0].x = 50;
-        this.answers[0].y = 500;
+        this.answers[0].y = 560;
         this.answers[0].width = 80;
         this.answers[0].height = 80;
         
         this.answers[1].x = 155;
-        this.answers[1].y = 500;
+        this.answers[1].y = 560;
         this.answers[1].width = 80;
         this.answers[1].height = 80;
         
         this.answers[2].x = 260;
-        this.answers[2].y = 500;
+        this.answers[2].y = 560;
         this.answers[2].width = 80;
         this.answers[2].height = 80;
         
@@ -211,8 +211,8 @@ class CalculatorGame {
     drawPallet() {
         // Изометрическая паллета
         const cx = this.canvas.width / 2;
-        const cy = 540;
-        const palletWidth = 200;
+        const cy = 470;
+        const palletWidth = 220;
         const palletDepth = 40;
         const palletHeight = 15;
         
@@ -259,6 +259,11 @@ class CalculatorGame {
             this.ctx.closePath();
             this.ctx.fill();
             
+            // Обводка верхней грани
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
             // Левая грань
             this.ctx.fillStyle = '#FF9933';
             this.ctx.beginPath();
@@ -269,6 +274,11 @@ class CalculatorGame {
             this.ctx.closePath();
             this.ctx.fill();
             
+            // Обводка левой грани
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
             // Правая грань
             this.ctx.fillStyle = '#FFCE73';
             this.ctx.beginPath();
@@ -278,6 +288,11 @@ class CalculatorGame {
             this.ctx.lineTo(0, -h/2);
             this.ctx.closePath();
             this.ctx.fill();
+            
+            // Обводка правой грани
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
             
             this.ctx.restore();
         });
