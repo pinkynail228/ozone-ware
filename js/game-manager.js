@@ -347,7 +347,7 @@ class GameManager {
     }
 
     showLevelResult(success) {
-        if (this.levelResultEmojiEl) this.levelResultEmojiEl.textContent = success ? '✅' : '💥';
+        if (this.levelResultEmojiEl) this.levelResultEmojiEl.className = success ? 'result-icon success' : 'result-icon fail';
         if (this.levelResultTitleEl) this.levelResultTitleEl.textContent = success ? 'Задание выполнено' : 'Почти получилось';
 
         const subtitle = success
@@ -541,17 +541,17 @@ class GameManager {
         if (!this.resultIconEl || !this.resultTitleEl) return;
 
         if (success) {
-            this.resultIconEl.textContent = '✅';
+            this.resultIconEl.className = 'result-icon success';
             this.resultTitleEl.innerHTML = 'Готово! Заказ уходит в ПВЗ';
-            this.screens.result.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
+            this.screens.result.style.background = 'linear-gradient(180deg, #00D9A3 0%, #00B386 100%)';
             document.getElementById('next-game-btn').textContent = 'Следующая игра';
             if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
             this.resultRestartAction = 'exit';
         } else {
-            this.resultIconEl.textContent = '💥';
+            this.resultIconEl.className = 'result-icon fail';
             const hearts = '❤️'.repeat(Math.max(0, this.lives)) || '❤️';
             this.resultTitleEl.innerHTML = `ПВЗ заметил ошибку<br><span class="result-hearts">${hearts}</span>`;
-            this.screens.result.style.background = 'linear-gradient(135deg, #d63031, #ff7675)';
+            this.screens.result.style.background = 'linear-gradient(180deg, #FF6B6B 0%, #CC0000 100%)';
             document.getElementById('next-game-btn').textContent = 'Продолжить смену';
             if (this.resultRestartBtn) this.resultRestartBtn.textContent = 'Выйти со смены';
             this.resultRestartAction = 'exit';
@@ -621,7 +621,7 @@ class GameManager {
     showGameOver() {
         console.log('💔 Жизни кончились — показываем экран отдыха.');
 
-        if (this.gameoverEmojiEl) this.gameoverEmojiEl.textContent = '😴';
+        if (this.gameoverEmojiEl) this.gameoverEmojiEl.className = 'result-icon gameover';
         if (this.gameoverTitleEl) this.gameoverTitleEl.textContent = 'Сотрудник ПВЗ устал';
         if (this.gameoverSubtitleEl) this.gameoverSubtitleEl.textContent = 'Ему нужен перерыв. Начни смену заново!';
         if (this.gameoverScoreEl) this.gameoverScoreEl.textContent = this.totalScore;
