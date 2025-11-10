@@ -21,15 +21,20 @@ class ScannerGame {
         this.requiredScans = 4;
         this.scanned = 0;
         this.score = 0;
+        this.combo = 0;
+        this.baseSpeed = 2.5;
+        this.speedMultiplier = 1.0;
 
         this.scanningZone = {
-            width: 180,
-            height: 140,
-            x: (this.canvas.width - 180) / 2,
-            y: 320
+            width: 200,
+            height: 160,
+            x: (this.canvas.width - 200) / 2,
+            y: 320,
+            pulse: 0
         };
 
         this.currentCrate = null;
+        this.scanEffect = null;
         this.createCrate();
         this.setupControls();
 
@@ -57,17 +62,35 @@ class ScannerGame {
     }
 
     createCrate() {
-        const emojis = ['📦', '🎁', '📚', '🎮', '🧳', '💡'];
+        // Больше товаров!
+        const emojis = ['📦', '🎁', '📚', '🎮', '🧳', '💡', '👟', '🎂', '🎸', '📱', '⌨️', '💍', '🕯️', '🎭', '🎨', '🧩'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        const speed = 2.8 + Math.random() * 1.7; // 2.8 - 4.5 px/frame
+        
+        // Разная скорость + ускорение
+        const baseSpeed = this.baseSpeed * this.speedMultiplier;
+        const speed = baseSpeed + Math.random() * 2.5;
+        
+        // Неожиданные изменения скорости
+        const hasSpeedChange = Math.random() > 0.6;
+        const speedChangePoint = hasSpeedChange ? 100 + Math.random() * 150 : null;
+        const speedChangeFactor = hasSpeedChange ? (Math.random() > 0.5 ? 1.8 : 0.5) : 1;
 
         this.currentCrate = {
             emoji,
             x: -60,
             y: this.scanningZone.y + this.scanningZone.height / 2,
             speed,
-            size: 72
+            baseSpeed: speed,
+            size: 72,
+            wobble: 0,
+            hasSpeedChange,
+            speedChangePoint,
+            speedChangeFactor,
+            speedChanged: false
         };
+        
+        // Ускоряем игру со временем
+        this.speedMultiplier += 0.08;
     }
 
     setupControls() {
@@ -109,8 +132,17 @@ class ScannerGame {
     handleSuccessfulScan() {
         console.log('✅ Посылка отсканирована');
         this.scanned++;
-        this.score += 30;
+        this.combo++;
+        this.score += 30 + (this.combo * 10); // Бонус за комбо
         if (this.sound) this.sound.playEffect('collectGood');
+        
+        // Эффект сканирования
+        this.scanEffect = {
+            x: this.currentCrate.x,
+            y: this.currentCrate.y,
+            alpha: 1,
+            size: 0
+        };
 
         if (this.scanned >= this.requiredScans) {
             this.isRunning = false;
@@ -122,6 +154,7 @@ class ScannerGame {
 
     fail(reason) {
         console.log('❌ Ошибка сканирования:', reason);
+        this.combo = 0; // Сброс комбо
         if (this.sound) this.sound.playEffect('collectBad');
         this.lose();
     }
@@ -175,11 +208,24 @@ class ScannerGame {
     }
 
     drawBackground() {
+        // Ozon фиолетовый градиент
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#001f3f');
-        gradient.addColorStop(1, '#003d82');
+        gradient.addColorStop(0, '#6B2FFF');
+        gradient.addColorStop(1, '#4B1FDD');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Анимированный конвейер
+        const conveyorY = this.scanningZone.y + this.scanningZone.height + 20;
+        this.ctx.fillStyle = '#3A2A6F';
+        this.ctx.fillRect(0, conveyorY, this.canvas.width, 40);
+        
+        // Полосы конвейера
+        const offset = (Date.now() / 50) % 30;
+        this.ctx.fillStyle = '#2A1A5F';
+        for (let i = -1; i < 15; i++) {
+            this.ctx.fillRect(i * 30 - offset, conveyorY, 20, 40);
+        }
     }
 
     drawHeader() {
@@ -219,34 +265,68 @@ class ScannerGame {
 
     drawCrate() {
         if (!this.currentCrate) return;
+        
+        const crate = this.currentCrate;
+        crate.wobble += 0.1;
+        const wobbleOffset = Math.sin(crate.wobble) * 3;
 
         this.ctx.fillStyle = '#0f172a';
         this.ctx.globalAlpha = 0.8;
         this.ctx.beginPath();
-        this.ctx.arc(this.currentCrate.x, this.currentCrate.y, this.currentCrate.size / 2 + 18, 0, Math.PI * 2);
+        this.ctx.arc(crate.x, crate.y + wobbleOffset, crate.size / 2 + 18, 0, Math.PI * 2);
         this.ctx.fill();
         this.ctx.globalAlpha = 1;
 
-        this.ctx.font = `${this.currentCrate.size}px Arial`;
+        this.ctx.font = `${crate.size}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(this.currentCrate.emoji, this.currentCrate.x, this.currentCrate.y);
+        this.ctx.fillText(crate.emoji, crate.x, crate.y + wobbleOffset);
         this.ctx.textBaseline = 'alphabetic';
+        
+        // Эффект сканирования
+        if (this.scanEffect) {
+            this.ctx.strokeStyle = `rgba(0, 255, 157, ${this.scanEffect.alpha})`;
+            this.ctx.lineWidth = 4;
+            this.ctx.beginPath();
+            this.ctx.arc(this.scanEffect.x, this.scanEffect.y, this.scanEffect.size, 0, Math.PI * 2);
+            this.ctx.stroke();
+            
+            this.scanEffect.size += 8;
+            this.scanEffect.alpha -= 0.05;
+            
+            if (this.scanEffect.alpha <= 0) {
+                this.scanEffect = null;
+            }
+        }
     }
 
     drawProgress() {
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '18px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('Сканируй быстро и точно', this.canvas.width / 2, this.scanningZone.y + this.scanningZone.height + 60);
+        // Комбо
+        if (this.combo > 1) {
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 28px "Exo 2", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.shadowBlur = 8;
+            this.ctx.fillText(`COMBO x${this.combo}!`, this.canvas.width / 2, 200);
+            this.ctx.shadowBlur = 0;
+        }
     }
 
     updateCratePosition() {
         if (!this.currentCrate) return;
+        
+        const crate = this.currentCrate;
+        
+        // Неожиданное изменение скорости!
+        if (crate.hasSpeedChange && !crate.speedChanged && crate.x > crate.speedChangePoint) {
+            crate.speed = crate.baseSpeed * crate.speedChangeFactor;
+            crate.speedChanged = true;
+        }
 
-        this.currentCrate.x += this.currentCrate.speed;
+        crate.x += crate.speed;
 
-        if (this.currentCrate.x - this.currentCrate.size / 2 > this.canvas.width + 60) {
+        if (crate.x - crate.size / 2 > this.canvas.width + 60) {
             this.fail('Посылка проскочила сканер');
         }
     }
