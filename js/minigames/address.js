@@ -113,7 +113,7 @@ class AddressGame {
                     this.hasAnswered = true;
                     this.state = 'finished';
                     
-                    if (selected === this.currentAddress.full) {
+                    if (selected.full === this.currentAddress.full) {
                         console.log('✅ Правильный адрес!');
                         this.score = 120;
                         if (this.sound) this.sound.playEffect('collectGood');
@@ -225,8 +225,8 @@ class AddressGame {
     drawAddressCard(address) {
         const cx = this.canvas.width / 2;
         const cy = 280;
-        const cardWidth = 320;
-        const cardHeight = 180;
+        const cardWidth = 340;
+        const cardHeight = 120;
         
         // Карточка с градиентом
         const cardGrad = this.ctx.createLinearGradient(cx - cardWidth/2, cy - cardHeight/2, cx + cardWidth/2, cy + cardHeight/2);
@@ -242,35 +242,13 @@ class AddressGame {
         this.roundRect(this.ctx, cx - cardWidth/2, cy - cardHeight/2, cardWidth, cardHeight, 20);
         this.ctx.stroke();
         
-        // Иконки и текст
-        this.ctx.textAlign = 'left';
+        // Адрес одной строкой
+        this.ctx.textAlign = 'center';
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         this.ctx.shadowBlur = 4;
-        
-        // Улица
-        this.ctx.font = '32px Arial';
         this.ctx.fillStyle = '#FFD700';
-        this.ctx.fillText('🏙️', cx - 140, cy - 50);
-        this.ctx.font = 'bold 24px "Exo 2", sans-serif';
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillText(address.street, cx - 100, cy - 50);
-        
-        // Дом
-        this.ctx.font = '32px Arial';
-        this.ctx.fillStyle = '#00D9FF';
-        this.ctx.fillText('🏠', cx - 140, cy + 10);
-        this.ctx.font = 'bold 32px "Exo 2", sans-serif';
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillText(`д. ${address.house}`, cx - 100, cy + 10);
-        
-        // Квартира
-        this.ctx.font = '32px Arial';
-        this.ctx.fillStyle = '#FF6B9D';
-        this.ctx.fillText('🚪', cx - 140, cy + 70);
-        this.ctx.font = 'bold 32px "Exo 2", sans-serif';
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillText(`кв. ${address.apt}`, cx - 100, cy + 70);
-        
+        this.ctx.font = 'bold 28px "Exo 2", sans-serif';
+        this.ctx.fillText(address.full, cx, cy);
         this.ctx.shadowBlur = 0;
     }
     
