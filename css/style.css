@@ -417,10 +417,10 @@ body {
 /* === ЭКРАН ВЫБОРА УРОВНЕЙ === */
 #level-select-screen {
     background: linear-gradient(135deg, #0f172a, #1e293b);
-    padding: 32px 28px;
+    padding: 32px 20px 24px;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 20px;
+    gap: 16px;
 }
 
 .level-select-header {
@@ -440,15 +440,18 @@ body {
 #level-select-layout {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .level-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-height: 320px;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 6px;
 }
@@ -490,13 +493,13 @@ body {
 }
 
 .level-detail {
-    padding: 20px;
+    padding: 18px;
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     animation: resultPop 0.35s ease;
 }
 
@@ -524,7 +527,7 @@ body {
 .level-actions {
     display: flex;
     gap: 12px;
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 .level-actions button {
