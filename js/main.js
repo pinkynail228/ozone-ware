@@ -56,11 +56,15 @@ function setupEventListeners() {
     const loadingScreen = document.getElementById('loading-screen');
     addStartListeners(loadingScreen);
 
-    const levelSelectLink = document.getElementById('level-select-link');
-    if (levelSelectLink) {
-        levelSelectLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('🗂️ Нажат текстовый линк: Уровни');
+    const startShiftBtn = document.getElementById('start-shift-btn');
+    if (startShiftBtn) {
+        startShiftBtn.addEventListener('click', startFirstGame);
+    }
+
+    const levelSelectBtn = document.getElementById('level-select-btn');
+    if (levelSelectBtn) {
+        levelSelectBtn.addEventListener('click', () => {
+            console.log('🗂️ Нажата кнопка: Уровни');
             removeStartListeners(loadingScreen);
             gameManager.enterLevelSelect();
         });
