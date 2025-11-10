@@ -56,19 +56,6 @@ function setupEventListeners() {
     const loadingScreen = document.getElementById('loading-screen');
     addStartListeners(loadingScreen);
 
-    const startShiftBtn = document.getElementById('start-shift-btn');
-    if (startShiftBtn) {
-        startShiftBtn.addEventListener('click', startFirstGame);
-    }
-
-    const levelSelectBtn = document.getElementById('level-select-btn');
-    if (levelSelectBtn) {
-        levelSelectBtn.addEventListener('click', () => {
-            console.log('🗂️ Нажата кнопка: Уровни');
-            removeStartListeners(loadingScreen);
-            gameManager.enterLevelSelect();
-        });
-    }
 
     // Кнопка "Следующая игра"
     const nextGameBtn = document.getElementById('next-game-btn');

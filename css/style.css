@@ -355,18 +355,6 @@ body {
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
 }
 
-.start-actions {
-    width: 100%;
-    max-width: 280px;
-    margin: 24px auto 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.start-actions button {
-    width: 100%;
-}
 
 /* Статистика */
 .stats {
