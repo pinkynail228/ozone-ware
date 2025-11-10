@@ -3,6 +3,8 @@
    Разрешение: 390x844 (вертикальное)
    ============================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800;900&display=swap');
+
 /* === RESET & BASE === */
 * {
     margin: 0;
@@ -12,7 +14,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #000;
     color: #fff;
     overflow: hidden;
@@ -20,7 +22,7 @@ body {
     user-select: none;
     -webkit-user-select: none;
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
 }
 
 /* === ГЛАВНЫЙ КОНТЕЙНЕР === */
@@ -476,7 +478,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 16px 18px;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
@@ -484,6 +486,7 @@ body {
     border: none;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
+    min-height: 68px;
 }
 
 .level-item:hover,
@@ -493,19 +496,25 @@ body {
 }
 
 .level-item .level-emoji {
-    font-size: 32px;
-    margin-right: 16px;
+    font-size: 36px;
+    margin-right: 14px;
+    flex-shrink: 0;
 }
 
 .level-item .level-name {
     flex: 1;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 16px;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
 }
 
 .level-item .level-duration {
-    font-size: 14px;
-    opacity: 0.85;
+    font-size: 13px;
+    opacity: 0.8;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 8px;
 }
 
 .level-detail {
@@ -638,8 +647,8 @@ body {
     text-shadow: 
         0 2px 4px rgba(0, 0, 0, 0.8),
         0 0 8px rgba(0, 91, 255, 0.6);
-    font-family: 'Arial', sans-serif;
-    letter-spacing: 0.5px;
+    font-family: 'Exo 2', sans-serif;
+    letter-spacing: 0.08em;
 }
 
 .score {
@@ -711,7 +720,7 @@ body {
 
 /* === КНОПКИ В СТИЛЕ OZON === */
 button {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Exo 2', sans-serif;
     font-size: 18px;
     font-weight: 700;
     padding: 16px 32px;
