@@ -14,30 +14,32 @@ class DeliveryGame {
         this.sound = gameManager.sound;
         
         // Игровые параметры
-        this.gameTime = 7; // 7 секунд
+        this.gameTime = 5; // 5 секунд - быстрый раннер
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
         
         // Игрок (курьер)
         this.player = {
-            x: 80,
-            y: 600,
-            width: 40,
-            height: 60,
+            x: 100,
+            y: 580,
+            width: 45,
+            height: 70,
             velocityY: 0,
-            gravity: 1.2,
-            jumpPower: -22,
+            gravity: 1.3,
+            jumpPower: -23,
             isJumping: false,
-            groundY: 600,
-            color: '#0066ff' // Синий цвет Ozone
+            groundY: 580,
+            legPhase: 0, // Анимация бега
+            armPhase: 0
         };
         
-        // Препятствия
+        // Препятствия (разные типы)
         this.obstacles = [];
-        this.obstacleSpeed = 6;
+        this.obstacleSpeed = 7;
         this.obstacleSpawnTimer = 0;
-        this.obstacleSpawnInterval = 80;
+        this.obstacleSpawnInterval = 70; // Чаще для динамики
+        this.obstacleTypes = ['box', 'hole', 'barrier'];
         
         // Фон (симуляция движения)
         this.backgroundOffset = 0;
@@ -168,23 +170,33 @@ class DeliveryGame {
      * Отрисовать фон (дорога)
      */
     drawBackground() {
-        // Земля
-        this.ctx.fillStyle = '#228B22';
-        this.ctx.fillRect(0, 660, this.canvas.width, this.canvas.height - 660);
+        // Тротуар/обочина
+        const roadGrad = this.ctx.createLinearGradient(0, 650, 0, this.canvas.height);
+        roadGrad.addColorStop(0, '#8B7355');
+        roadGrad.addColorStop(1, '#6B5345');
+        this.ctx.fillStyle = roadGrad;
+        this.ctx.fillRect(0, 650, this.canvas.width, this.canvas.height - 650);
         
-        // Дорога
-        this.ctx.fillStyle = '#555';
-        this.ctx.fillRect(0, 660, this.canvas.width, 80);
+        // Асфальт дороги с градиентом
+        const asphaltGrad = this.ctx.createLinearGradient(0, 660, 0, 730);
+        asphaltGrad.addColorStop(0, '#4A4A4A');
+        asphaltGrad.addColorStop(1, '#2A2A2A');
+        this.ctx.fillStyle = asphaltGrad;
+        this.ctx.fillRect(0, 660, this.canvas.width, 70);
         
-        // Полосы на дороге (движение)
+        // Разметка дороги (движущиеся полосы)
         this.backgroundOffset += this.backgroundSpeed;
-        if (this.backgroundOffset > 60) this.backgroundOffset = 0;
+        if (this.backgroundOffset > 80) this.backgroundOffset = 0;
         
-        this.ctx.fillStyle = '#fff';
-        for (let i = -1; i < 10; i++) {
-            const x = i * 60 - this.backgroundOffset;
-            this.ctx.fillRect(x, 695, 40, 10);
+        this.ctx.fillStyle = '#FFD700';
+        for (let i = -1; i < 8; i++) {
+            const x = i * 80 - this.backgroundOffset;
+            this.ctx.fillRect(x, 693, 50, 4);
         }
+        
+        // Тень под дорогой
+        this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.fillRect(0, 730, this.canvas.width, 3);
     }
     
     /**
@@ -210,35 +222,84 @@ class DeliveryGame {
     }
     
     /**
-     * Отрисовать игрока (курьер на велосипеде)
+     * Отрисовать игрока (курьер с рюкзаком)
      */
     drawPlayer() {
         const p = this.player;
         
-        // Тело курьера (простой пиксель-арт)
-        this.ctx.fillStyle = p.color;
+        // Анимация бега
+        if (!p.isJumping) {
+            p.legPhase += 0.3;
+            p.armPhase += 0.25;
+        }
+        
+        this.ctx.save();
+        this.ctx.translate(p.x + p.width/2, p.y + p.height);
+        
+        // Рюкзак Ozon (синий)
+        const backpackGrad = this.ctx.createLinearGradient(-15, -55, -15, -35);
+        backpackGrad.addColorStop(0, '#1E90FF');
+        backpackGrad.addColorStop(1, '#0066CC');
+        this.ctx.fillStyle = backpackGrad;
+        this.roundRect(this.ctx, -18, -55, 16, 20, 4);
+        this.ctx.fill();
+        
+        // Лямки рюкзака
+        this.ctx.strokeStyle = '#0066CC';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(-12, -50);
+        this.ctx.lineTo(-8, -40);
+        this.ctx.stroke();
+        
+        // Тело (оранжевая форма)
+        const bodyGrad = this.ctx.createLinearGradient(-10, -50, 10, -20);
+        bodyGrad.addColorStop(0, '#FF9933');
+        bodyGrad.addColorStop(1, '#FF7700');
+        this.ctx.fillStyle = bodyGrad;
+        this.roundRect(this.ctx, -10, -50, 20, 30, 5);
+        this.ctx.fill();
         
         // Голова
-        this.ctx.fillRect(p.x + 10, p.y - 10, 20, 20);
-        
-        // Тело
-        this.ctx.fillRect(p.x + 5, p.y + 10, 30, 30);
-        
-        // Руки
-        this.ctx.fillRect(p.x, p.y + 15, 10, 15);
-        this.ctx.fillRect(p.x + 30, p.y + 15, 10, 15);
-        
-        // Ноги (анимация простая)
-        const legOffset = Math.sin(Date.now() / 100) * 5;
-        this.ctx.fillRect(p.x + 8, p.y + 40, 8, 20);
-        this.ctx.fillRect(p.x + 24, p.y + 40 + legOffset, 8, 20);
-        
-        // Велосипед (поднимаю выше)
-        this.ctx.fillStyle = '#333';
+        this.ctx.fillStyle = '#FFDCB0';
         this.ctx.beginPath();
-        this.ctx.arc(p.x + 10, p.y + 55, 8, 0, Math.PI * 2); // Был p.y + 65
-        this.ctx.arc(p.x + 30, p.y + 55, 8, 0, Math.PI * 2); // Был p.y + 65
+        this.ctx.arc(0, -60, 10, 0, Math.PI * 2);
         this.ctx.fill();
+        
+        // Глаза
+        this.ctx.fillStyle = '#2A2A2E';
+        this.ctx.beginPath();
+        this.ctx.arc(-4, -62, 2, 0, Math.PI * 2);
+        this.ctx.arc(4, -62, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Руки (анимация)
+        const armSwing = Math.sin(p.armPhase) * 5;
+        this.ctx.fillStyle = '#FFDCB0';
+        this.ctx.fillRect(-15, -45 + armSwing, 5, 20);
+        this.ctx.fillRect(10, -45 - armSwing, 5, 20);
+        
+        // Ноги (анимация бега)
+        const legSwing = Math.sin(p.legPhase) * 8;
+        this.ctx.fillStyle = '#0066CC';
+        this.ctx.fillRect(-8, -20, 6, 20 + legSwing);
+        this.ctx.fillRect(2, -20, 6, 20 - legSwing);
+        
+        this.ctx.restore();
+    }
+    
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
     }
     
     /**
@@ -268,58 +329,89 @@ class DeliveryGame {
     }
 
     /**
-     * Спавн препятствия - тематика доставки маркетплейса
+     * Спавн препятствия - разные типы
      */
     spawnObstacle() {
-        const types = ['box', 'cart', 'pallet', 'cone'];
-        const type = types[Math.floor(Math.random() * types.length)];
+        const type = this.obstacleTypes[Math.floor(Math.random() * this.obstacleTypes.length)];
 
         const obstacle = {
             x: this.canvas.width,
             type,
-            y: 630 // На земле
+            y: 630
         };
 
         if (type === 'box') {
+            obstacle.width = 40;
+            obstacle.height = 40;
+        } else if (type === 'hole') {
+            obstacle.width = 50;
+            obstacle.height = 20;
+            obstacle.y = 650;
+        } else if (type === 'barrier') {
             obstacle.width = 30;
-            obstacle.height = 30;
-            obstacle.emoji = '📦';
-        } else if (type === 'cart') {
-            obstacle.width = 28;
-            obstacle.height = 32;
-            obstacle.emoji = '🛒';
-        } else if (type === 'pallet') {
-            obstacle.width = 35;
-            obstacle.height = 25;
-            obstacle.color = '#CD853F';
-        } else {
-            obstacle.width = 20;
-            obstacle.height = 35;
-            obstacle.emoji = '🚧';
+            obstacle.height = 50;
         }
 
         this.obstacles.push(obstacle);
-        console.log(`🚧 Препятствие: ${type} на x=${obstacle.x}`);
         if (this.sound) this.sound.playEffect('conveyorTick', 0.6);
     }
 
     /**
-     * Отрисовать препятствия (тематика маркетплейса)
+     * Отрисовать препятствия
      */
     drawObstacles() {
         this.obstacles.forEach(obs => {
-            if (obs.emoji) {
-                this.ctx.font = '32px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText(obs.emoji, obs.x + obs.width / 2, obs.y + obs.height - 5);
-            } else if (obs.type === 'pallet') {
-                this.ctx.fillStyle = obs.color;
-                this.ctx.fillRect(obs.x, obs.y + obs.height - 10, obs.width, 10);
+            if (obs.type === 'box') {
+                // Изометрическая коробка
+                const boxGrad = this.ctx.createLinearGradient(obs.x, obs.y, obs.x, obs.y + obs.height);
+                boxGrad.addColorStop(0, '#FFB366');
+                boxGrad.addColorStop(1, '#FF9933');
+                this.ctx.fillStyle = boxGrad;
+                this.roundRect(this.ctx, obs.x, obs.y, obs.width, obs.height, 6);
+                this.ctx.fill();
+                
+                // Обводка
+                this.ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                this.ctx.lineWidth = 2;
+                this.roundRect(this.ctx, obs.x, obs.y, obs.width, obs.height, 6);
+                this.ctx.stroke();
+                
+                // Скотч
+                this.ctx.strokeStyle = '#8B4513';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x + obs.width/2, obs.y);
+                this.ctx.lineTo(obs.x + obs.width/2, obs.y + obs.height);
+                this.ctx.stroke();
+            } else if (obs.type === 'hole') {
+                // Яма на дороге
+                this.ctx.fillStyle = '#1A1A1A';
+                this.ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                
+                // Трещины
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, obs.y);
+                this.ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+                this.ctx.moveTo(obs.x + obs.width, obs.y);
+                this.ctx.lineTo(obs.x, obs.y + obs.height);
+                this.ctx.stroke();
+            } else if (obs.type === 'barrier') {
+                // Дорожный барьер
+                const barrierGrad = this.ctx.createLinearGradient(obs.x, obs.y, obs.x, obs.y + obs.height);
+                barrierGrad.addColorStop(0, '#FF6B6B');
+                barrierGrad.addColorStop(0.5, '#FFF');
+                barrierGrad.addColorStop(1, '#FF6B6B');
+                this.ctx.fillStyle = barrierGrad;
+                this.roundRect(this.ctx, obs.x, obs.y, obs.width, obs.height, 4);
+                this.ctx.fill();
+                
+                // Полосы
+                this.ctx.fillStyle = '#FF0000';
                 for (let i = 0; i < 3; i++) {
-                    this.ctx.fillRect(obs.x + i * 12, obs.y + obs.height - 20, 10, 8);
+                    this.ctx.fillRect(obs.x, obs.y + i * 17, obs.width, 8);
                 }
-                this.ctx.fillStyle = '#8B4513';
-                this.ctx.fillRect(obs.x + 5, obs.y, obs.width - 10, obs.height - 20);
             }
         });
     }
