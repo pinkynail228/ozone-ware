@@ -271,11 +271,10 @@ class InspectionGame {
         const ctx = this.ctx;
         ctx.save();
 
-        // Фон
-        const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
-        gradient.addColorStop(0, '#4328ff');
-        gradient.addColorStop(0.5, '#6c2dff');
-        gradient.addColorStop(1, '#a52fff');
+        // Фон Ozon
+        const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#6B2FFF');
+        gradient.addColorStop(1, '#4B1FDD');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -290,18 +289,31 @@ class InspectionGame {
 
     drawShelf(ctx) {
         ctx.save();
-        ctx.fillStyle = '#2b1ea8';
-        ctx.shadowColor = 'rgba(255,255,255,0.25)';
-        ctx.shadowBlur = 16;
+        
+        // Стойка стеллажа с градиентом
+        const poleGrad = ctx.createLinearGradient(this.shelfX, 0, this.shelfX + 28, 0);
+        poleGrad.addColorStop(0, '#3A2A8F');
+        poleGrad.addColorStop(0.5, '#4B3AA0');
+        poleGrad.addColorStop(1, '#3A2A8F');
+        ctx.fillStyle = poleGrad;
         ctx.fillRect(this.shelfX, this.shelfTopY - 40, 28, this.canvas.height - (this.shelfTopY - 40) - 70);
 
-        ctx.shadowBlur = 0;
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        // Полки с объёмом
+        ctx.lineWidth = 8;
         const shelfCount = 3;
         const spacing = 115;
         for (let i = 0; i < shelfCount; i++) {
             const y = this.shelfTopY + i * spacing;
+            
+            // Тень полки
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(this.shelfX - 120, y + 2);
+            ctx.lineTo(this.shelfX + 24, y + 2);
+            ctx.stroke();
+            
+            // Полка
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
             ctx.beginPath();
             ctx.moveTo(this.shelfX - 120, y);
             ctx.lineTo(this.shelfX + 24, y);
@@ -314,37 +326,54 @@ class InspectionGame {
         ctx.save();
         ctx.translate(this.worker.x + this.worker.reachOffset + Math.sin(this.worker.catchBounce) * 4, this.worker.y);
 
-        // Тело
-        const bodyGradient = ctx.createLinearGradient(-40, -120, 40, 20);
-        bodyGradient.addColorStop(0, '#09f');
-        bodyGradient.addColorStop(1, '#7b4dff');
-        ctx.fillStyle = bodyGradient;
-        ctx.fillRoundRect?.(-38, -95, 76, 95, 20) ?? ctx.fillRect(-38, -95, 76, 95);
+        // Тележка с градиентом
+        const cartGrad = ctx.createLinearGradient(-50, -28, -50, 10);
+        cartGrad.addColorStop(0, '#2A2A3E');
+        cartGrad.addColorStop(1, '#1A1A2E');
+        ctx.fillStyle = cartGrad;
+        this.roundRect(ctx, -50, -28, 100, 38, 10);
+        ctx.fill();
+        
+        // Блик на тележке
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        this.roundRect(ctx, -48, -26, 96, 15, 8);
+        ctx.fill();
 
-        // Тележка
-        ctx.fillStyle = '#0d1335';
-        ctx.fillRoundRect?.(-50, -28, 100, 24, 10) ?? ctx.fillRect(-50, -28, 100, 24);
-        ctx.fillRoundRect?.(-48, -6, 96, 16, 8) ?? ctx.fillRect(-48, -6, 96, 16);
-
-        ctx.fillStyle = '#ffad66';
+        // Колёса с градиентом
+        const wheelGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 10);
+        wheelGrad.addColorStop(0, '#555');
+        wheelGrad.addColorStop(1, '#333');
+        ctx.fillStyle = wheelGrad;
         ctx.beginPath();
         ctx.arc(-24, 12, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
         ctx.arc(24, 12, 10, 0, Math.PI * 2);
         ctx.fill();
 
+        // Тело рабочего
+        const bodyGradient = ctx.createLinearGradient(-40, -120, 40, 20);
+        bodyGradient.addColorStop(0, '#1E90FF');
+        bodyGradient.addColorStop(1, '#0066CC');
+        ctx.fillStyle = bodyGradient;
+        this.roundRect(ctx, -38, -95, 76, 95, 20);
+        ctx.fill();
+
         // Голова
-        ctx.fillStyle = '#ffdcb0';
+        ctx.fillStyle = '#FFDCB0';
         ctx.beginPath();
         ctx.arc(0, -116, 26, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#0d1335';
+        // Глаза
+        ctx.fillStyle = '#2A2A3E';
         ctx.beginPath();
         ctx.arc(-10, -122, 4, 0, Math.PI * 2);
         ctx.arc(10, -122, 4, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = '#0d1335';
+        // Рот
+        ctx.strokeStyle = '#2A2A3E';
         ctx.lineWidth = 3;
         ctx.beginPath();
         if (this.worker.faceMood === 'happy') {
@@ -358,6 +387,20 @@ class InspectionGame {
         ctx.stroke();
 
         ctx.restore();
+    }
+    
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
     }
 
     drawBox(ctx) {
@@ -394,32 +437,21 @@ class InspectionGame {
     }
 
     drawText(ctx) {
-        ctx.fillStyle = '#ffffff';
+        // Минимальный текст только для статуса
         ctx.textAlign = 'center';
-        ctx.font = '700 30px "Montserrat", Arial';
-        ctx.fillText('ПРИЁМКА: ЛОВИ ПАДАЮЩИЙ ТОВАР', this.canvas.width / 2, 78);
-
-        ctx.font = '600 20px "Montserrat", Arial';
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.fillText('Жми в момент падения — иначе коробка разобьётся!', this.canvas.width / 2, 108);
-
-        ctx.font = '700 24px "Montserrat", Arial';
-        if (this.state === 'waiting') {
-            ctx.fillStyle = 'rgba(255,255,255,0.65)';
-            ctx.fillText('⌛ Ждём складское «землетрясение»...', this.canvas.width / 2, 150);
-        } else if (this.state === 'warning') {
-            ctx.fillStyle = '#ffec9f';
-            ctx.fillText('⚠️ ГОТОВЬСЯ! СЕЙЧАС РУХНЕТ', this.canvas.width / 2, 150);
+        ctx.font = 'bold 20px "Exo 2", sans-serif';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 6;
+        
+        if (this.state === 'warning') {
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText('⚠️ ГОТОВЬСЯ!', this.canvas.width / 2, 140);
         } else if (this.state === 'falling') {
-            ctx.fillStyle = '#fffb7d';
-            ctx.fillText('⚠️ ЛОВИ СЕЙЧАС!', this.canvas.width / 2, 150);
-        } else if (this.state === 'caught') {
-            ctx.fillStyle = '#00ffc6';
-            ctx.fillText('✅ Поймано!', this.canvas.width / 2, 150);
-        } else if (this.state === 'missed') {
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillText('💥 Товар разбился', this.canvas.width / 2, 150);
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillText('⚡ ТАПНИ!', this.canvas.width / 2, 140);
         }
+        
+        ctx.shadowBlur = 0;
     }
 
     drawEffects(ctx) {
