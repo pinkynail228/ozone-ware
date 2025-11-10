@@ -18,7 +18,7 @@ class SortingGame {
         this.isRunning = false;
         this.gameLoop = null;
 
-        this.requiredItems = 5;
+        this.minCorrectSwipes = 2; // Минимум для победы
         this.score = 0;
         this.collectedCorrect = 0;
         this.combo = 0;
@@ -273,12 +273,9 @@ class SortingGame {
         this.combo++;
         this.score += 40 + (this.combo * 10);
         if (this.sound) this.sound.playEffect('collectGood');
-
-        if (this.collectedCorrect >= this.requiredItems) {
-            setTimeout(() => this.win(), 250);
-        } else {
-            this.advanceItem();
-        }
+        
+        // Просто продолжаем игру
+        this.advanceItem();
     }
 
     fail(reason) {
@@ -334,18 +331,18 @@ class SortingGame {
 
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
-            console.log('⏰ Время вышло! Собрано:', this.collectedCorrect);
-            if (this.collectedCorrect >= this.requiredItems) {
+            console.log('⏰ Время вышло! Правильных:', this.collectedCorrect);
+            if (this.collectedCorrect >= this.minCorrectSwipes) {
                 this.win();
             } else {
-                this.fail('Не успел!');
+                this.fail(`Нужно минимум ${this.minCorrectSwipes} правильных!`);
             }
             return;
         }
 
         this.gameManager.updateDebug(`
             Target: ${this.targetLabel}<br>
-            Collected: ${this.collectedCorrect}/${this.requiredItems}<br>
+            Correct: ${this.collectedCorrect} (min: ${this.minCorrectSwipes})<br>
             Combo: x${this.combo}<br>
             Score: ${this.score}
         `);
@@ -359,11 +356,11 @@ class SortingGame {
         this.ctx.font = 'bold 28px "Exo 2", sans-serif';
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         this.ctx.shadowBlur = 8;
-        this.ctx.fillText(`СОБЕРИ: ${this.targetLabel}`, this.canvas.width / 2, 100);
+        this.ctx.fillText(`СОРТИРУЙ: ${this.targetLabel}`, this.canvas.width / 2, 100);
 
         this.ctx.fillStyle = '#FFD700';
-        this.ctx.font = 'bold 24px "Exo 2", sans-serif';
-        this.ctx.fillText(`${this.collectedCorrect}/${this.requiredItems}`, this.canvas.width / 2, 140);
+        this.ctx.font = 'bold 20px "Exo 2", sans-serif';
+        this.ctx.fillText(`Правильных: ${this.collectedCorrect}`, this.canvas.width / 2, 140);
         this.ctx.shadowBlur = 0;
     }
     
