@@ -17,6 +17,7 @@ class CatcherGame {
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
         
         this.score = 0;
         this.caught = 0;
@@ -106,8 +107,16 @@ class CatcherGame {
         this.removeControls();
     }
     
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+            var deltaTime = 1/60;
+        } else {
+            var deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1);
+            this.lastFrameTime = currentTime;
+        }
         
         // Фон
         this.ctx.fillStyle = '#87ceeb';
@@ -139,14 +148,14 @@ class CatcherGame {
         this.ctx.shadowBlur = 0;
         
         // Спавн товаров
-        this.spawnTimer++;
+        this.spawnTimer += deltaTime * 60;
         if (this.spawnTimer >= this.spawnInterval) {
             this.spawnItem();
             this.spawnTimer = 0;
         }
         
         // Обновить товары
-        this.updateItems();
+        this.updateItems(deltaTime);
         
         // Плавное движение корзины
         this.basket.x += (this.basket.targetX - this.basket.x) * 0.2;
@@ -198,10 +207,10 @@ class CatcherGame {
         if (this.sound) this.sound.playEffect(isGood ? 'dropGood' : 'dropBad', 0.7);
     }
     
-    updateItems() {
+    updateItems(deltaTime) {
         for (let i = this.items.length - 1; i >= 0; i--) {
             const item = this.items[i];
-            item.y += item.speed;
+            item.y += item.speed * deltaTime * 60;
             
             // Проверить коллизию с корзиной
             if (item.y + item.height >= this.basket.y &&
