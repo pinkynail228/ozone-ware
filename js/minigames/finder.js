@@ -287,13 +287,13 @@ class FinderGame {
         const remaining = Math.max(0, this.gameTime - elapsed);
         
         const timerText = document.getElementById('timer-text');
-        timerText.textContent = Math.ceil(remaining);
+        if (timerText) timerText.textContent = Math.ceil(remaining);
         
         const timerFill = document.getElementById('timer-fill');
-        const percentage = (remaining / this.gameTime) * 100;
-        timerFill.style.width = percentage + '%';
-        
-        scoreDisplay.textContent = this.score;
+        if (timerFill) {
+            const percentage = (remaining / this.gameTime) * 100;
+            timerFill.style.width = percentage + '%';
+        }
     }
     
     /**
