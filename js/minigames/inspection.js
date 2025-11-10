@@ -28,23 +28,24 @@ class InspectionGame {
         this.animationFrame = null;
         this.isRunning = false;
 
-        // Геометрия сцены
-        this.groundY = this.canvas.height - 100;
-        this.shelfX = this.canvas.width - 120;
-        this.shelfTopY = this.canvas.height * 0.28;
-        this.workerBaseX = 120;
-        this.workerBaseY = this.canvas.height - 140;
+        // Геометрия сцены (изометрическая перспектива)
+        this.groundY = this.canvas.height - 80;
+        this.shelfX = this.canvas.width - 100;
+        this.shelfTopY = 180;
+        this.workerBaseX = 100;
+        this.workerBaseY = this.canvas.height - 160;
 
         this.box = {
-            width: 74,
-            height: 64,
-            startX: this.shelfX - 38,
-            startY: this.shelfTopY,
-            currentX: this.shelfX - 38,
-            currentY: this.shelfTopY,
-            targetY: this.groundY,
+            width: 60,
+            height: 60,
+            startX: this.shelfX - 30,
+            startY: this.shelfTopY + 10,
+            currentX: this.shelfX - 30,
+            currentY: this.shelfTopY + 10,
+            targetY: this.groundY - 30,
             wobblePhase: 0,
-            glow: 0
+            glow: 0,
+            rotation: 0
         };
 
         this.worker = {
@@ -199,6 +200,7 @@ class InspectionGame {
         const eased = progress * progress;
 
         this.box.currentY = this.box.startY + (this.box.targetY - this.box.startY) * eased;
+        this.box.rotation = progress * 45; // Вращение при падении
 
         if (progress >= 1) {
             this.fail(true);
@@ -290,35 +292,55 @@ class InspectionGame {
     drawShelf(ctx) {
         ctx.save();
         
-        // Стойка стеллажа с градиентом
-        const poleGrad = ctx.createLinearGradient(this.shelfX, 0, this.shelfX + 28, 0);
-        poleGrad.addColorStop(0, '#3A2A8F');
-        poleGrad.addColorStop(0.5, '#4B3AA0');
-        poleGrad.addColorStop(1, '#3A2A8F');
+        const shelfWidth = 140;
+        const shelfDepth = 20;
+        
+        // Стойка стеллажа (изометрическая)
+        const poleGrad = ctx.createLinearGradient(this.shelfX, 0, this.shelfX + 24, 0);
+        poleGrad.addColorStop(0, '#2A1F5C');
+        poleGrad.addColorStop(0.5, '#3D2E7A');
+        poleGrad.addColorStop(1, '#2A1F5C');
         ctx.fillStyle = poleGrad;
-        ctx.fillRect(this.shelfX, this.shelfTopY - 40, 28, this.canvas.height - (this.shelfTopY - 40) - 70);
-
-        // Полки с объёмом
-        ctx.lineWidth = 8;
+        
+        // Левая грань стойки
+        ctx.beginPath();
+        ctx.moveTo(this.shelfX, this.shelfTopY - 30);
+        ctx.lineTo(this.shelfX - 8, this.shelfTopY - 22);
+        ctx.lineTo(this.shelfX - 8, this.groundY - 8);
+        ctx.lineTo(this.shelfX, this.groundY);
+        ctx.closePath();
+        ctx.fillStyle = '#1F1640';
+        ctx.fill();
+        
+        // Передняя грань стойки
+        ctx.fillStyle = poleGrad;
+        ctx.fillRect(this.shelfX, this.shelfTopY - 30, 24, this.groundY - (this.shelfTopY - 30));
+        
+        // Полки (изометрические)
         const shelfCount = 3;
-        const spacing = 115;
+        const spacing = 140;
         for (let i = 0; i < shelfCount; i++) {
             const y = this.shelfTopY + i * spacing;
             
-            // Тень полки
-            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            // Верхняя грань полки
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
             ctx.beginPath();
-            ctx.moveTo(this.shelfX - 120, y + 2);
-            ctx.lineTo(this.shelfX + 24, y + 2);
-            ctx.stroke();
-            
-            // Полка
-            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            ctx.beginPath();
-            ctx.moveTo(this.shelfX - 120, y);
+            ctx.moveTo(this.shelfX - shelfWidth, y);
+            ctx.lineTo(this.shelfX - shelfWidth - shelfDepth, y - 10);
+            ctx.lineTo(this.shelfX + 24 - shelfDepth, y - 10);
             ctx.lineTo(this.shelfX + 24, y);
-            ctx.stroke();
+            ctx.closePath();
+            ctx.fill();
+            
+            // Передняя грань полки
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(this.shelfX - shelfWidth, y, shelfWidth + 24, 8);
+            
+            // Тень под полкой
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(this.shelfX - shelfWidth, y + 8, shelfWidth + 24, 2);
         }
+        
         ctx.restore();
     }
 
@@ -406,31 +428,72 @@ class InspectionGame {
     drawBox(ctx) {
         ctx.save();
 
-        const { currentX, currentY, width, height } = this.box;
+        const { currentX, currentY, width, height, rotation } = this.box;
+        const wobble = Math.sin(this.box.wobblePhase) * 1.5;
 
-        ctx.translate(currentX, currentY + Math.sin(this.box.wobblePhase) * 2);
-        const boxGradient = ctx.createLinearGradient(-width / 2, -height / 2, width / 2, height / 2);
-        boxGradient.addColorStop(0, '#ffa94d');
-        boxGradient.addColorStop(1, '#ffce73');
-        ctx.fillStyle = boxGradient;
-        ctx.fillRoundRect?.(-width / 2, -height / 2, width, height, 14) ?? ctx.fillRect(-width / 2, -height / 2, width, height);
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(-width / 2, -height / 2, width, height);
-
-        ctx.strokeStyle = '#f27a0a';
-        ctx.lineWidth = 7;
+        ctx.translate(currentX, currentY + wobble);
+        ctx.rotate(rotation * Math.PI / 180);
+        
+        // Тень коробки
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(-width / 2 + 4, height / 2 + 4, width, 8);
+        
+        // Изометрическая коробка
+        // Верхняя грань
+        const topGrad = ctx.createLinearGradient(0, -height / 2 - 15, 0, -height / 2);
+        topGrad.addColorStop(0, '#FFB366');
+        topGrad.addColorStop(1, '#FFA94D');
+        ctx.fillStyle = topGrad;
         ctx.beginPath();
-        ctx.moveTo(-width / 4, -height / 2);
-        ctx.lineTo(-width / 4, height / 2);
-        ctx.moveTo(width / 4, -height / 2);
-        ctx.lineTo(width / 4, height / 2);
+        ctx.moveTo(0, -height / 2 - 15);
+        ctx.lineTo(width / 2, -height / 2 - 8);
+        ctx.lineTo(0, -height / 2);
+        ctx.lineTo(-width / 2, -height / 2 - 8);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Левая грань
+        const leftGrad = ctx.createLinearGradient(-width / 2, -height / 2, -width / 2, height / 2);
+        leftGrad.addColorStop(0, '#FF9933');
+        leftGrad.addColorStop(1, '#E67300');
+        ctx.fillStyle = leftGrad;
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, -height / 2 - 8);
+        ctx.lineTo(-width / 2, height / 2);
+        ctx.lineTo(0, height / 2 + 8);
+        ctx.lineTo(0, -height / 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Правая грань (светлее)
+        const rightGrad = ctx.createLinearGradient(width / 2, -height / 2, width / 2, height / 2);
+        rightGrad.addColorStop(0, '#FFCE73');
+        rightGrad.addColorStop(1, '#FFB84D');
+        ctx.fillStyle = rightGrad;
+        ctx.beginPath();
+        ctx.moveTo(width / 2, -height / 2 - 8);
+        ctx.lineTo(width / 2, height / 2);
+        ctx.lineTo(0, height / 2 + 8);
+        ctx.lineTo(0, -height / 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Скотч на коробке
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, -height / 2);
+        ctx.lineTo(0, height / 2 + 8);
         ctx.stroke();
-
+        
+        // Свечение при падении
         if (this.box.glow > 0) {
-            ctx.fillStyle = `rgba(255,255,255,${0.35 * this.box.glow})`;
-            ctx.fillRect(-width / 2, -height / 2, width, height);
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 20 * this.box.glow;
+            ctx.strokeStyle = `rgba(255, 215, 0, ${0.6 * this.box.glow})`;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-width / 2 - 5, -height / 2 - 15, width + 10, height + 23);
+            ctx.shadowBlur = 0;
         }
 
         ctx.restore();
