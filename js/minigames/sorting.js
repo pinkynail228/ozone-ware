@@ -137,11 +137,14 @@ class SortingGame {
             e.preventDefault();
             
             const { x, y } = this.getPointerPosition(e);
+            console.log('👆 Touch start:', x, y);
             this.swipeState.isDragging = true;
             this.swipeState.startX = x;
             this.swipeState.startY = y;
             this.swipeState.currentX = x;
             this.swipeState.currentY = y;
+            this.swipeState.deltaX = 0;
+            this.swipeState.deltaY = 0;
         };
         
         this.touchMoveHandler = (e) => {
@@ -162,8 +165,9 @@ class SortingGame {
         
         this.touchEndHandler = (e) => {
             if (!this.swipeState.isDragging) return;
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
             
+            console.log('⬆️ Touch end, deltaX:', this.swipeState.deltaX);
             this.swipeState.isDragging = false;
             
             const swipeThreshold = 80;
@@ -171,6 +175,7 @@ class SortingGame {
             
             if (Math.abs(deltaX) > swipeThreshold) {
                 // Свайп зафиксирован!
+                console.log('✅ Свайп:', deltaX > 0 ? 'RIGHT' : 'LEFT');
                 if (deltaX > 0) {
                     this.handleSwipe('right'); // Вправо = ВЗЯТЬ
                 } else {
@@ -178,6 +183,7 @@ class SortingGame {
                 }
             } else {
                 // Вернуть карточку на место
+                console.log('❌ Слабый свайп, возврат');
                 this.resetCardPosition();
             }
         };
@@ -188,6 +194,7 @@ class SortingGame {
         this.canvas.addEventListener('mousedown', this.touchStartHandler);
         this.canvas.addEventListener('mousemove', this.touchMoveHandler);
         this.canvas.addEventListener('mouseup', this.touchEndHandler);
+        this.canvas.addEventListener('mouseleave', this.touchEndHandler); // Важно!
     }
     
     resetCardPosition() {
@@ -213,6 +220,7 @@ class SortingGame {
         this.canvas.removeEventListener('mousedown', this.touchStartHandler);
         this.canvas.removeEventListener('mousemove', this.touchMoveHandler);
         this.canvas.removeEventListener('mouseup', this.touchEndHandler);
+        this.canvas.removeEventListener('mouseleave', this.touchEndHandler);
     }
 
     getPointerPosition(e) {
