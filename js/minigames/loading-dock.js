@@ -91,6 +91,7 @@ class LoadingDockGame {
         this.updateUI(elapsed);
 
         if (this.progress >= 1) {
+            this.renderedProgress = 1;
             this.finishRun(elapsed, true);
             return;
         }
@@ -104,11 +105,11 @@ class LoadingDockGame {
     }
 
     finishRun(elapsed, success) {
-        const progressRatio = Math.min(1, this.renderedProgress);
+        const progressRatio = success ? 1 : Math.min(1, this.renderedProgress);
         const timeBonus = Math.max(0, this.gameTime - elapsed);
         this.score = Math.round(progressRatio * 120 + timeBonus * 15 + this.tapCount * 2);
 
-        if (success && progressRatio >= 1) {
+        if (success) {
             console.log('🏆 LoadingDockGame: Коробка на погрузке!');
             this.stop();
             this.gameManager.endGame(true, this.score);
