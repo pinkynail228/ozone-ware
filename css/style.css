@@ -15,7 +15,7 @@
 
 body {
     font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #000;
+    background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
     color: #fff;
     overflow: hidden;
     touch-action: manipulation;
@@ -31,10 +31,10 @@ body {
     height: 844px;
     max-height: 100vh;
     margin: 0 auto;
-    background: #1a1a2e;
+    background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 50px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 0 50px rgba(107, 47, 255, 0.4);
 }
 
 /* На десктопе — черные полосы по бокам */
@@ -177,9 +177,7 @@ body {
 
 /* === ЭКРАН ЗАГРУЗКИ === */
 #loading-screen {
-    background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
+    background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
     text-align: center;
     overflow: hidden;
     position: relative;
@@ -270,17 +268,24 @@ body {
     filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
 }
 
-/* Глитч эффект на заголовке */
+/* 3D заголовок в стиле Ozon */
 #loading-screen h1 {
     font-size: 56px;
-    font-weight: bold;
+    font-weight: 900;
     margin: 20px 0;
+    background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-shadow: 
-        3px 3px 0 #ff006e,
-        -3px -3px 0 #3a86ff,
-        0 0 20px rgba(255, 255, 255, 0.5);
+        0 4px 0 #5D3A1A,
+        0 6px 0 #4A2E15,
+        0 8px 0 #3A2410,
+        0 12px 20px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 215, 0, 0.4);
     animation: glitchText 3s infinite;
     position: relative;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .glitch::before,
@@ -434,7 +439,7 @@ body {
 
 /* === ЭКРАН ВЫБОРА УРОВНЕЙ === */
 #level-select-screen {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
+    background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
     padding: 32px 20px 24px;
     align-items: stretch;
     justify-content: flex-start;
@@ -765,53 +770,81 @@ button:active {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #005bff 0%, #003d82 100%);
+    background: linear-gradient(180deg, #1E90FF 0%, #0066CC 100%);
     color: #ffffff;
     box-shadow: 
-        0 6px 16px rgba(0, 91, 255, 0.4),
-        0 2px 4px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        0 6px 16px rgba(30, 144, 255, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #0066ff 0%, #004499 100%);
+    background: linear-gradient(180deg, #3AA0FF 0%, #1177DD 100%);
     transform: translateY(-2px);
     box-shadow: 
-        0 8px 20px rgba(0, 91, 255, 0.5),
-        0 4px 8px rgba(0, 0, 0, 0.15);
+        0 8px 20px rgba(30, 144, 255, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-primary:active {
-    background: linear-gradient(135deg, #004499 0%, #003366 100%);
-    transform: translateY(0px) scale(0.96);
+    background: linear-gradient(180deg, #0066CC 0%, #004499 100%);
+    transform: translateY(1px) scale(0.98);
     box-shadow: 
-        0 4px 12px rgba(0, 91, 255, 0.3),
-        0 1px 2px rgba(0, 0, 0, 0.2);
+        0 3px 8px rgba(30, 144, 255, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
+    background: linear-gradient(180deg, #FF8C42 0%, #FF6B35 100%);
     color: #ffffff;
     box-shadow: 
-        0 6px 16px rgba(255, 107, 53, 0.4),
-        0 2px 4px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        0 6px 16px rgba(255, 107, 53, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(135deg, #ff7a47 0%, #f0643d 100%);
+    background: linear-gradient(180deg, #FFA05C 0%, #FF7A47 100%);
     transform: translateY(-2px);
     box-shadow: 
-        0 8px 20px rgba(255, 107, 53, 0.5),
-        0 4px 8px rgba(0, 0, 0, 0.15);
+        0 8px 20px rgba(255, 107, 53, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary:active {
-    background: linear-gradient(135deg, #e55a2b 0%, #cc4420 100%);
-    transform: translateY(0px) scale(0.96);
+    background: linear-gradient(180deg, #FF6B35 0%, #E55A2B 100%);
+    transform: translateY(1px) scale(0.98);
     box-shadow: 
-        0 4px 12px rgba(255, 107, 53, 0.3),
-        0 1px 2px rgba(0, 0, 0, 0.2);
+        0 3px 8px rgba(255, 107, 53, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* === DEBUG ПАНЕЛЬ === */
