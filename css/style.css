@@ -15,7 +15,7 @@
 
 body {
     font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
+    background: #000;
     color: #fff;
     overflow: hidden;
     touch-action: manipulation;
