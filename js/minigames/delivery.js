@@ -18,6 +18,7 @@ class DeliveryGame {
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
+        this.lastFrameTime = null;
         
         // Игрок (курьер)
         this.player = {
@@ -119,8 +120,13 @@ class DeliveryGame {
     /**
      * Главный игровой цикл
      */
-    update() {
+    update(currentTime) {
         if (!this.isRunning) return;
+        
+        // Delta time для независимости от FPS
+        if (!this.lastFrameTime) this.lastFrameTime = currentTime;
+        const deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1); // макс 0.1с
+        this.lastFrameTime = currentTime;
         
         // Очистить экран
         this.ctx.fillStyle = '#87ceeb'; // Небо
@@ -130,10 +136,10 @@ class DeliveryGame {
         this.drawBackground();
         
         // Обновить физику игрока
-        this.updatePlayer();
+        this.updatePlayer(deltaTime);
         
         // Обновить препятствия
-        this.updateObstacles();
+        this.updateObstacles(deltaTime);
         
         // Отрисовать игрока
         this.drawPlayer();
@@ -202,22 +208,32 @@ class DeliveryGame {
     /**
      * Обновить игрока
      */
-    updatePlayer() {
-        // Гравитация
-        this.player.velocityY += this.player.gravity;
-        this.player.y += this.player.velocityY;
+    updatePlayer(deltaTime) {
+        const p = this.player;
+        
+        // Анимация бега (независимо от FPS)
+        if (!p.isJumping) {
+            p.legPhase += 0.3 * deltaTime * 60;
+            p.armPhase += 0.25 * deltaTime * 60;
+        }
+        
+        // Гравитация (умножаем на 60 для совместимости со старыми значениями)
+        if (p.isJumping) {
+            p.velocityY += p.gravity * deltaTime * 60;
+            p.y += p.velocityY * deltaTime * 60;
+        }
         
         // Проверка земли
-        if (this.player.y >= this.player.groundY) {
-            this.player.y = this.player.groundY;
-            this.player.velocityY = 0;
-            this.player.isJumping = false;
+        if (p.y >= p.groundY) {
+            p.y = p.groundY;
+            p.velocityY = 0;
+            p.isJumping = false;
         }
         
         // Ограничение по верху
-        if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.velocityY = 0;
+        if (p.y < 0) {
+            p.y = 0;
+            p.velocityY = 0;
         }
     }
     
@@ -226,12 +242,6 @@ class DeliveryGame {
      */
     drawPlayer() {
         const p = this.player;
-        
-        // Анимация бега
-        if (!p.isJumping) {
-            p.legPhase += 0.3;
-            p.armPhase += 0.25;
-        }
         
         this.ctx.save();
         this.ctx.translate(p.x + p.width/2, p.y + p.height);
@@ -305,9 +315,9 @@ class DeliveryGame {
     /**
      * Обновить препятствия
      */
-    updateObstacles() {
+    updateObstacles(deltaTime) {
         // Спавн препятствий
-        this.obstacleSpawnTimer++;
+        this.obstacleSpawnTimer += deltaTime * 60;
         if (this.obstacleSpawnTimer >= this.obstacleSpawnInterval) {
             this.spawnObstacle();
             this.obstacleSpawnTimer = 0;
@@ -316,7 +326,7 @@ class DeliveryGame {
         // Двигать препятствия
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             const obs = this.obstacles[i];
-            obs.x -= this.obstacleSpeed;
+            obs.x -= this.obstacleSpeed * deltaTime * 60;
 
             // Удалить за экраном
             if (obs.x + obs.width < 0) {
