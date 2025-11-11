@@ -63,6 +63,7 @@ class ScannerGame {
     }
 
     createCrate() {
+        console.log('📦 Scanner: Creating new crate...');
         // Больше товаров!
         const emojis = ['📦', '🎁', '📚', '🎮', '🧳', '💡', '👟', '🎂', '🎸', '📱', '⌨️', '💍', '🕯️', '🎭', '🎨', '🧩'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -89,6 +90,8 @@ class ScannerGame {
             speedChangeFactor,
             speedChanged: false
         };
+        
+        console.log('✅ Scanner: Crate created:', this.currentCrate);
         
         // Ускоряем игру со временем
         this.speedMultiplier += 0.08;
@@ -258,7 +261,10 @@ class ScannerGame {
     }
 
     drawCrate(deltaTime) {
-        if (!this.currentCrate) return;
+        if (!this.currentCrate) {
+            console.log('⚠️ Scanner: currentCrate is null!');
+            return;
+        }
         
         const crate = this.currentCrate;
         crate.wobble += 0.15 * deltaTime * 60;
