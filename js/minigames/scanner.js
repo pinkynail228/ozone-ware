@@ -26,11 +26,12 @@ class ScannerGame {
         this.baseSpeed = 2.5;
         this.speedMultiplier = 1.0;
 
+        // Узкая горизонтальная зона сканирования (лазер)
         this.scanningZone = {
-            width: 200,
-            height: 160,
-            x: (this.canvas.width - 200) / 2,
-            y: 320,
+            width: 280,
+            height: 50, // Было 160, стало 50 (в 3+ раза меньше)
+            x: (this.canvas.width - 280) / 2,
+            y: 400, // Ниже по центру
             pulse: 0
         };
 
@@ -73,16 +74,18 @@ class ScannerGame {
         const speed = Math.min(baseSpeed + Math.random() * 2.5, 8.0); // Макс 8 пикс/кадр
         
         // Неожиданные изменения скорости (чаще и драматичнее!)
-        const hasSpeedChange = Math.random() > 0.4; // Было 0.6, стало 0.4 (чаще)
-        const speedChangePoint = hasSpeedChange ? 100 + Math.random() * 150 : null;
-        // Замедление до 0.2 или ускорение до 2.5x
-        const speedChangeFactor = hasSpeedChange ? (Math.random() > 0.5 ? 2.5 : 0.2) : 1;
-        const pauseBeforeChange = hasSpeedChange ? 0.3 : 0; // Пауза 0.3 сек перед изменением
+        const hasSpeedChange = Math.random() > 0.3; // Ещё чаще
+        // Точка остановки — перед зоной сканирования
+        const speedChangePoint = hasSpeedChange ? this.scanningZone.y - 100 - Math.random() * 50 : null;
+        // После паузы — только ускорение (2x-3x)
+        const speedChangeFactor = hasSpeedChange ? (2.0 + Math.random() * 1.0) : 1;
+        // Пауза от 0.5 до 2 секунд
+        const pauseBeforeChange = hasSpeedChange ? 0.5 + Math.random() * 1.5 : 0;
 
         this.currentCrate = {
             emoji,
-            x: -60,
-            y: this.scanningZone.y + this.scanningZone.height / 2,
+            x: this.canvas.width / 2, // По центру горизонтально
+            y: -60, // Начинаем сверху
             speed,
             baseSpeed: speed,
             size: 72,
@@ -118,10 +121,11 @@ class ScannerGame {
 
             if (!this.currentCrate) return;
 
-            const zoneCenter = this.scanningZone.x + this.scanningZone.width / 2;
-            const tolerance = this.scanningZone.width / 2 - 18;
+            // Проверяем Y координату — ящик должен быть в зоне сканирования
+            const zoneCenter = this.scanningZone.y + this.scanningZone.height / 2;
+            const tolerance = this.scanningZone.height / 2 + 20; // Небольшой запас
 
-            if (Math.abs(this.currentCrate.x - zoneCenter) <= tolerance) {
+            if (Math.abs(this.currentCrate.y - zoneCenter) <= tolerance) {
                 this.handleSuccessfulScan();
             } else {
                 this.fail('Сканировал мимо посылки');
@@ -369,12 +373,13 @@ class ScannerGame {
             }
         }
 
-        // Двигаем ящик (если не на паузе)
+        // Двигаем ящик ВНИЗ (если не на паузе)
         if (!crate.isPaused || crate.speedChanged) {
-            crate.x += crate.speed * deltaTime * 60;
+            crate.y += crate.speed * deltaTime * 60;
         }
 
-        if (crate.x - crate.size / 2 > this.canvas.width + 60) {
+        // Проверка выхода за экран
+        if (crate.y - crate.size / 2 > this.canvas.height + 60) {
             this.fail('Посылка проскочила сканер');
         }
     }
