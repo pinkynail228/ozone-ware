@@ -318,6 +318,8 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    height: 100%;
+    padding-bottom: 20px;
 }
 
 /* Старые стили .start-link удалены - теперь используется .level-select-button */
@@ -395,10 +397,7 @@ body {
 
 /* Кнопка выбора уровней */
 .level-select-button {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: auto; /* Прижимаем к низу */
     width: 100%;
     max-width: 330px; /* Ширина как у трёх бейджей */
     padding: 14px 24px;
