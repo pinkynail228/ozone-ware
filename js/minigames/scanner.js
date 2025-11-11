@@ -13,7 +13,7 @@ class ScannerGame {
         this.gameManager = gameManager;
         this.sound = gameManager.sound;
 
-        this.gameTime = 10; // Было 7, стало 10 (больше времени)
+        this.gameTime = 6; // 6 секунд на выживание
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
