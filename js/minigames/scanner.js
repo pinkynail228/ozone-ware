@@ -272,7 +272,7 @@ class ScannerGame {
         this.ctx.lineWidth = 3;
         this.ctx.setLineDash([8, 8]);
         
-        this.roundRect(this.ctx, zone.x, zone.y, zone.width, zone.height, 15, false);
+        this.drawRoundedRect(zone.x, zone.y, zone.width, zone.height, 15, false);
         
         // Центральная линия сканера
         this.ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
