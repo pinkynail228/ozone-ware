@@ -28,8 +28,9 @@ body {
 /* === ГЛАВНЫЙ КОНТЕЙНЕР === */
 #game-container {
     width: 390px;
-    height: 844px;
-    max-height: 100vh;
+    height: 100dvh; /* Динамическая высота viewport */
+    max-height: 100dvh;
+    min-height: 844px; /* Минимум для игр */
     margin: 0 auto;
     background: linear-gradient(180deg, #6B2FFF 0%, #4B1FDD 100%);
     position: relative;
