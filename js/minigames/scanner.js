@@ -100,6 +100,9 @@ class ScannerGame {
         };
         
         console.log('✅ Scanner: Crate created:', this.currentCrate);
+        if (hasSpeedChange) {
+            console.log('🎲 Speed change enabled! Point:', speedChangePoint, 'Factor:', speedChangeFactor, 'Pause:', pauseBeforeChange);
+        }
         
         // Ускоряем игру со временем
         this.speedMultiplier += 0.08;
@@ -346,7 +349,8 @@ class ScannerGame {
         const crate = this.currentCrate;
         
         // Неожиданное изменение скорости с паузой!
-        if (crate.hasSpeedChange && !crate.speedChanged && crate.x > crate.speedChangePoint) {
+        if (crate.hasSpeedChange && !crate.speedChanged && crate.y > crate.speedChangePoint) {
+            console.log('🎯 Reached speed change point! Y:', crate.y, 'Point:', crate.speedChangePoint);
             if (!crate.isPaused) {
                 // Начинаем паузу
                 crate.isPaused = true;
