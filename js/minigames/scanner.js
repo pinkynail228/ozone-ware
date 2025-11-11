@@ -252,8 +252,8 @@ class ScannerGame {
         this.ctx.strokeStyle = 'rgba(255,255,255,0.4)';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
-        this.ctx.moveTo(zone.x + 20, zone.y + zone.height / 2);
-        this.ctx.lineTo(zone.x + zone.width - 20, zone.y + zone.height / 2);
+        this.ctx.moveTo(this.scanningZone.x + 20, this.scanningZone.y + this.scanningZone.height / 2);
+        this.ctx.lineTo(this.scanningZone.x + this.scanningZone.width - 20, this.scanningZone.y + this.scanningZone.height / 2);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
 
