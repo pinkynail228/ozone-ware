@@ -13,17 +13,17 @@ class ScannerGame {
         this.gameManager = gameManager;
         this.sound = gameManager.sound;
 
-        this.gameTime = 7;
+        this.gameTime = 10; // Было 7, стало 10 (больше времени)
         this.startTime = null;
         this.isRunning = false;
         this.gameLoop = null;
         this.lastFrameTime = null;
 
-        this.requiredScans = 4;
+        this.requiredScans = 5; // Было 4, стало 5 (больше ящиков)
         this.scanned = 0;
         this.score = 0;
         this.combo = 0;
-        this.baseSpeed = 2.5;
+        this.baseSpeed = 4.0; // Было 2.5, стало 4.0 (быстрее)
         this.speedMultiplier = 1.0;
 
         // Узкая горизонтальная зона сканирования (лазер)
@@ -69,9 +69,9 @@ class ScannerGame {
         const emojis = ['📦', '🎁', '📚', '🎮', '🧳', '💡', '👟', '🎂', '🎸', '📱', '⌨️', '💍', '🕯️', '🎭', '🎨', '🧩'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
         
-        // Разная скорость + ускорение (ограничиваем максимум)
-        const baseSpeed = this.baseSpeed * Math.min(this.speedMultiplier, 2.0); // Макс x2
-        const speed = Math.min(baseSpeed + Math.random() * 2.5, 8.0); // Макс 8 пикс/кадр
+        // Разная скорость + ускорение
+        const baseSpeed = this.baseSpeed * Math.min(this.speedMultiplier, 1.5); // Макс x1.5
+        const speed = baseSpeed + Math.random() * 2.0; // Вариация
         
         // Неожиданные изменения скорости (чаще и драматичнее!)
         const hasSpeedChange = Math.random() > 0.3; // Ещё чаще
@@ -79,8 +79,8 @@ class ScannerGame {
         const speedChangePoint = hasSpeedChange ? this.scanningZone.y - 100 - Math.random() * 50 : null;
         // После паузы — только ускорение (2x-3x)
         const speedChangeFactor = hasSpeedChange ? (2.0 + Math.random() * 1.0) : 1;
-        // Пауза от 0.5 до 2 секунд
-        const pauseBeforeChange = hasSpeedChange ? 0.5 + Math.random() * 1.5 : 0;
+        // Пауза от 0.3 до 1 секунды (короче!)
+        const pauseBeforeChange = hasSpeedChange ? 0.3 + Math.random() * 0.7 : 0;
 
         this.currentCrate = {
             emoji,
