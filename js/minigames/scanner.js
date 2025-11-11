@@ -109,25 +109,17 @@ class ScannerGame {
         this.tapHandler = (e) => {
             if (!this.isRunning) return;
             e.preventDefault();
-
-            const touch = e.touches ? e.touches[0] : e;
-            const rect = this.canvas.getBoundingClientRect();
-            const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
-            const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
-
-            if (!this.isPointInZone(x, y)) {
-                return;
-            }
-
+            
             if (!this.currentCrate) return;
 
-            // Проверяем Y координату — ящик должен быть в зоне сканирования
+            // Проверяем Y координату ящика — он должен быть в зоне сканирования
             const zoneCenter = this.scanningZone.y + this.scanningZone.height / 2;
-            const tolerance = this.scanningZone.height / 2 + 20; // Небольшой запас
+            const tolerance = this.scanningZone.height / 2 + 30; // Щедрый запас
 
             if (Math.abs(this.currentCrate.y - zoneCenter) <= tolerance) {
                 this.handleSuccessfulScan();
             } else {
+                console.log('❌ Тап мимо! Ящик Y:', this.currentCrate.y, 'Зона Y:', zoneCenter, '±', tolerance);
                 this.fail('Сканировал мимо посылки');
             }
         };
