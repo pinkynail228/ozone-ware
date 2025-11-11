@@ -320,24 +320,7 @@ body {
     text-align: center;
 }
 
-.start-link {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    color: rgba(255, 255, 255, 0.72);
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: color 0.2s ease, opacity 0.2s ease;
-}
-
-.start-link:hover,
-.start-link:focus-visible {
-    color: #ffffff;
-    opacity: 1;
-}
+/* Старые стили .start-link удалены - теперь используется .level-select-button */
 
 /* Subtitle с анимированными буквами */
 .subtitle {
@@ -408,6 +391,38 @@ body {
     display: flex;
     align-items: center;
     opacity: 0.5;
+}
+
+/* Кнопка выбора уровней */
+.level-select-button {
+    margin-top: 30px;
+    width: 280px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Exo 2', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.level-select-button:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.25));
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+.level-select-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* === ЭКРАН ПЕРЕХОДА === */
