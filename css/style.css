@@ -395,8 +395,10 @@ body {
 
 /* Кнопка выбора уровней */
 .level-select-button {
-    margin-top: 20px;
-    margin-bottom: 80px; /* Больше отступ снизу чтобы заполнить пространство */
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     max-width: 330px; /* Ширина как у трёх бейджей */
     padding: 14px 24px;
