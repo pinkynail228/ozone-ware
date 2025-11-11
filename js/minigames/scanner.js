@@ -260,6 +260,32 @@ class ScannerGame {
         this.ctx.restore();
     }
 
+    drawScanningZone(deltaTime) {
+        const zone = this.scanningZone;
+        zone.pulse += 0.1 * deltaTime * 60;
+        
+        this.ctx.save();
+        
+        // Пульсирующая рамка зоны сканирования
+        const pulseAlpha = 0.3 + Math.sin(zone.pulse) * 0.2;
+        this.ctx.strokeStyle = `rgba(34, 197, 94, ${pulseAlpha})`;
+        this.ctx.lineWidth = 3;
+        this.ctx.setLineDash([8, 8]);
+        
+        this.roundRect(this.ctx, zone.x, zone.y, zone.width, zone.height, 15, false);
+        
+        // Центральная линия сканера
+        this.ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(zone.x + 20, zone.y + zone.height / 2);
+        this.ctx.lineTo(zone.x + zone.width - 20, zone.y + zone.height / 2);
+        this.ctx.stroke();
+        
+        this.ctx.restore();
+    }
+
     drawCrate(deltaTime) {
         if (!this.currentCrate) {
             console.log('⚠️ Scanner: currentCrate is null!');
