@@ -152,12 +152,8 @@ class ScannerGame {
             size: 0
         };
 
-        if (this.scanned >= this.requiredScans) {
-            this.isRunning = false;
-            setTimeout(() => this.win(), 250);
-        } else {
-            this.createCrate();
-        }
+        // Просто создаём новый ящик, победа по таймеру!
+        this.createCrate();
     }
 
     fail(reason) {
@@ -212,12 +208,9 @@ class ScannerGame {
 
         const elapsed = (Date.now() - this.startTime) / 1000;
         if (elapsed >= this.gameTime) {
-            console.log('⏰ Время на сканирование вышло');
-            if (this.scanned >= this.requiredScans) {
-                this.win();
-            } else {
-                this.lose();
-            }
+            console.log('⏰ Время вышло! Отсканировано:', this.scanned);
+            // Победа если дожил до конца без ошибок!
+            this.win();
             return;
         }
 
@@ -270,22 +263,30 @@ class ScannerGame {
         
         this.ctx.save();
         
-        // Пульсирующая рамка зоны сканирования
-        const pulseAlpha = 0.3 + Math.sin(zone.pulse) * 0.2;
-        this.ctx.strokeStyle = `rgba(34, 197, 94, ${pulseAlpha})`;
-        this.ctx.lineWidth = 3;
-        this.ctx.setLineDash([8, 8]);
+        // Яркая зелёная зона с подсветкой
+        const pulseAlpha = 0.15 + Math.sin(zone.pulse) * 0.1;
         
-        this.drawRoundedRect(zone.x, zone.y, zone.width, zone.height, 15, false);
+        // Фон зоны
+        this.ctx.fillStyle = `rgba(34, 197, 94, ${pulseAlpha})`;
+        this.ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
         
-        // Центральная линия сканера
-        this.ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
-        this.ctx.lineWidth = 2;
+        // Яркая рамка
+        this.ctx.strokeStyle = '#22c55e';
+        this.ctx.lineWidth = 4;
         this.ctx.setLineDash([]);
+        this.ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
+        
+        // Центральная линия лазера
+        const laserPulse = 0.6 + Math.sin(zone.pulse * 2) * 0.4;
+        this.ctx.strokeStyle = `rgba(34, 197, 94, ${laserPulse})`;
+        this.ctx.lineWidth = 3;
+        this.ctx.shadowColor = '#22c55e';
+        this.ctx.shadowBlur = 10;
         this.ctx.beginPath();
-        this.ctx.moveTo(zone.x + 20, zone.y + zone.height / 2);
-        this.ctx.lineTo(zone.x + zone.width - 20, zone.y + zone.height / 2);
+        this.ctx.moveTo(zone.x, zone.y + zone.height / 2);
+        this.ctx.lineTo(zone.x + zone.width, zone.y + zone.height / 2);
         this.ctx.stroke();
+        this.ctx.shadowBlur = 0;
         
         this.ctx.restore();
     }
