@@ -77,8 +77,8 @@ class ScannerGame {
         const hasSpeedChange = Math.random() > 0.3; // Ещё чаще
         // Точка остановки — перед зоной сканирования
         const speedChangePoint = hasSpeedChange ? this.scanningZone.y - 100 - Math.random() * 50 : null;
-        // После паузы — только ускорение (2x-3x)
-        const speedChangeFactor = hasSpeedChange ? (2.0 + Math.random() * 1.0) : 1;
+        // После паузы — ускорение (1.4x-2.1x, было 2x-3x)
+        const speedChangeFactor = hasSpeedChange ? (1.4 + Math.random() * 0.7) : 1;
         // Пауза от 0.3 до 1 секунды (короче!)
         const pauseBeforeChange = hasSpeedChange ? 0.3 + Math.random() * 0.7 : 0;
 
