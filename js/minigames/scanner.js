@@ -72,10 +72,12 @@ class ScannerGame {
         const baseSpeed = this.baseSpeed * Math.min(this.speedMultiplier, 2.0); // Макс x2
         const speed = Math.min(baseSpeed + Math.random() * 2.5, 8.0); // Макс 8 пикс/кадр
         
-        // Неожиданные изменения скорости
-        const hasSpeedChange = Math.random() > 0.6;
+        // Неожиданные изменения скорости (чаще и драматичнее!)
+        const hasSpeedChange = Math.random() > 0.4; // Было 0.6, стало 0.4 (чаще)
         const speedChangePoint = hasSpeedChange ? 100 + Math.random() * 150 : null;
-        const speedChangeFactor = hasSpeedChange ? (Math.random() > 0.5 ? 1.8 : 0.5) : 1;
+        // Замедление до 0.2 или ускорение до 2.5x
+        const speedChangeFactor = hasSpeedChange ? (Math.random() > 0.5 ? 2.5 : 0.2) : 1;
+        const pauseBeforeChange = hasSpeedChange ? 0.3 : 0; // Пауза 0.3 сек перед изменением
 
         this.currentCrate = {
             emoji,
@@ -88,7 +90,10 @@ class ScannerGame {
             hasSpeedChange,
             speedChangePoint,
             speedChangeFactor,
-            speedChanged: false
+            speedChanged: false,
+            pauseBeforeChange,
+            pauseStartTime: null,
+            isPaused: false
         };
         
         console.log('✅ Scanner: Crate created:', this.currentCrate);
@@ -344,13 +349,30 @@ class ScannerGame {
         
         const crate = this.currentCrate;
         
-        // Неожиданное изменение скорости!
+        // Неожиданное изменение скорости с паузой!
         if (crate.hasSpeedChange && !crate.speedChanged && crate.x > crate.speedChangePoint) {
-            crate.speed = Math.min(crate.baseSpeed * crate.speedChangeFactor, 8.0); // Ограничиваем
-            crate.speedChanged = true;
+            if (!crate.isPaused) {
+                // Начинаем паузу
+                crate.isPaused = true;
+                crate.pauseStartTime = Date.now();
+                crate.speed = 0; // Останавливаем
+                console.log('⏸️ Scanner: Crate paused before speed change');
+            } else {
+                // Проверяем закончилась ли пауза
+                const pauseDuration = (Date.now() - crate.pauseStartTime) / 1000;
+                if (pauseDuration >= crate.pauseBeforeChange) {
+                    // Резко меняем скорость!
+                    crate.speed = crate.baseSpeed * crate.speedChangeFactor; // БЕЗ ограничения!
+                    crate.speedChanged = true;
+                    console.log('🚀 Scanner: Speed changed to', crate.speed);
+                }
+            }
         }
 
-        crate.x += crate.speed * deltaTime * 60;
+        // Двигаем ящик (если не на паузе)
+        if (!crate.isPaused || crate.speedChanged) {
+            crate.x += crate.speed * deltaTime * 60;
+        }
 
         if (crate.x - crate.size / 2 > this.canvas.width + 60) {
             this.fail('Посылка проскочила сканер');
