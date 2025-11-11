@@ -169,7 +169,8 @@ class ScannerGame {
         console.log('▶️ ScannerGame: старт');
         this.isRunning = true;
         this.startTime = Date.now();
-        this.update();
+        this.createCrate(); // Создаём первый ящик!
+        this.gameLoop = requestAnimationFrame((time) => this.update(time)); // Правильный запуск
     }
 
     stop() {
@@ -213,7 +214,7 @@ class ScannerGame {
             return;
         }
 
-        this.gameLoop = requestAnimationFrame(() => this.update());
+        this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
 
     drawBackground() {
