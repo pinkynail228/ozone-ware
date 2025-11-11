@@ -73,8 +73,8 @@ class ScannerGame {
         const baseSpeed = this.baseSpeed * Math.min(this.speedMultiplier, 1.5); // Макс x1.5
         const speed = baseSpeed + Math.random() * 2.0; // Вариация
         
-        // Неожиданные изменения скорости (чаще и драматичнее!)
-        const hasSpeedChange = Math.random() > 0.3; // Ещё чаще
+        // Неожиданные изменения скорости (НО НЕ для первых 2 ящиков!)
+        const hasSpeedChange = this.scanned >= 2 && Math.random() > 0.3; // Паузы с 3-го ящика
         // Точка остановки — перед зоной сканирования
         const speedChangePoint = hasSpeedChange ? this.scanningZone.y - 100 - Math.random() * 50 : null;
         // После паузы — ускорение (1.4x-2.1x, было 2x-3x)
