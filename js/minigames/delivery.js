@@ -27,24 +27,24 @@ class DeliveryGame {
             width: 45,
             height: 70,
             velocityY: 0,
-            gravity: 1.3,
-            jumpPower: -23,
+            gravity: 1.0, // Было 1.3, стало 1.0 (мягче)
+            jumpPower: -20, // Было -23, стало -20 (ниже прыжок)
             isJumping: false,
             groundY: 580,
             legPhase: 0, // Анимация бега
             armPhase: 0
         };
         
-        // Препятствия (разные типы)
+        // Препятствия (разные типы) - снижаем скорости для мобильных
         this.obstacles = [];
-        this.obstacleSpeed = 7;
+        this.obstacleSpeed = 4; // Было 7, стало 4
         this.obstacleSpawnTimer = 0;
-        this.obstacleSpawnInterval = 70; // Чаще для динамики
+        this.obstacleSpawnInterval = 90; // Было 70, стало 90 (реже)
         this.obstacleTypes = ['box', 'hole', 'barrier'];
         
-        // Фон (симуляция движения)
+        // Фон (симуляция движения) - тоже медленнее
         this.backgroundOffset = 0;
-        this.backgroundSpeed = 6;
+        this.backgroundSpeed = 3; // Было 6, стало 3
         
         // Счет
         this.score = 0;
