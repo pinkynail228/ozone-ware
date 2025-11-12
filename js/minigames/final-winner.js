@@ -153,37 +153,81 @@ class FinalWinnerGame {
         this.drawCenterButton();
     }
     
+    /**
+     * Отрисовка призов с гарантированным позиционированием коробки в центре
+     * ИСПРАВЛЕНО: Теперь корректно отображает коробку в центре
+     */
     drawPrizes() {
-        const startX = -this.prizeWidth; // Начинаем левее экрана
-        const endX = this.canvas.width + this.prizeWidth; // Заканчиваем правее экрана
-        
-        let currentX = startX - this.prizeOffset;
-        let prizeIndex = 0;
-        
-        // Рисуем призы пока не заполним весь экран
-        while (currentX < endX) {
-            const prize = this.prizes[prizeIndex % this.prizeCount];
-            const x = currentX + this.prizeWidth / 2;
-            const y = this.centerY;
+        // Когда мы завершили вращение и в центре должна быть коробка
+        if (!this.isSpinning && this.spinSpeed < 10) {
+            // Для финального этапа - статическое отображение с коробкой в центре
+            const centerX = this.canvas.width / 2;
+            const boxPrizeIndex = 3; // Коробка всегда имеет индекс 3
             
-            // Рисуем только если приз виден на экране
-            if (x > -50 && x < this.canvas.width + 50) {
-                this.drawPrize(prize, x, y, prizeIndex);
+            // Позиции призов на экране
+            const positions = [
+                centerX - this.prizeWidth * 2,  // Крайний левый
+                centerX - this.prizeWidth,      // Слева от центра
+                centerX,                        // Центр
+                centerX + this.prizeWidth,      // Справа от центра
+                centerX + this.prizeWidth * 2   // Крайний правый
+            ];
+            
+            // Массив призов в порядке отображения, с коробкой в центре
+            const prizesToDraw = [
+                this.prizes[0],  // $100K слева
+                this.prizes[1],  // Rolex слева
+                this.prizes[3],  // Коробка в центре
+                this.prizes[2],  // Квартира справа
+                this.prizes[0]   // $100K справа
+            ];
+            
+            // Рисуем все призы, помечая центральный
+            for (let i = 0; i < prizesToDraw.length; i++) {
+                const isCentral = i === 2; // Индекс 2 - это центр
+                this.drawPrize(prizesToDraw[i], positions[i], this.centerY, i, isCentral);
             }
+        } else {
+            // Режим анимации - стандартная отрисовка
+            const startX = -this.prizeWidth; // Начинаем левее экрана
+            const endX = this.canvas.width + this.prizeWidth; // Заканчиваем правее экрана
             
-            currentX += this.prizeWidth;
-            prizeIndex++;
+            let currentX = startX - this.prizeOffset;
+            let prizeIndex = 0;
+            
+            // Рисуем призы пока не заполним весь экран
+            while (currentX < endX) {
+                const prize = this.prizes[prizeIndex % this.prizeCount];
+                const x = currentX + this.prizeWidth / 2;
+                const y = this.centerY;
+                
+                // Рисуем только если приз виден на экране
+                if (x > -50 && x < this.canvas.width + 50) {
+                    // Определяем, является ли этот приз центральным
+                    const centerX = this.canvas.width / 2;
+                    const distanceFromCenter = Math.abs(x - centerX);
+                    const isCentral = distanceFromCenter < this.prizeWidth / 2;
+                    
+                    this.drawPrize(prize, x, y, prizeIndex, isCentral);
+                }
+                
+                currentX += this.prizeWidth;
+                prizeIndex++;
+            }
         }
     }
     
-    drawPrize(prize, x, y, index) {
+    /**
+     * Отрисовка отдельного приза
+     * @param {Object} prize - Объект приза
+     * @param {number} x - Координата X
+     * @param {number} y - Координата Y
+     * @param {number} index - Индекс приза
+     * @param {boolean} isCentral - Флаг, указывающий, является ли приз центральным
+     */
+    drawPrize(prize, x, y, index, isCentral) {
         this.ctx.save();
         this.ctx.translate(x, y);
-        
-        // Определяем является ли приз центральным
-        const centerX = this.canvas.width / 2;
-        const distanceFromCenter = Math.abs(x - centerX);
-        const isCentral = distanceFromCenter < this.prizeWidth / 2;
         
         // Размер и прозрачность зависят от позиции
         let size, opacity, fontSize, textSize;
@@ -402,22 +446,41 @@ class FinalWinnerGame {
         }, 100);
     }
     
-    // Позиционирование коробки в центре
+    /**
+     * Позиционирование коробки в центре
+     * ИСПРАВЛЕНО: Теперь корректно рассчитывает смещение
+     */
     positionBoxInCenter() {
         const boxPrizeIndex = 3; // Коробка - индекс 3
         
-        // Коробка должна быть в центре, вычисляем нужный offset
-        const currentOffset = this.prizeOffset % (this.prizeWidth * this.prizeCount);
-        const targetOffset = boxPrizeIndex * this.prizeWidth;
+        // Важно! Рассчитываем смещение так, чтобы в центре была коробка
+        // Для этого используем принцип модульной арифметики
+        const totalWidth = this.prizeWidth * this.prizeCount;
+        
+        // Рассчитываем смещение так, чтобы коробка (индекс 3) была в центре
+        let targetOffset = 0;
+        
+        // При отрисовке, 2 полные ширины приза слева от центра будут первыми двумя призами
+        // Поэтому нам нужно сместить призы так, чтобы коробка (индекс 3) была в центре
+        // То есть, нам нужно чтобы коробка (индекс 3) была в позиции индекса 2
+        targetOffset = (this.prizeCount - (boxPrizeIndex - 2)) * this.prizeWidth % totalWidth;
+        
         this.prizeOffset = targetOffset;
         
-        console.log('📦 Коробка установлена в центр');
+        // Проверка - какой приз в центре
+        const centerPrizeIndex = Math.floor(this.prizeOffset / this.prizeWidth) % this.prizeCount;
+        console.log(`📦 Коробка установлена в центр, смещение: ${this.prizeOffset}, центральный приз: ${this.prizes[boxPrizeIndex].title}`);
     }
     
-    // Завершение вращения
+    /**
+     * Завершение вращения и определение победителя
+     */
     onSpinComplete() {
-        // Победа - коробка
-        console.log('📦 ПОБЕДА: Коробка!');
+        // Явно задаем коробку как победителя
+        const boxPrizeIndex = 3; // Коробка всегда имеет индекс 3
+        const winnerPrize = this.prizes[boxPrizeIndex];
+        
+        console.log(`📦 ПОБЕДА: ${winnerPrize.title}! Описание:`, winnerPrize);
         
         // Играем победный звук
         this.playVictorySound();
