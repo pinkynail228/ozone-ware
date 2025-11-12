@@ -1,15 +1,15 @@
 // ============================================
-//  ROULETTE GAME - Призы по кругу (Vampire Survivors стиль)
+//  FINAL STAGE - Финальный этап получения награды
 // ============================================
 
 class RouletteGame {
     constructor(canvas, ctx, gameManager) {
-        console.log('🎰 RouletteGame: Инициализация...');
+        console.log('🎁 Финальный этап: Инициализация...');
 
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
-        this.sound = null; // Отключаем ВСЕ звуки для рулетки
+        this.sound = null; // Отключаем ВСЕ звуки для финального этапа
 
         // Игровые параметры
         this.isRunning = false;
@@ -69,7 +69,7 @@ class RouletteGame {
         this.stars = [];
         this.initStars();
 
-        console.log('✅ RouletteGame: готов к запуску');
+        console.log('✅ Финальный этап: готов к запуску');
     }
 
     initStars() {
