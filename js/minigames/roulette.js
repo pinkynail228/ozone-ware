@@ -282,17 +282,40 @@ class RouletteGame {
     drawPrize(prize, x, y, index) {
         this.ctx.save();
         
-        // Размер приза
-        const size = 70;
-        const pulseScale = 1 + Math.sin(Date.now() / 1000 + index) * 0.1;
+        // Определяем является ли приз центральным
+        const centerX = this.canvas.width / 2;
+        const distanceFromCenter = Math.abs(x - centerX);
+        const isCentral = distanceFromCenter < 60; // В пределах 60px от центра
+        
+        // Размер и прозрачность зависят от позиции
+        let size, opacity, fontSize, textSize;
+        if (isCentral) {
+            // Центральный приз - КРУПНЫЙ и ЯРКИЙ
+            size = 100;
+            opacity = 1;
+            fontSize = 50;
+            textSize = 16;
+        } else {
+            // Боковые призы - меньше и прозрачнее
+            const fadeDistance = Math.min(distanceFromCenter / 100, 1);
+            size = 70 - fadeDistance * 20;
+            opacity = 1 - fadeDistance * 0.6;
+            fontSize = 35 - fadeDistance * 10;
+            textSize = 12 - fadeDistance * 3;
+        }
+        
+        this.ctx.globalAlpha = opacity;
+        
+        // Пульсация только для центрального
+        const pulseScale = isCentral ? 1 + Math.sin(Date.now() / 400) * 0.15 : 1;
         
         this.ctx.translate(x, y);
         this.ctx.scale(pulseScale, pulseScale);
         
-        // Тень приза
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        this.ctx.shadowBlur = 15;
-        this.ctx.shadowOffsetY = 8;
+        // Усиленная тень для центрального
+        this.ctx.shadowColor = isCentral ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.3)';
+        this.ctx.shadowBlur = isCentral ? 25 : 10;
+        this.ctx.shadowOffsetY = isCentral ? 12 : 6;
         
         // Градиентный фон приза
         const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, size/2);
@@ -305,25 +328,39 @@ class RouletteGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fill();
         
-        // Золотая рамка
-        this.ctx.strokeStyle = '#FFD700';
-        this.ctx.lineWidth = 3;
+        // Рамка - золотая для центрального, серебряная для боковых
+        this.ctx.strokeStyle = isCentral ? '#FFD700' : '#C0C0C0';
+        this.ctx.lineWidth = isCentral ? 4 : 2;
         this.ctx.stroke();
         
+        // Дополнительное свечение для центрального
+        if (isCentral) {
+            this.ctx.shadowBlur = 30;
+            this.ctx.shadowColor = prize.color;
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
+        }
+        
         // Эмодзи приза
-        this.ctx.font = 'bold 35px Arial';
+        this.ctx.shadowBlur = 0;
+        this.ctx.font = `bold ${fontSize}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillText(prize.emoji, 0, -5);
         
-        // Название приза
-        this.ctx.font = 'bold 12px Exo 2';
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeText(prize.title, 0, 25);
-        this.ctx.fillText(prize.title, 0, 25);
+        // Название приза - читаемый размер
+        if (textSize > 8) { // Показываем текст только если достаточно крупный
+            this.ctx.font = `bold ${textSize}px Exo 2`;
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            this.ctx.lineWidth = Math.max(2, textSize / 6);
+            
+            const textY = size/2 + textSize + 5;
+            this.ctx.strokeText(prize.title, 0, textY);
+            this.ctx.fillText(prize.title, 0, textY);
+        }
         
         this.ctx.restore();
     }
@@ -331,46 +368,68 @@ class RouletteGame {
     drawCenterButton() {
         this.ctx.save();
         
-        // Пульсирующий эффект кнопки
-        const pulseScale = 1 + Math.sin(Date.now() / 500) * 0.05;
-        const buttonSize = 90;
+        // Современная прямоугольная кнопка
+        const buttonWidth = 260;
+        const buttonHeight = 60;
+        const buttonY = this.canvas.height - 100;
+        const cornerRadius = 30;
         
-        // Кнопка внизу экрана
-        const buttonY = this.canvas.height - 120;
+        // Пульсирующий эффект
+        const pulseScale = 1 + Math.sin(Date.now() / 600) * 0.03;
+        const glowIntensity = 0.5 + Math.sin(Date.now() / 400) * 0.3;
+        
         this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulseScale, pulseScale);
         
-        // Тень кнопки
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        this.ctx.shadowBlur = 25;
-        this.ctx.shadowOffsetY = 10;
+        // Большая мягкая тень
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowOffsetY = 8;
         
-        // Градиент кнопки
-        const buttonGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, buttonSize/2);
-        buttonGradient.addColorStop(0, '#FFFACD');
-        buttonGradient.addColorStop(0.3, '#FFD700');
-        buttonGradient.addColorStop(1, '#FFA500');
+        // Премиальный градиент кнопки
+        const buttonGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
+        buttonGradient.addColorStop(0, '#FFD700');  // Золотой верх
+        buttonGradient.addColorStop(0.5, '#FFA500'); // Оранжевый центр
+        buttonGradient.addColorStop(1, '#FF8C00');   // Тёмно-оранжевый низ
         
-        // Круг кнопки
+        // Рисуем скругленный прямоугольник
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, buttonSize/2, 0, Math.PI * 2);
+        this.ctx.roundRect(-buttonWidth/2, -buttonHeight/2, buttonWidth, buttonHeight, cornerRadius);
         this.ctx.fillStyle = buttonGradient;
         this.ctx.fill();
         
         // Белая рамка
         this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 4;
+        this.ctx.lineWidth = 3;
         this.ctx.stroke();
         
-        // Текст "ПОЛУЧИТЬ ПРИЗ"
-        this.ctx.shadowBlur = 5;
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.font = 'bold 14px Exo 2';
+        // Внутренняя подсветка (блик)
+        const highlightGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, -buttonHeight/4);
+        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+        highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        this.ctx.beginPath();
+        this.ctx.roundRect(-buttonWidth/2 + 3, -buttonHeight/2 + 3, buttonWidth - 6, buttonHeight/2, cornerRadius - 3);
+        this.ctx.fillStyle = highlightGradient;
+        this.ctx.fill();
+        
+        // Внешнее свечение
+        this.ctx.shadowColor = `rgba(255, 215, 0, ${glowIntensity})`;
+        this.ctx.shadowBlur = 40;
+        this.ctx.shadowOffsetY = 0;
+        this.ctx.strokeStyle = `rgba(255, 215, 0, ${glowIntensity * 0.5})`;
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // Текст кнопки
+        this.ctx.shadowBlur = 3;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.font = 'bold 20px Exo 2';
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillText('ПОЛУЧИТЬ', 0, -8);
-        this.ctx.fillText('ПРИЗ', 0, 8);
+        this.ctx.fillText('🎁 ПОЛУЧИТЬ ПРИЗ 🎁', 0, 0);
         
         this.ctx.restore();
     }
