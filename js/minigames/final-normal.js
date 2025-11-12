@@ -175,30 +175,38 @@ class FinalNormalGame {
     }
     
     /**
-     * Рисуем призы в линейной прокрутке
+     * Рисуем призы в линейной прокрутке (ИСПРАВЛЕНО)
      */
     drawPrizes() {
-        const startX = -this.prizeWidth * 2;
-        const endX = this.canvas.width + this.prizeWidth * 2;
+        const centerX = this.canvas.width / 2;
         
-        // Рисуем призы циклически
-        for (let x = startX; x < endX; x += this.prizeWidth) {
-            const adjustedX = x - this.prizeOffset;
-            const prizeX = adjustedX + this.prizeWidth / 2;
-            
-            if (prizeX < -this.prizeWidth || prizeX > this.canvas.width + this.prizeWidth) {
-                continue;
-            }
+        // Рисуем 5 призов: 2 слева, 1 в центре, 2 справа
+        for (let i = -2; i <= 2; i++) {
+            const prizeX = centerX + i * this.prizeWidth;
             
             // Определяем какой приз рисовать
-            const cyclePosition = Math.floor((adjustedX + this.prizeOffset) / this.prizeWidth);
-            const prizeIndex = ((cyclePosition % this.prizes.length) + this.prizes.length) % this.prizes.length;
-            const prize = this.prizes[prizeIndex];
+            // Используем правильную формулу
+            const position = Math.floor((prizeX + this.prizeOffset) / this.prizeWidth);
+            let prizeIndex = position % this.prizes.length;
             
-            // Определяем центральный приз
-            const centerX = this.canvas.width / 2;
-            const distanceFromCenter = Math.abs(prizeX - centerX);
-            const isCentral = distanceFromCenter < this.prizeWidth / 3;
+            // Обрабатываем отрицательные индексы
+            if (prizeIndex < 0) {
+                prizeIndex += this.prizes.length;
+            }
+            
+            const prize = this.prizes[prizeIndex];
+            const isCentral = i === 0; // Центральный - это i=0
+            
+            // Отладочная информация для центрального приза
+            if (isCentral) {
+                console.log('🎯 Центральный приз:', {
+                    prizeIndex: prizeIndex,
+                    prizeName: prize.title,
+                    prizeX: prizeX,
+                    offset: this.prizeOffset,
+                    position: position
+                });
+            }
             
             this.drawPrize(prize, prizeX, this.centerY, isCentral);
         }
