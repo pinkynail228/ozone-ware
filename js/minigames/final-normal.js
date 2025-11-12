@@ -89,23 +89,48 @@ class FinalNormalGame {
             this.prizeOffset += this.spinSpeed * deltaTime;
             
             // Плавное замедление
-            this.spinSpeed *= 0.995; // Очень плавное замедление
+            this.spinSpeed *= 0.995;
             
-            // Когда скорость мала, останавливаемся точно на коробке
+            // Когда скорость мала, ПРИНУДИТЕЛЬНО ставим коробку в центр
             if (this.spinSpeed < 20) {
                 this.isSpinning = false;
                 this.spinSpeed = 0;
                 
-                // Принудительно ставим коробку в центр
-                // Коробка имеет индекс 3, значит нужно чтобы offset был кратен 4*prizeWidth + 3*prizeWidth
-                const totalCycle = this.prizeWidth * this.prizes.length;
-                const boxPosition = this.prizeWidth * 3; // Позиция коробки в цикле
+                // КОРОБКА ДОЛЖНА БЫТЬ В ЦЕНТРЕ!
+                // Призы: [0:'$100K', 1:'Rolex', 2:'Квартира', 3:'Коробка']
+                // Коробка имеет индекс 3
                 
-                // Находим ближайшую позицию, где коробка будет в центре
-                const currentCycle = Math.floor(this.prizeOffset / totalCycle);
-                this.prizeOffset = currentCycle * totalCycle + boxPosition;
+                // При отрисовке призов:
+                // prizeIndex = Math.floor((adjustedX + this.prizeOffset) / this.prizeWidth) % 4
+                // Для того чтобы в центре была коробка (индекс 3):
+                // Нужно чтобы (centerX + this.prizeOffset) / this.prizeWidth % 4 = 3
+                // Где centerX = this.canvas.width / 2 = 195
                 
-                console.log('📦 Остановились на коробке, offset:', this.prizeOffset);
+                const centerX = this.canvas.width / 2; // 195
+                const targetPrizeIndex = 3; // Коробка
+                
+                // Рассчитываем нужный offset
+                // (centerX + offset) / prizeWidth % 4 = 3
+                // (195 + offset) / 120 % 4 = 3
+                // offset = 3 * 120 - 195 = 360 - 195 = 165
+                
+                const totalCycle = this.prizeWidth * this.prizes.length; // 480
+                const requiredOffset = (targetPrizeIndex * this.prizeWidth - centerX) % totalCycle;
+                
+                // Находим сколько полных циклов прошло
+                const completedCycles = Math.floor(this.prizeOffset / totalCycle);
+                this.prizeOffset = completedCycles * totalCycle + requiredOffset;
+                
+                console.log('📦 КОРОБКА ПРИНУДИТЕЛЬНО УСТАНОВЛЕНА В ЦЕНТР:');
+                console.log('   - Новый offset:', this.prizeOffset);
+                console.log('   - Нужный offset для коробки:', requiredOffset);
+                console.log('   - Циклов прошло:', completedCycles);
+                
+                // Проверяем какой приз теперь в центре
+                const testCenterX = this.canvas.width / 2;
+                const testPrizeIndex = Math.floor((testCenterX + this.prizeOffset) / this.prizeWidth) % this.prizes.length;
+                console.log('   - Проверка: индекс центрального приза:', testPrizeIndex);
+                console.log('   - Проверка: название приза:', this.prizes[testPrizeIndex].title);
                 
                 // Объявляем победу
                 setTimeout(() => {
