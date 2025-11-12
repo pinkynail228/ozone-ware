@@ -38,21 +38,21 @@ class FinalNormalGame {
         // Аудиоконтекст
         this._audioContext = null;
         
-        // Призы в циклическом порядке - 11 предметов, коробка последняя
+        // Призы в циклическом порядке — псевдореальные бонусы сотрудника склада
         this.prizes = [
-            { emoji: '💰', title: '$100K', color: '#22C55E', gradientColor: '#4ADE80' },      // Индекс 0
-            { emoji: '⌚', title: 'Rolex', color: '#3B82F6', gradientColor: '#60A5FA' },        // Индекс 1
-            { emoji: '🏠', title: 'Квартира', color: '#F59E0B', gradientColor: '#FBBF24' }, // Индекс 2
-            { emoji: '🚗', title: 'Машина', color: '#EF4444', gradientColor: '#F87171' },   // Индекс 3
-            { emoji: '🏝️', title: 'Остров', color: '#06B6D4', gradientColor: '#67E8F9' },     // Индекс 4
-            { emoji: '✈️', title: 'Самолет', color: '#8B5CF6', gradientColor: '#A78BFA' },   // Индекс 5
-            { emoji: '💎', title: 'Алмаз', color: '#EC4899', gradientColor: '#F472B6' },     // Индекс 6
-            { emoji: '🏆', title: 'Кубок', color: '#F59E0B', gradientColor: '#FBBF24' },      // Индекс 7
-            { emoji: '🎆', title: 'Фейерверк', color: '#10B981', gradientColor: '#34D399' }, // Индекс 8
-            { emoji: '🎸', title: 'Гитара', color: '#8B5CF6', gradientColor: '#A78BFA' },    // Индекс 9
-            { emoji: '📦', title: 'КОРОБКА', color: '#A855F7', gradientColor: '#D946EF' }  // Индекс 10 - ПОБЕДНЫЙ ПРИЗ!
+            { emoji: '💸', title: 'x2 за смену', color: '#22C55E', gradientColor: '#4ADE80' },        // 0
+            { emoji: '💸', title: 'x3 за смену', color: '#16A34A', gradientColor: '#34D399' },        // 1
+            { emoji: '💰', title: 'Премия 5000₽', color: '#059669', gradientColor: '#10B981' },      // 2
+            { emoji: '🗓️', title: 'Бесплатные выходные', color: '#2563EB', gradientColor: '#60A5FA' }, // 3
+            { emoji: '🍔', title: 'Обед за счет компании', color: '#F59E0B', gradientColor: '#FBBF24' }, // 4
+            { emoji: '🧢', title: 'Мерч Ozon', color: '#8B5CF6', gradientColor: '#A78BFA' },         // 5
+            { emoji: '⭐', title: 'Приоритет графика', color: '#A855F7', gradientColor: '#D946EF' },  // 6
+            { emoji: '🌙', title: 'Смена без ночи', color: '#0EA5E9', gradientColor: '#38BDF8' },    // 7
+            { emoji: '🎟️', title: 'Бонусные часы', color: '#EC4899', gradientColor: '#F472B6' },    // 8
+            { emoji: '🎁', title: 'Сюрприз от HR', color: '#10B981', gradientColor: '#34D399' },     // 9
+            { emoji: '📘', title: 'ИНСТРУКЦИЯ', color: '#334155', gradientColor: '#64748B' }         // 10 — ПОБЕДИТЕЛЬ
         ];
-        this.targetPrizeIndex = 10; // индекс коробки
+        this.targetPrizeIndex = 10; // всегда выигрывает "ИНСТРУКЦИЯ"
         this.cycleWidth = this.prizeWidth * this.prizes.length;
         
         // Частицы
@@ -360,10 +360,8 @@ class FinalNormalGame {
     }
     
     onSpinComplete() {
-        const boxPrizeIndex = 10; // КОРОБКА ТЕПЕРЬ ПОД ИНДЕКСОМ 10!
-        const winnerPrize = this.prizes[boxPrizeIndex];
-        
-        console.log(`📦 ПОБЕДА: ${winnerPrize.title}!`, winnerPrize);
+        const winnerPrize = this.prizes[this.targetPrizeIndex];
+        console.log(`🏁 Победа: ${winnerPrize.title}!`, winnerPrize);
         
         this.playVictorySound();
         
