@@ -58,13 +58,92 @@ class FinalNormalGame {
         // Частицы
         this.particles = [];
         
+        // Джекпот-вспышка
+        this.jackpot = { active: false, start: 0, duration: 800 };
+        
         console.log('✅ Финальный этап: готов к запуску');
+    }
+
+    // ===== UI helpers: спрятать/вернуть таймер =====
+    hideTimerUI() {
+        const timer = document.getElementById('timer');
+        const timerText = document.getElementById('timer-text');
+        const timerFill = document.getElementById('timer-fill');
+        if (timer) {
+            this._prevTimerDisplay = timer.style.display;
+            timer.style.display = 'none';
+        }
+        if (timerText) timerText.textContent = '';
+        if (timerFill) timerFill.style.width = '0%';
+    }
+    restoreTimerUI() {
+        const timer = document.getElementById('timer');
+        if (timer) timer.style.display = this._prevTimerDisplay || '';
+    }
+
+    // ===== Modal: инструкция с поддержкой =====
+    showInstructionModal() {
+        // Создаем контейнер если его нет
+        let modal = document.getElementById('instruction-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'instruction-modal';
+            Object.assign(modal.style, {
+                position: 'fixed', inset: '0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(0,0,0,0.5)', zIndex: '9999'
+            });
+            const card = document.createElement('div');
+            Object.assign(card.style, {
+                width: '84%', maxWidth: '360px', borderRadius: '16px', padding: '20px 18px',
+                background: 'linear-gradient(145deg,#111827,#1f2937)', color: '#fff',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.35)', textAlign: 'center',
+                border: '1px solid rgba(255,255,255,0.08)'
+            });
+            const title = document.createElement('div');
+            title.textContent = 'ИНСТРУКЦИЯ';
+            Object.assign(title.style, { fontWeight: '800', fontSize: '20px', letterSpacing: '1px', marginBottom: '10px' });
+            const phrase = document.createElement('div');
+            phrase.id = 'support-phrase';
+            Object.assign(phrase.style, { fontSize: '16px', lineHeight: '1.4', opacity: '0.95', marginBottom: '16px' });
+            const btn = document.createElement('button');
+            btn.textContent = 'Прочитать';
+            Object.assign(btn.style, {
+                width: '100%', padding: '12px 16px', borderRadius: '12px',
+                background: 'linear-gradient(135deg,#6366F1,#A855F7)', color: '#fff',
+                border: 'none', fontWeight: '700', letterSpacing: '0.5px', cursor: 'pointer',
+                boxShadow: '0 6px 16px rgba(99,102,241,0.35)'
+            });
+            btn.addEventListener('click', () => {
+                modal.remove();
+                // Завершить игру после прочтения
+                this.win();
+            });
+            card.appendChild(title);
+            card.appendChild(phrase);
+            card.appendChild(btn);
+            modal.appendChild(card);
+            document.body.appendChild(modal);
+        }
+        // Выставляем случайную фразу поддержки
+        const phrases = [
+            'Отличная смена! Ты держишь ритм склада 💪',
+            'Спасибо за порядок и скорость — на тебе всё держится 👏',
+            'Твоя внимательность — золото логистики ✨',
+            'Смена пролетела, а ты — красавчик(а). Продолжаем в том же духе! 🚀',
+            'Надёжность — твоё второе имя. Команда это ценит ❤️',
+            'Ты делаешь склад лучше каждый день. Респект! 🙌',
+            'Чётко, быстро, по делу — вот это наш стиль ✅',
+            'Стабильно на 200%. Так держать! 🔥'
+        ];
+        const phraseEl = document.getElementById('support-phrase');
+        if (phraseEl) phraseEl.textContent = phrases[Math.floor(Math.random() * phrases.length)];
     }
 
     start() {
         console.log('▶️ Финальный этап: СТАРТ ИГРЫ');
         this.isRunning = true;
         this.lastFrameTime = null;
+        this.hideTimerUI();
         this.setupControls();
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
@@ -72,6 +151,7 @@ class FinalNormalGame {
     stop() {
         console.log('⏹️ Финальный этап: стоп');
         this.isRunning = false;
+        this.restoreTimerUI();
         this.removeControls();
         if (this.gameLoop) {
             cancelAnimationFrame(this.gameLoop);
@@ -167,6 +247,7 @@ class FinalNormalGame {
         this.drawParticles();
         this.drawCenterButton();
         this.drawShineSweep();
+        this.drawJackpotFlash();
     }
     
     // Рисуем 5 призов: 2 слева, 1 центр, 2 справа (без лишних логов)
@@ -324,6 +405,43 @@ class FinalNormalGame {
         this.ctx.fillRect(0, this.centerY - 120, w, 240);
         this.ctx.restore();
     }
+
+    // Джекпот-вспышка: белая вспышка + радиальные лучи, затухающие по easing
+    triggerJackpotFlash() {
+        this.jackpot.active = true;
+        this.jackpot.start = performance.now();
+    }
+    drawJackpotFlash() {
+        if (!this.jackpot.active) return;
+        const now = performance.now();
+        const t = Math.min(1, (now - this.jackpot.start) / this.jackpot.duration);
+        const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        const alpha = (1 - ease) * 0.75; // пиковая яркость в начале
+
+        // Полноэкранная вспышка
+        this.ctx.save();
+        this.ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Радиальные лучи вокруг центра
+        const rays = 18;
+        const maxLen = Math.max(this.canvas.width, this.canvas.height) * 0.7;
+        for (let i = 0; i < rays; i++) {
+            const a = (i / rays) * Math.PI * 2;
+            const len = maxLen * (1 - ease);
+            const x2 = this.centerX + Math.cos(a) * len;
+            const y2 = this.centerY + Math.sin(a) * len;
+            this.ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.6})`;
+            this.ctx.lineWidth = 3 * (1 - ease);
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.centerX, this.centerY);
+            this.ctx.lineTo(x2, y2);
+            this.ctx.stroke();
+        }
+        this.ctx.restore();
+
+        if (t >= 1) this.jackpot.active = false;
+    }
     
     drawParticles() {
         this.ctx.save();
@@ -436,6 +554,7 @@ class FinalNormalGame {
         console.log(`🏁 Победа: ${winnerPrize.title}!`, winnerPrize);
         
         this.playVictorySound();
+        this.triggerJackpotFlash();
         
         // Эффекты победы
         for (let i = 0; i < 100; i++) {
@@ -447,10 +566,8 @@ class FinalNormalGame {
                 this.createParticles(x, y, 2);
             }, i * 20);
         }
-        
-        setTimeout(() => {
-            this.win();
-        }, 3000);
+        // Показываем модалку с инструкцией и фразой поддержки
+        this.showInstructionModal();
     }
     
     setupControls() {
