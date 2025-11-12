@@ -223,8 +223,13 @@ class GameManager {
             target.classList.add('active');
         }
 
+        // Запускаем gameplay loop только если это НЕ рулетка
         if (screenName === 'game' || screenName === 'transition') {
-            this.sound.startGameplayLoop();
+            if (this.currentGameKey !== 'roulette') {
+                this.sound.startGameplayLoop();
+            } else {
+                console.log('🔇 Рулетка: пропускаем gameplay loop');
+            }
         } else {
             this.sound.stopGameplayLoop();
         }
@@ -401,8 +406,14 @@ class GameManager {
     startGame(gameName) {
         console.log(`▶️ Запуск игры: ${gameName}`);
 
-        this.sound.enable();
-        this.sound.playEffect('transition');
+        // Специальная обработка для рулетки - БЕЗ тикающих звуков!
+        if (gameName !== 'roulette') {
+            this.sound.enable();
+            this.sound.playEffect('transition');
+        } else {
+            console.log('🔇 Рулетка: отключаем все игровые звуки');
+            this.sound.disable(); // Отключаем полностью для рулетки
+        }
 
         switch (gameName) {
             case 'delivery':
