@@ -105,6 +105,177 @@ class FinalNormalGame {
         }
     }
     
+    // Создает красивую иллюстрацию для модального окна
+    createModalIllustration() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 240;
+        canvas.height = 180;
+        const ctx = canvas.getContext('2d');
+        
+        // Фон с градиентом
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bgGradient.addColorStop(0, '#6B2FFF');
+        bgGradient.addColorStop(1, '#4B1FDD');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Добавляем декоративные элементы
+        // Звезды/частицы
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 3 + 1;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.7 + 0.3})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Рисуем коробку Ozon в центре
+        this.drawOzonBox(ctx, canvas.width / 2, canvas.height / 2 - 10, 70);
+        
+        // Рисуем фигурку сотрудника
+        this.drawWorker(ctx, canvas.width / 2, canvas.height / 2 + 50, 30);
+        
+        // Добавляем декоративные линии
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(20, 20);
+        ctx.lineTo(60, 20);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(canvas.width - 20, 20);
+        ctx.lineTo(canvas.width - 60, 20);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(20, canvas.height - 20);
+        ctx.lineTo(60, canvas.height - 20);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(canvas.width - 20, canvas.height - 20);
+        ctx.lineTo(canvas.width - 60, canvas.height - 20);
+        ctx.stroke();
+        
+        return canvas.toDataURL();
+    }
+    
+    // Рисует коробку Ozon
+    drawOzonBox(ctx, x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Тень
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(-size/2 + 5, size/2 - 5, size, 10);
+        
+        // Основная часть коробки
+        const boxGradient = ctx.createLinearGradient(-size/2, -size/2, size/2, size/2);
+        boxGradient.addColorStop(0, '#A855F7');
+        boxGradient.addColorStop(1, '#7928CA');
+        ctx.fillStyle = boxGradient;
+        ctx.fillRect(-size/2, -size/2, size, size);
+        
+        // Верхняя грань для 3D эффекта
+        ctx.beginPath();
+        ctx.moveTo(-size/2, -size/2);
+        ctx.lineTo(-size/2 + size/5, -size/2 - size/5);
+        ctx.lineTo(size/2 + size/5, -size/2 - size/5);
+        ctx.lineTo(size/2, -size/2);
+        ctx.closePath();
+        ctx.fillStyle = '#D946EF';
+        ctx.fill();
+        
+        // Боковая грань для 3D эффекта
+        ctx.beginPath();
+        ctx.moveTo(size/2, -size/2);
+        ctx.lineTo(size/2 + size/5, -size/2 - size/5);
+        ctx.lineTo(size/2 + size/5, size/2 - size/5);
+        ctx.lineTo(size/2, size/2);
+        ctx.closePath();
+        ctx.fillStyle = '#9333EA';
+        ctx.fill();
+        
+        // Лента на коробке
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-size/2, 0);
+        ctx.lineTo(size/2, 0);
+        ctx.moveTo(0, -size/2);
+        ctx.lineTo(0, size/2);
+        ctx.stroke();
+        
+        // Лого Ozon
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold ' + (size/4) + 'px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('OZON', 0, 0);
+        
+        ctx.restore();
+    }
+    
+    // Рисует стилизованную фигурку сотрудника
+    drawWorker(ctx, x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Голова
+        ctx.fillStyle = '#FFD3B5';
+        ctx.beginPath();
+        ctx.arc(0, -size/2, size/3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Тело
+        const bodyGradient = ctx.createLinearGradient(-size/2, -size/4, size/2, size);
+        bodyGradient.addColorStop(0, '#3B82F6');
+        bodyGradient.addColorStop(1, '#1E40AF');
+        ctx.fillStyle = bodyGradient;
+        
+        ctx.beginPath();
+        ctx.moveTo(-size/2, -size/4);
+        ctx.lineTo(size/2, -size/4);
+        ctx.lineTo(size/3, size/2);
+        ctx.lineTo(-size/3, size/2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Руки
+        ctx.strokeStyle = '#3B82F6';
+        ctx.lineWidth = size/6;
+        ctx.lineCap = 'round';
+        
+        // Левая рука
+        ctx.beginPath();
+        ctx.moveTo(-size/3, -size/6);
+        ctx.lineTo(-size/2, size/4);
+        ctx.stroke();
+        
+        // Правая рука
+        ctx.beginPath();
+        ctx.moveTo(size/3, -size/6);
+        ctx.lineTo(size/2, size/4);
+        ctx.stroke();
+        
+        // Бейдж Ozon
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.rect(-size/6, -size/6, size/3, size/4);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FF4500';
+        ctx.font = 'bold ' + (size/8) + 'px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('O', 0, -size/10);
+        
+        ctx.restore();
+    }
+    
     showInstructionModal() {
         // Создаем контейнер если его нет
         let modal = document.getElementById('instruction-modal');
@@ -122,41 +293,99 @@ class FinalNormalGame {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.35)', textAlign: 'center',
                 border: '1px solid rgba(255,255,255,0.08)'
             });
+            
+            // Заголовок
             const title = document.createElement('div');
             title.textContent = 'ИНСТРУКЦИЯ';
-            Object.assign(title.style, { fontWeight: '800', fontSize: '20px', letterSpacing: '1px', marginBottom: '10px' });
+            Object.assign(title.style, { 
+                fontWeight: '800', 
+                fontSize: '24px', 
+                letterSpacing: '1px', 
+                marginBottom: '16px',
+                background: 'linear-gradient(90deg, #A855F7, #6366F1)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            });
+            
+            // Иллюстрация
+            const illustration = document.createElement('div');
+            const imageUrl = this.createModalIllustration();
+            Object.assign(illustration.style, {
+                width: '100%',
+                height: '180px',
+                marginBottom: '16px',
+                backgroundImage: `url(${imageUrl})`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+            });
+            
+            // Текст поддержки
             const phrase = document.createElement('div');
             phrase.id = 'support-phrase';
-            Object.assign(phrase.style, { fontSize: '16px', lineHeight: '1.4', opacity: '0.95', marginBottom: '16px' });
+            Object.assign(phrase.style, { 
+                fontSize: '16px', 
+                lineHeight: '1.5', 
+                opacity: '0.95', 
+                marginBottom: '20px',
+                padding: '0 8px'
+            });
+            
+            // Кнопка
             const btn = document.createElement('button');
             btn.textContent = 'ИДТИ НА СМЕНУ';
             Object.assign(btn.style, {
-                width: '100%', padding: '12px 16px', borderRadius: '12px',
-                background: 'linear-gradient(135deg,#6366F1,#A855F7)', color: '#fff',
-                border: 'none', fontWeight: '700', letterSpacing: '0.5px', cursor: 'pointer',
-                boxShadow: '0 6px 16px rgba(99,102,241,0.35)'
+                width: '100%', 
+                padding: '14px 16px', 
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg,#6366F1,#A855F7)', 
+                color: '#fff',
+                border: 'none', 
+                fontWeight: '700', 
+                fontSize: '16px',
+                letterSpacing: '0.5px', 
+                cursor: 'pointer',
+                boxShadow: '0 6px 16px rgba(99,102,241,0.35)',
+                transition: 'transform 0.2s, box-shadow 0.2s'
             });
+            
+            // Эффект при наведении
+            btn.addEventListener('mouseover', () => {
+                btn.style.transform = 'translateY(-2px)';
+                btn.style.boxShadow = '0 8px 20px rgba(99,102,241,0.4)';
+            });
+            btn.addEventListener('mouseout', () => {
+                btn.style.transform = 'translateY(0)';
+                btn.style.boxShadow = '0 6px 16px rgba(99,102,241,0.35)';
+            });
+            
             btn.addEventListener('click', () => {
                 modal.remove();
                 // Возвращаемся на начальную заставку игры
                 this.gameManager.showStartScreen();
             });
+            
             card.appendChild(title);
+            card.appendChild(illustration);
             card.appendChild(phrase);
             card.appendChild(btn);
             modal.appendChild(card);
             document.body.appendChild(modal);
         }
+        
         // Выставляем случайную фразу поддержки
         const phrases = [
-            'Отличная смена! Ты держишь ритм склада, но нужно еще лучше работать 💪',
+            'Отличная смена! Ты держишь ритм склада, но нужно еще лучше работать. Продолжай совершенствоваться! 💪',
             'Спасибо за порядок и скорость — на тебе всё держится. В следующую смену постарайся еще лучше! 👏',
-            'Твоя внимательность — золото логистики. Продолжай совершенствоваться! ✨',
-            'Смена пролетела, а ты — молодец. На следующей смене покажи больше результатов! 🚀',
-            'Надёжность — твоё второе имя. Команда это ценит, но всегда есть куда расти! ❤️',
-            'Ты делаешь склад лучше каждый день. В следующий раз будет еще лучше! 🙌',
-            'Чётко, быстро, по делу — но на следующей смене нужно работать еще усерднее! ✅',
-            'Стабильно на 200%. В следующий раз постарайся выйти на 300%! 🔥'
+            'Твоя внимательность — золото логистики. Продолжай совершенствоваться и достигай новых высот! ✨',
+            'Смена пролетела, а ты — молодец. На следующей смене покажи больше результатов и эффективности! 🚀',
+            'Надёжность — твоё второе имя. Команда это ценит, но всегда есть куда расти и к чему стремиться! ❤️',
+            'Ты делаешь склад лучше каждый день. В следующий раз будет еще лучше, если приложишь больше усилий! 🙌',
+            'Чётко, быстро, по делу — но на следующей смене нужно работать еще усерднее и внимательнее! ✅',
+            'Стабильно на 200%. В следующий раз постарайся выйти на 300% и стать лучшим сотрудником месяца! 🔥'
         ];
         const phraseEl = document.getElementById('support-phrase');
         if (phraseEl) phraseEl.textContent = phrases[Math.floor(Math.random() * phrases.length)];
