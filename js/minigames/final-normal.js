@@ -27,14 +27,18 @@ class FinalNormalGame {
         this.prizeWidth = 120;
         
         // Анимация
-        this.spinSpeed = 0;
         this.prizeOffset = 0;
+        this.spinSpeed = 0; // px/sec по ленте
+        this.phase = 'idle'; // idle | spinFast | easeOut
+        this.phaseStart = 0;
+        this.spinFastDuration = 900; // мс
+        this.easeOutDuration = 700; // мс
         this.targetOffset = 0;
         
         // Аудиоконтекст
         this._audioContext = null;
         
-        // Призы в циклическом порядке - ДОБАВЛЯЕМ ЕЩЕ ОДИН ПРИЗ!
+        // Призы в циклическом порядке - 11 предметов, коробка последняя
         this.prizes = [
             { emoji: '💰', title: '$100K', color: '#22C55E', gradientColor: '#4ADE80' },      // Индекс 0
             { emoji: '⌚', title: 'Rolex', color: '#3B82F6', gradientColor: '#60A5FA' },        // Индекс 1
@@ -48,6 +52,8 @@ class FinalNormalGame {
             { emoji: '🎸', title: 'Гитара', color: '#8B5CF6', gradientColor: '#A78BFA' },    // Индекс 9
             { emoji: '📦', title: 'КОРОБКА', color: '#A855F7', gradientColor: '#D946EF' }  // Индекс 10 - ПОБЕДНЫЙ ПРИЗ!
         ];
+        this.targetPrizeIndex = 10; // индекс коробки
+        this.cycleWidth = this.prizeWidth * this.prizes.length;
         
         // Частицы
         this.particles = [];
@@ -91,89 +97,45 @@ class FinalNormalGame {
     }
 
     updateMovement(deltaTime) {
-        if (this.isSpinning) {
-            // Обновляем позицию призов
+        // Нормализуем смещение в пределах цикла
+        const norm = () => {
+            while (this.prizeOffset >= this.cycleWidth) this.prizeOffset -= this.cycleWidth;
+            while (this.prizeOffset < 0) this.prizeOffset += this.cycleWidth;
+        };
+
+        if (this.phase === 'spinFast') {
             this.prizeOffset += this.spinSpeed * deltaTime;
-            
-            // Плавное замедление
-            this.spinSpeed *= 0.995;
-            
-            // Когда скорость мала, ПРОСТО ДВИГАЕМ ДО КОРОБКИ
-            if (this.spinSpeed < 20) {
-                this.isSpinning = false;
-                this.spinSpeed = 0;
-                
-                console.log('📦 ПРОСТО ДВИГАЕМ ДО КОРОБКИ!');
-                
-                const centerX = this.canvas.width / 2; // 195
-                const targetPrizeIndex = 10; // КОРОБКА
-                
-                console.log('📦 Призы в массиве:');
-                this.prizes.forEach((prize, index) => {
-                    console.log(`   ${index}: ${prize.title}`);
-                });
-                
-                // ПРОСТО ПОДБИРАЕМ offset ТАК, ЧТОБЫ КОРОБКА БЫЛА В ЦЕНТРЕ
-                // Проверяем 1000 разных оффсетов и находим нужный
-                let foundOffset = null;
-                
-                for (let testOffset = 0; testOffset < 2000; testOffset++) {
-                    const testPosition = Math.floor((centerX + testOffset) / this.prizeWidth);
-                    const testPrizeIndex = testPosition % this.prizes.length;
-                    
-                    if (testPrizeIndex === targetPrizeIndex) {
-                        foundOffset = testOffset;
-                        console.log(`✅ НАШЛИ OFFSET ДЛЯ КОРОБКИ: ${foundOffset}`);
-                        console.log(`   - testPosition: ${testPosition}`);
-                        console.log(`   - testPrizeIndex: ${testPrizeIndex}`);
-                        break;
-                    }
-                }
-                
-                if (foundOffset !== null) {
-                    // Применяем найденный offset с учетом пройденных циклов
-                    const totalCycle = this.prizeWidth * this.prizes.length;
-                    const completedCycles = Math.floor(this.prizeOffset / totalCycle);
-                    this.prizeOffset = completedCycles * totalCycle + foundOffset;
-                    
-                    console.log(`📦 КОРОБКА УСТАНОВЛЕНА:`);
-                    console.log(`   - Новый offset: ${this.prizeOffset}`);
-                    console.log(`   - Найденный базовый offset: ${foundOffset}`);
-                    console.log(`   - Пройдено циклов: ${completedCycles}`);
-                    
-                    // Проверяем результат
-                    const finalTestPosition = Math.floor((centerX + this.prizeOffset) / this.prizeWidth);
-                    const finalTestPrizeIndex = finalTestPosition % this.prizes.length;
-                    
-                    console.log(`🔎 ПРОВЕРКА РЕЗУЛЬТАТА:`);
-                    console.log(`   - Позиция: ${finalTestPosition}`);
-                    console.log(`   - Индекс приза: ${finalTestPrizeIndex}`);
-                    console.log(`   - Название: ${this.prizes[finalTestPrizeIndex].title}`);
-                    
-                    if (finalTestPrizeIndex === targetPrizeIndex) {
-                        console.log('✅ ПОБЕДА! Коробка в центре!');
-                    } else {
-                        console.log('❌ ОШИБКА! Коробка НЕ в центре!');
-                    }
-                } else {
-                    console.log('❌ НЕ НАШЛИ OFFSET ДЛЯ КОРОБКИ!');
-                }
-                
-                // Объявляем победу
-                setTimeout(() => {
-                    this.onSpinComplete();
-                }, 500);
+            norm();
+
+            const elapsed = performance.now() - this.phaseStart;
+            if (elapsed >= this.spinFastDuration) {
+                // Переход к easeOut: рассчитываем целевой offset для коробки, который находится ВПЕРЕДИ текущего
+                const current = this.prizeOffset;
+                const required = this.computeRequiredOffsetForIndex(this.targetPrizeIndex);
+                // подбираем ближайшую цель впереди (минимум +1 полный цикл, чтобы был вау-эффект)
+                let target = required;
+                while (target <= current + this.prizeWidth) target += this.cycleWidth; // гарантируем движение вперед
+                // Добавим еще 0..1 циклов чтобы не казалось телепортом
+                this.targetOffset = target;
+                this.startOffset = current;
+                this.phase = 'easeOut';
+                this.phaseStart = performance.now();
+            }
+        } else if (this.phase === 'easeOut') {
+            const t = Math.min(1, (performance.now() - this.phaseStart) / this.easeOutDuration);
+            const eased = this.easeOutCubic(t);
+            const path = this.targetOffset - this.startOffset;
+            this.prizeOffset = this.startOffset + path * eased;
+            norm();
+            if (t >= 1) {
+                // Зафиксировать идеально на цели
+                this.prizeOffset = this.targetOffset % this.cycleWidth;
+                norm();
+                this.phase = 'idle';
+                this.onSpinComplete();
             }
         }
-        
-        // Нормализуем offset для циклического отображения
-        const totalWidth = this.prizeWidth * this.prizes.length;
-        while (this.prizeOffset >= totalWidth) {
-            this.prizeOffset -= totalWidth;
-        }
-        while (this.prizeOffset < 0) {
-            this.prizeOffset += totalWidth;
-        }
+        // idle: ничего не делаем
     }
 
     updateParticles(deltaTime) {
@@ -201,41 +163,16 @@ class FinalNormalGame {
         this.drawCenterButton();
     }
     
-    /**
-     * Рисуем призы в линейной прокрутке (ИСПРАВЛЕНО)
-     */
+    // Рисуем 5 призов: 2 слева, 1 центр, 2 справа (без лишних логов)
     drawPrizes() {
-        const centerX = this.canvas.width / 2;
-        
-        // Рисуем 5 призов: 2 слева, 1 в центре, 2 справа
+        const cx = this.canvas.width / 2;
         for (let i = -2; i <= 2; i++) {
-            const prizeX = centerX + i * this.prizeWidth;
-            
-            // Определяем какой приз рисовать
-            // Используем правильную формулу
+            const prizeX = cx + i * this.prizeWidth;
             const position = Math.floor((prizeX + this.prizeOffset) / this.prizeWidth);
             let prizeIndex = position % this.prizes.length;
-            
-            // Обрабатываем отрицательные индексы
-            if (prizeIndex < 0) {
-                prizeIndex += this.prizes.length;
-            }
-            
+            if (prizeIndex < 0) prizeIndex += this.prizes.length;
             const prize = this.prizes[prizeIndex];
-            const isCentral = i === 0; // Центральный - это i=0
-            
-            // Отладочная информация для центрального приза
-            if (isCentral) {
-                console.log('🎯 Центральный приз:', {
-                    prizeIndex: prizeIndex,
-                    prizeName: prize.title,
-                    prizeX: prizeX,
-                    offset: this.prizeOffset,
-                    position: position
-                });
-            }
-            
-            this.drawPrize(prize, prizeX, this.centerY, isCentral);
+            this.drawPrize(prize, prizeX, this.centerY, i === 0);
         }
     }
     
@@ -392,29 +329,33 @@ class FinalNormalGame {
         }
     }
     
-    // Запуск прокрутки
+    // Запуск прокрутки (фазы: быстрый спин -> плавное замедление к коробке)
     spinWheel() {
-        if (this.isSpinning) return;
-        
-        console.log('🎲 ЗАПУСК ПРОКРУТКИ');
-        
-        // Играем стартовый звук
+        if (this.phase !== 'idle') return;
         this.playStartSound();
-        
-        // Начальные эффекты
-        for (let i = 0; i < 20; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 20 + Math.random() * 30;
-            const x = this.centerX + Math.cos(angle) * distance;
-            const y = this.centerY + Math.sin(angle) * distance;
-            this.createParticles(x, y, 1);
+        for (let i = 0; i < 16; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const d = 20 + Math.random() * 28;
+            this.createParticles(this.centerX + Math.cos(a) * d, this.centerY + Math.sin(a) * d, 1);
         }
-        
-        // Запускаем вращение
-        this.isSpinning = true;
-        this.spinSpeed = 400; // Постоянная начальная скорость
-        
-        console.log('🎯 Вращение началось со скоростью:', this.spinSpeed);
+        this.spinSpeed = 1200; // px/sec быстро
+        this.phase = 'spinFast';
+        this.phaseStart = performance.now();
+    }
+
+    // Вычисляет требуемый offset, чтобы индекс prizeIndex оказался строго по центру
+    computeRequiredOffsetForIndex(prizeIndex) {
+        const centerX = this.canvas.width / 2; // пиксели
+        // (centerX + offset) / prizeWidth % N == prizeIndex
+        // offset == prizeIndex * prizeWidth - centerX (mod cycleWidth)
+        let off = prizeIndex * this.prizeWidth - centerX;
+        off %= this.cycleWidth;
+        if (off < 0) off += this.cycleWidth;
+        return off;
+    }
+
+    easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
     }
     
     onSpinComplete() {
