@@ -9,7 +9,7 @@ class RouletteGame {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameManager = gameManager;
-        this.sound = gameManager.sound;
+        this.sound = null; // Отключаем ВСЕ звуки для рулетки
 
         // Игровые параметры
         this.isRunning = false;
@@ -736,8 +736,8 @@ class RouletteGame {
         
         console.log('🎰 Запуск вращения призов');
         
-        // 🎵 ПРАЗДНИЧНЫЙ ЗВУК старта (как в казино)
-        if (this.sound) this.sound.playEffect('collectGood');
+        // 🎵 СОБСТВЕННЫЙ ПРАЗДНИЧНЫЙ ЗВУК (без тикания!)
+        this.playVictorySound();
         
         // Создаём эффекты
         for (let i = 0; i < 20; i++) {
@@ -757,13 +757,8 @@ class RouletteGame {
     onSpinComplete() {
         console.log('🎯 Призы остановились');
         
-        // 🎵 ПОБЕДНЫЙ ФАНФАР (как Марио добрался до замка!)
-        if (this.sound) {
-            // Серия звуков для эффекта фанфара
-            this.sound.playEffect('collectGood');
-            setTimeout(() => this.sound.playEffect('collectGood'), 200);
-            setTimeout(() => this.sound.playEffect('collectGood'), 400);
-        }
+        // 🎵 СОБСТВЕННЫЙ ПОБЕДНЫЙ ФАНФАР (без тикания!)
+        this.playVictoryFanfare();
         
         // Всегда выигрывает коробка
         const winnerPrize = this.prizes[4];
@@ -782,6 +777,73 @@ class RouletteGame {
         setTimeout(() => {
             this.win();
         }, 3000);
+    }
+
+    // 🎵 СОБСТВЕННАЯ СИСТЕМА ЗВУКОВ (без тикания!)
+    playVictorySound() {
+        // Создаём короткий приятный звук через Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Приятная нота (C5 = 523.25 Hz)
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            // Быстрое затухание
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (e) {
+            console.log('🔇 Audio not available');
+        }
+    }
+
+    playVictoryFanfare() {
+        // Создаём праздничную мелодию из трёх нот
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Нота 1: C5 (523.25 Hz)
+            this.playNote(audioContext, 523.25, 0, 0.4);
+            
+            // Нота 2: E5 (659.25 Hz) 
+            setTimeout(() => {
+                this.playNote(audioContext, 659.25, 0, 0.4);
+            }, 200);
+            
+            // Нота 3: G5 (783.99 Hz)
+            setTimeout(() => {
+                this.playNote(audioContext, 783.99, 0, 0.6);
+            }, 400);
+        } catch (e) {
+            console.log('🔇 Audio not available');
+        }
+    }
+
+    playNote(audioContext, frequency, startTime, duration) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + startTime);
+        oscillator.type = 'triangle'; // Приятный тембр
+        
+        // Плавное нарастание и затухание
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
+        
+        oscillator.start(audioContext.currentTime + startTime);
+        oscillator.stop(audioContext.currentTime + startTime + duration);
     }
 
     // Обработка тапов
