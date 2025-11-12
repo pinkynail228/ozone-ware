@@ -523,15 +523,112 @@ class FinalNormalGame {
         this.ctx.fillStyle = bgGradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Добавляем анимированные частицы для фона
+        this.drawBackgroundParticles();
+        
         // Казино-визуал
         this.drawBackgroundVignette();
         this.drawMarqueeLights();
+
+        // Рисуем анимированный заголовок "ВЫПЛАТА ЗА СМЕНУ"
+        this.drawAnimatedTitle();
 
         this.drawPrizes();
         this.drawParticles();
         this.drawCenterButton();
         this.drawShineSweep();
         this.drawJackpotFlash();
+    }
+    
+    // Рисуем анимированные частицы на фоне
+    drawBackgroundParticles() {
+        // Время для анимации
+        const time = Date.now() * 0.001;
+        
+        // Рисуем 20 мерцающих звезд
+        for (let i = 0; i < 20; i++) {
+            // Используем хеш-функцию для стабильных позиций
+            const x = ((i * 397) % this.canvas.width);
+            const y = ((i * 631) % this.canvas.height);
+            
+            // Пульсация с разными частотами
+            const pulse = 0.5 + 0.5 * Math.sin(time + i * 0.7);
+            
+            // Разные размеры для разных звезд
+            const size = 1 + 2 * pulse;
+            
+            // Разные цвета
+            const colors = ['rgba(255,255,255,', 'rgba(255,200,255,', 'rgba(200,200,255,'];
+            const color = colors[i % colors.length];
+            
+            this.ctx.fillStyle = `${color}${pulse * 0.7})`;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, size, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+    
+    // Рисуем анимированный заголовок "ВЫПЛАТА ЗА СМЕНУ"
+    drawAnimatedTitle() {
+        const title = 'ВЫПЛАТА ЗА СМЕНУ';
+        const x = this.canvas.width / 2;
+        const y = 80;
+        const time = Date.now() * 0.001;
+        
+        // Создаем градиент для заголовка
+        const gradient = this.ctx.createLinearGradient(x - 150, y - 20, x + 150, y + 20);
+        gradient.addColorStop(0, '#FF4081');
+        gradient.addColorStop(0.5, '#FFD700');
+        gradient.addColorStop(1, '#FF4081');
+        
+        // Добавляем анимацию сдвига градиента
+        const gradientShift = (Math.sin(time * 2) + 1) / 2;
+        gradient.addColorStop(gradientShift * 0.8, '#FFFFFF');
+        
+        // Настраиваем шрифт и тени
+        this.ctx.font = 'bold 36px "Exo 2", sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Рисуем тени для 3D эффекта
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.fillText(title, x + 3, y + 3);
+        
+        // Рисуем основной текст с градиентом
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillText(title, x, y);
+        
+        // Добавляем блик сверху
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.fillText(title, x, y - 1);
+        
+        // Добавляем вибрацию для эффекта глитча
+        if (Math.random() > 0.97) {
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.fillText(title, x + (Math.random() * 4 - 2), y + (Math.random() * 4 - 2));
+        }
+        
+        // Добавляем декоративные линии под заголовком
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        this.ctx.lineWidth = 2;
+        
+        // Левая линия
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 140, y + 25);
+        this.ctx.lineTo(x - 60, y + 25);
+        this.ctx.stroke();
+        
+        // Правая линия
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 60, y + 25);
+        this.ctx.lineTo(x + 140, y + 25);
+        this.ctx.stroke();
+        
+        // Декоративный элемент посередине
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y + 25, 4, 0, Math.PI * 2);
+        this.ctx.fill();
     }
     
     // Рисуем 5 призов: 2 слева, 1 центр, 2 справа (без лишних логов)
@@ -755,37 +852,75 @@ class FinalNormalGame {
         const buttonHeight = 80;
         const buttonY = this.canvas.height - 110;
         const cornerRadius = 24;
+        const time = Date.now() * 0.001; // Для анимации
         
-        const pulse = Math.sin(Date.now() / 300) * 0.03 + 1;
+        // Улучшенная пульсация
+        const pulse = Math.sin(time * 3) * 0.03 + 1.02;
         this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulse, pulse);
         
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.shadowBlur = 20;
-        this.ctx.shadowOffsetY = 8;
+        // Усиленная тень
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.shadowBlur = 25;
+        this.ctx.shadowOffsetY = 10;
         
-        const gradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
-        gradient.addColorStop(0, 'rgba(165, 85, 247, 0.8)');
-        gradient.addColorStop(0.5, 'rgba(190, 75, 240, 0.85)');
-        gradient.addColorStop(1, 'rgba(212, 70, 239, 0.95)');
+        // Красивый градиент с анимацией
+        const gradientShift = (Math.sin(time * 2) + 1) / 2; // 0..1
+        const gradient = this.ctx.createLinearGradient(-buttonWidth/2, 0, buttonWidth/2, 0);
+        gradient.addColorStop(0, '#FF4081');
+        gradient.addColorStop(0.5, '#A855F7');
+        gradient.addColorStop(1, '#3B82F6');
+        // Добавляем движущийся блик
+        gradient.addColorStop(gradientShift * 0.8, '#FFD700');
         
+        // Основная форма кнопки
         this.ctx.beginPath();
         this.ctx.roundRect(-buttonWidth/2, -buttonHeight/2, buttonWidth, buttonHeight, cornerRadius);
         this.ctx.fillStyle = gradient;
         this.ctx.fill();
         
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        this.ctx.lineWidth = 2.5;
+        // Добавляем внутреннюю обводку для эффекта стекла
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        this.ctx.lineWidth = 3;
         this.ctx.stroke();
         
-        this.ctx.fillStyle = '#FFFFFF';
+        // Добавляем блик сверху для эффекта стекла
+        this.ctx.beginPath();
+        this.ctx.moveTo(-buttonWidth/2 + cornerRadius, -buttonHeight/2 + 8);
+        this.ctx.lineTo(buttonWidth/2 - cornerRadius, -buttonHeight/2 + 8);
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // Текст кнопки с эффектом металлика
+        // Сначала тень
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
         this.ctx.shadowBlur = 5;
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.font = 'bold 30px system-ui, -apple-system, Roboto, Arial';
+        this.ctx.shadowOffsetY = 3;
+        this.ctx.font = 'bold 30px "Exo 2", sans-serif';
         this.ctx.textBaseline = 'middle';
         this.ctx.textAlign = 'center';
+        this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 2);
+        
+        // Затем металлический текст
+        const textGradient = this.ctx.createLinearGradient(0, -15, 0, 15);
+        textGradient.addColorStop(0, '#FFFFFF');
+        textGradient.addColorStop(0.5, '#E0E0E0');
+        textGradient.addColorStop(1, '#FFFFFF');
+        
+        this.ctx.fillStyle = textGradient;
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetY = 0;
         this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 0);
+        
+        // Добавляем иконку подарка
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = '24px Arial';
+        this.ctx.fillText('🎁', -buttonWidth/2 + 30, 0);
+        
+        // Добавляем иконку стрелки
+        this.ctx.fillText('→', buttonWidth/2 - 30, 0);
         
         this.ctx.restore();
     }
