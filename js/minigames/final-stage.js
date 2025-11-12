@@ -671,11 +671,15 @@ class FinalStageGame {
         this.canvas.removeEventListener('mousedown', this.tapHandler);
     }
 
-    // Завершение игры
+    /**
+     * Завершение игры с победой
+     */
     win() {
         console.log('🏆 Финальный этап: победа');
         this.isRunning = false;
-        this.gameManager.onGameComplete(true, 100);
+        
+        // Исправляем на правильный метод gameManager.endGame вместо onGameComplete
+        this.gameManager.endGame(true, 100);
     }
 
     // СОБСТВЕННАЯ СИСТЕМА ЗВУКОВ (Web Audio API)
