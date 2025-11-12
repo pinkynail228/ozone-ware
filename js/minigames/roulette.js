@@ -231,6 +231,23 @@ class RouletteGame {
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
 
+    updateWheelRotation(deltaTime) {
+        if (this.wheel.isSpinning) {
+            // Применяем скорость вращения
+            this.wheel.rotation += this.wheel.spinSpeed * deltaTime * 60;
+            
+            // Замедление (трение)
+            this.wheel.spinSpeed *= 0.98;
+            
+            // Остановка когда скорость мала
+            if (this.wheel.spinSpeed < 0.5) {
+                this.wheel.isSpinning = false;
+                this.wheel.spinSpeed = 0;
+                this.onSpinComplete();
+            }
+        }
+    }
+
     draw(deltaTime) {
         // Очистка canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -695,7 +712,7 @@ class RouletteGame {
         this.wheel.spinSpeed = 15 + Math.random() * 10; // 15-25 оборотов в секунду
         this.wheel.isSpinning = true;
         
-        if (this.sound) this.sound.playEffect('collectGood');
+        // Звук убран для рулетки
     }
 
     // Завершение вращения
