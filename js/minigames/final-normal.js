@@ -64,21 +64,46 @@ class FinalNormalGame {
         console.log('✅ Финальный этап: готов к запуску');
     }
 
-    // ===== UI helpers: спрятать/вернуть таймер =====
-    hideTimerUI() {
-        const timer = document.getElementById('timer');
+    // ===== UI helpers: спрятать/вернуть все элементы интерфейса =====
+    hideGameUI() {
+        // Скрываем таймер
+        const timerBar = document.querySelector('.timer-bar');
         const timerText = document.getElementById('timer-text');
         const timerFill = document.getElementById('timer-fill');
-        if (timer) {
-            this._prevTimerDisplay = timer.style.display;
-            timer.style.display = 'none';
+        
+        if (timerBar) {
+            this._prevTimerBarDisplay = timerBar.style.display;
+            timerBar.style.display = 'none';
         }
         if (timerText) timerText.textContent = '';
         if (timerFill) timerFill.style.width = '0%';
+        
+        // Скрываем все полоски и другие элементы UI
+        const gameUI = document.getElementById('game-ui');
+        if (gameUI) {
+            this._prevGameUIDisplay = gameUI.style.display;
+            gameUI.style.display = 'none';
+        }
+        
+        // Убираем все полоски и другие элементы, которые могут быть видны
+        const allBars = document.querySelectorAll('.timer-bar, .progress-bar, .score-bar');
+        allBars.forEach(bar => {
+            bar.style.display = 'none';
+        });
     }
-    restoreTimerUI() {
-        const timer = document.getElementById('timer');
-        if (timer) timer.style.display = this._prevTimerDisplay || '';
+    
+    restoreGameUI() {
+        const timerBar = document.querySelector('.timer-bar');
+        if (timerBar) timerBar.style.display = this._prevTimerBarDisplay || '';
+        
+        const gameUI = document.getElementById('game-ui');
+        if (gameUI) gameUI.style.display = this._prevGameUIDisplay || '';
+        
+        // Восстанавливаем все полоски
+        const allBars = document.querySelectorAll('.timer-bar, .progress-bar, .score-bar');
+        allBars.forEach(bar => {
+            bar.style.display = '';
+        });
     }
 
     // ===== Modal: инструкция с поддержкой =====
@@ -395,7 +420,7 @@ class FinalNormalGame {
         console.log('▶️ Финальный этап: СТАРТ ИГРЫ');
         this.isRunning = true;
         this.lastFrameTime = null;
-        this.hideTimerUI();
+        this.hideGameUI(); // Скрываем все элементы UI
         this.setupControls();
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
@@ -403,7 +428,7 @@ class FinalNormalGame {
     stop() {
         console.log('⏹️ Финальный этап: стоп');
         this.isRunning = false;
-        this.restoreTimerUI();
+        this.restoreGameUI(); // Восстанавливаем все элементы UI
         this.removeControls();
         if (this.gameLoop) {
             cancelAnimationFrame(this.gameLoop);
@@ -490,6 +515,13 @@ class FinalNormalGame {
     
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Рисуем красивый градиентный фон для финального экрана
+        const bgGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        bgGradient.addColorStop(0, '#6B2FFF');
+        bgGradient.addColorStop(1, '#4B1FDD');
+        this.ctx.fillStyle = bgGradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Казино-визуал
         this.drawBackgroundVignette();
