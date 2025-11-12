@@ -450,8 +450,8 @@ class GameManager {
                 this.currentGame = new ScannerGame(this.canvas, this.ctx, this);
                 break;
             case 'roulette':
-                console.log('🏠 Запуск простого финального этапа без анимации');
-                this.currentGame = new FinalSimpleGame(this.canvas, this.ctx, this);
+                console.log('🏠 Запуск нормального финального этапа с плавной анимацией');
+                this.currentGame = new FinalNormalGame(this.canvas, this.ctx, this);
                 break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
