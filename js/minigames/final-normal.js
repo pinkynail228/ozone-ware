@@ -34,12 +34,18 @@ class FinalNormalGame {
         // Аудиоконтекст
         this._audioContext = null;
         
-        // Призы в циклическом порядке
+        // Призы в циклическом порядке - ДОБАВЛЯЕМ БОЛЬШЕ ПРИЗОВ!
         this.prizes = [
-            { emoji: '💰', title: '$100K', color: '#22C55E', gradientColor: '#4ADE80' },
-            { emoji: '⌚', title: 'Rolex', color: '#3B82F6', gradientColor: '#60A5FA' },
-            { emoji: '🏠', title: 'Квартира', color: '#F59E0B', gradientColor: '#FBBF24' },
-            { emoji: '📦', title: 'Коробка', color: '#A855F7', gradientColor: '#D946EF' }
+            { emoji: '💰', title: '$100K', color: '#22C55E', gradientColor: '#4ADE80' },      // Индекс 0
+            { emoji: '⌚', title: 'Rolex', color: '#3B82F6', gradientColor: '#60A5FA' },        // Индекс 1
+            { emoji: '🏠', title: 'Квартира', color: '#F59E0B', gradientColor: '#FBBF24' }, // Индекс 2
+            { emoji: '🚗', title: 'Машина', color: '#EF4444', gradientColor: '#F87171' },   // Индекс 3
+            { emoji: '🏝️', title: 'Остров', color: '#06B6D4', gradientColor: '#67E8F9' },     // Индекс 4
+            { emoji: '✈️', title: 'Самолет', color: '#8B5CF6', gradientColor: '#A78BFA' },   // Индекс 5
+            { emoji: '💎', title: 'Алмаз', color: '#EC4899', gradientColor: '#F472B6' },     // Индекс 6
+            { emoji: '🏆', title: 'Кубок', color: '#F59E0B', gradientColor: '#FBBF24' },      // Индекс 7
+            { emoji: '🎆', title: 'Фейерверк', color: '#10B981', gradientColor: '#34D399' }, // Индекс 8
+            { emoji: '📦', title: 'КОРОБКА', color: '#A855F7', gradientColor: '#D946EF' }  // Индекс 9 - ПОБЕДНЫЙ ПРИЗ!
         ];
         
         // Частицы
@@ -97,40 +103,43 @@ class FinalNormalGame {
                 this.spinSpeed = 0;
                 
                 // КОРОБКА ДОЛЖНА БЫТЬ В ЦЕНТРЕ!
-                // Призы: [0:'$100K', 1:'Rolex', 2:'Квартира', 3:'Коробка']
-                // Коробка имеет индекс 3
+                // КОРОБКА ТЕПЕРЬ ИМЕЕТ ИНДЕКС 9 (ПОСЛЕДНЯЯ В МАССИВЕ)!
                 
-                // При отрисовке призов:
-                // prizeIndex = Math.floor((adjustedX + this.prizeOffset) / this.prizeWidth) % 4
-                // Для того чтобы в центре была коробка (индекс 3):
-                // Нужно чтобы (centerX + this.prizeOffset) / this.prizeWidth % 4 = 3
-                // Где centerX = this.canvas.width / 2 = 195
+                console.log('📦 ПРИЗЫ В МАССИВЕ:');
+                this.prizes.forEach((prize, index) => {
+                    console.log(`   ${index}: ${prize.title}`);
+                });
                 
                 const centerX = this.canvas.width / 2; // 195
-                const targetPrizeIndex = 3; // Коробка
+                const targetPrizeIndex = 9; // КОРОБКА ТЕПЕРЬ ПОД ИНДЕКСОМ 9!
+                
+                console.log('🎯 Цель: поставить приз с индексом', targetPrizeIndex, 'в центр');
                 
                 // Рассчитываем нужный offset
-                // (centerX + offset) / prizeWidth % 4 = 3
-                // (195 + offset) / 120 % 4 = 3
-                // offset = 3 * 120 - 195 = 360 - 195 = 165
-                
-                const totalCycle = this.prizeWidth * this.prizes.length; // 480
+                const totalCycle = this.prizeWidth * this.prizes.length; // 10 * 120 = 1200
                 const requiredOffset = (targetPrizeIndex * this.prizeWidth - centerX) % totalCycle;
                 
                 // Находим сколько полных циклов прошло
                 const completedCycles = Math.floor(this.prizeOffset / totalCycle);
                 this.prizeOffset = completedCycles * totalCycle + requiredOffset;
                 
-                console.log('📦 КОРОБКА ПРИНУДИТЕЛЬНО УСТАНОВЛЕНА В ЦЕНТР:');
+                console.log('📦 КОРОБКА (ИНДЕКС 9) ПРИНУДИТЕЛЬНО УСТАНОВЛЕНА В ЦЕНТР:');
                 console.log('   - Новый offset:', this.prizeOffset);
-                console.log('   - Нужный offset для коробки:', requiredOffset);
+                console.log('   - Нужный offset для коробки (индекс 9):', requiredOffset);
                 console.log('   - Циклов прошло:', completedCycles);
+                console.log('   - Общий размер цикла:', totalCycle);
                 
                 // Проверяем какой приз теперь в центре
                 const testCenterX = this.canvas.width / 2;
                 const testPrizeIndex = Math.floor((testCenterX + this.prizeOffset) / this.prizeWidth) % this.prizes.length;
-                console.log('   - Проверка: индекс центрального приза:', testPrizeIndex);
-                console.log('   - Проверка: название приза:', this.prizes[testPrizeIndex].title);
+                console.log('   - ПРОВЕРКА: индекс центрального приза:', testPrizeIndex);
+                console.log('   - ПРОВЕРКА: название приза:', this.prizes[testPrizeIndex].title);
+                
+                if (testPrizeIndex === 9) {
+                    console.log('✅ ПОБЕДА! Коробка в центре!');
+                } else {
+                    console.log('❌ ОШИБКА! Коробка НЕ в центре!');
+                }
                 
                 // Объявляем победу
                 setTimeout(() => {
@@ -391,7 +400,7 @@ class FinalNormalGame {
     }
     
     onSpinComplete() {
-        const boxPrizeIndex = 3;
+        const boxPrizeIndex = 9; // КОРОБКА ТЕПЕРЬ ПОД ИНДЕКСОМ 9!
         const winnerPrize = this.prizes[boxPrizeIndex];
         
         console.log(`📦 ПОБЕДА: ${winnerPrize.title}!`, winnerPrize);
