@@ -150,6 +150,12 @@ class RouletteGame {
             if (this.spinSpeed < 2) {
                 this.isSpinning = false;
                 this.spinSpeed = 0;
+                
+                // 🎯 ПРИНУДИТЕЛЬНО ставим коробку (приз #4) по центру!
+                const boxPrizeIndex = 4; // Коробка - 5й приз (индекс 4)
+                this.prizeOffset = boxPrizeIndex * this.prizeWidth;
+                
+                console.log('🎯 Коробка принудительно установлена по центру, offset:', this.prizeOffset);
                 this.onSpinComplete();
             }
         } else {
