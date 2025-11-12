@@ -151,11 +151,15 @@ class RouletteGame {
                 this.isSpinning = false;
                 this.spinSpeed = 0;
                 
-                // 🎯 ПРИНУДИТЕЛЬНО ставим коробку (приз #4) по центру!
+                // 🎯 ПРИНУДИТЕЛЬНО ставим коробку (приз #4) по центру экрана!
                 const boxPrizeIndex = 4; // Коробка - 5й приз (индекс 4)
-                this.prizeOffset = boxPrizeIndex * this.prizeWidth;
+                const centerX = this.canvas.width / 2; // Центр экрана
                 
-                console.log('🎯 Коробка принудительно установлена по центру, offset:', this.prizeOffset);
+                // Рассчитываем offset так, чтобы коробка была точно в центре экрана
+                const targetOffset = (boxPrizeIndex * this.prizeWidth) - centerX + (this.prizeWidth / 2);
+                this.prizeOffset = targetOffset;
+                
+                console.log('🎯 Коробка установлена в центр экрана, offset:', this.prizeOffset, 'centerX:', centerX);
                 this.onSpinComplete();
             }
         } else {
