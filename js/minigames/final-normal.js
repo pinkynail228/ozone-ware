@@ -848,30 +848,26 @@ class FinalNormalGame {
         
         this.ctx.save();
         
-        const buttonWidth = 300;
-        const buttonHeight = 80;
+        const buttonWidth = 280;
+        const buttonHeight = 70;
         const buttonY = this.canvas.height - 110;
-        const cornerRadius = 24;
+        const cornerRadius = 20;
         const time = Date.now() * 0.001; // Для анимации
         
-        // Улучшенная пульсация
-        const pulse = Math.sin(time * 3) * 0.03 + 1.02;
+        // Сдержанная пульсация
+        const pulse = Math.sin(time * 2) * 0.02 + 1.01;
         this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulse, pulse);
         
-        // Усиленная тень
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        this.ctx.shadowBlur = 25;
-        this.ctx.shadowOffsetY = 10;
+        // Тень кнопки
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 15;
+        this.ctx.shadowOffsetY = 6;
         
-        // Красивый градиент с анимацией
-        const gradientShift = (Math.sin(time * 2) + 1) / 2; // 0..1
-        const gradient = this.ctx.createLinearGradient(-buttonWidth/2, 0, buttonWidth/2, 0);
-        gradient.addColorStop(0, '#FF4081');
-        gradient.addColorStop(0.5, '#A855F7');
-        gradient.addColorStop(1, '#3B82F6');
-        // Добавляем движущийся блик
-        gradient.addColorStop(gradientShift * 0.8, '#FFD700');
+        // Сдержанный градиент
+        const gradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
+        gradient.addColorStop(0, '#A855F7');
+        gradient.addColorStop(1, '#7928CA');
         
         // Основная форма кнопки
         this.ctx.beginPath();
@@ -879,48 +875,20 @@ class FinalNormalGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fill();
         
-        // Добавляем внутреннюю обводку для эффекта стекла
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-        this.ctx.lineWidth = 3;
+        // Тонкая обводка
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.lineWidth = 1.5;
         this.ctx.stroke();
         
-        // Добавляем блик сверху для эффекта стекла
-        this.ctx.beginPath();
-        this.ctx.moveTo(-buttonWidth/2 + cornerRadius, -buttonHeight/2 + 8);
-        this.ctx.lineTo(buttonWidth/2 - cornerRadius, -buttonHeight/2 + 8);
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-        
-        // Текст кнопки с эффектом металлика
-        // Сначала тень
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.shadowBlur = 5;
-        this.ctx.shadowOffsetY = 3;
-        this.ctx.font = 'bold 30px "Exo 2", sans-serif';
+        // Текст кнопки
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 3;
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.font = 'bold 28px "Exo 2", sans-serif';
         this.ctx.textBaseline = 'middle';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 2);
-        
-        // Затем металлический текст
-        const textGradient = this.ctx.createLinearGradient(0, -15, 0, 15);
-        textGradient.addColorStop(0, '#FFFFFF');
-        textGradient.addColorStop(0.5, '#E0E0E0');
-        textGradient.addColorStop(1, '#FFFFFF');
-        
-        this.ctx.fillStyle = textGradient;
-        this.ctx.shadowBlur = 0;
-        this.ctx.shadowOffsetY = 0;
-        this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 0);
-        
-        // Добавляем иконку подарка
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '24px Arial';
-        this.ctx.fillText('🎁', -buttonWidth/2 + 30, 0);
-        
-        // Добавляем иконку стрелки
-        this.ctx.fillText('→', buttonWidth/2 - 30, 0);
+        this.ctx.fillText('ПОЛУЧИТЬ', 0, 0);
         
         this.ctx.restore();
     }
