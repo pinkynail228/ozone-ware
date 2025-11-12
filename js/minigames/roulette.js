@@ -88,11 +88,17 @@ class RouletteGame {
     }
 
     start() {
-        console.log('▶️ RouletteGame: старт');
+        console.log('▶️ Финальный этап: СТАРТ ИГРЫ');
+        console.log('🔍 Canvas size:', this.canvas.width, 'x', this.canvas.height);
+        console.log('🎯 Center point:', this.centerX, this.centerY);
+        console.log('🎁 Prizes count:', this.prizes.length);
+        
         this.isRunning = true;
         this.lastFrameTime = null;
         this.setupControls();
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
+        
+        console.log('✅ Финальный этап: инициализация завершена');
     }
 
     stop() {
@@ -106,20 +112,28 @@ class RouletteGame {
     }
 
     update(currentTime) {
-        if (!this.isRunning) return;
-
-        // Расчёт deltaTime
-        let deltaTime = 1/60; // Фоллбэк для первого кадра
-        if (this.lastFrameTime !== null) {
-            deltaTime = Math.min((currentTime - this.lastFrameTime) / 1000, 1/15);
+        if (!this.isRunning) {
+            console.log('❌ Update прерван: игра не запущена');
+            return;
         }
+        
+        // Инициализируем время
+        if (this.lastFrameTime === null) {
+            this.lastFrameTime = currentTime;
+            console.log('⏰ Первый кадр:', currentTime);
+        }
+        
+        const deltaTime = (currentTime - this.lastFrameTime) / 1000;
         this.lastFrameTime = currentTime;
-
-        // Обновление движения ленты
+        
+        // Первые несколько кадров логируем
+        if (currentTime < this.lastFrameTime + 3000) {
+            console.log('🔄 Update frame, deltaTime:', deltaTime);
+        }
+        
         this.updateMovement(deltaTime);
-
-        // Отрисовка
-        this.draw(deltaTime);
+        this.updateParticles(deltaTime);
+        this.draw();
 
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
