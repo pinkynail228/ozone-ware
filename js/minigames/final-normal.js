@@ -159,9 +159,14 @@ class FinalNormalGame {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Казино-визуал
+        this.drawBackgroundVignette();
+        this.drawMarqueeLights();
+
         this.drawPrizes();
         this.drawParticles();
         this.drawCenterButton();
+        this.drawShineSweep();
     }
     
     // Рисуем 5 призов: 2 слева, 1 центр, 2 справа (без лишних логов)
@@ -199,6 +204,22 @@ class FinalNormalGame {
             opacity = 0.6;
             fontSize = 40;
             textSize = 16;
+
+            // Трейл при быстром вращении для эффекта движения
+            if (this.phase === 'spinFast') {
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.15;
+                this.ctx.translate(-12, 0);
+                this.ctx.scale(0.98, 0.98);
+                const gradTrail = this.ctx.createLinearGradient(-size, 0, size, 0);
+                gradTrail.addColorStop(0, 'rgba(255,255,255,0.0)');
+                gradTrail.addColorStop(1, 'rgba(255,255,255,0.2)');
+                this.ctx.fillStyle = gradTrail;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, size/2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
         }
         
         // Рамка
@@ -250,6 +271,57 @@ class FinalNormalGame {
         this.ctx.strokeText(prize.title, 0, textY);
         this.ctx.fillText(prize.title, 0, textY);
         
+        this.ctx.restore();
+    }
+
+    // Виньетка для концентрации внимания на центре
+    drawBackgroundVignette() {
+        const g = this.ctx.createRadialGradient(
+            this.centerX, this.centerY, Math.min(this.canvas.width, this.canvas.height) * 0.25,
+            this.centerX, this.centerY, Math.max(this.canvas.width, this.canvas.height) * 0.7
+        );
+        g.addColorStop(0, 'rgba(0,0,0,0.0)');
+        g.addColorStop(1, 'rgba(0,0,0,0.35)');
+        this.ctx.fillStyle = g;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    // Огоньки-маркизы сверху и снизу экрана
+    drawMarqueeLights() {
+        const rows = [32, this.canvas.height - 64];
+        const step = 28;
+        const phase = (Date.now() % 1000) / 1000; // 0..1
+        for (const y of rows) {
+            for (let x = 20; x < this.canvas.width - 20; x += step) {
+                const idx = Math.floor(x / step);
+                const on = ((idx + Math.floor(phase * 8)) % 2) === 0;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 6, 0, Math.PI * 2);
+                this.ctx.fillStyle = on ? 'rgba(255,215,0,0.95)' : 'rgba(255,215,0,0.25)';
+                this.ctx.shadowColor = on ? 'rgba(255,200,0,0.9)' : 'transparent';
+                this.ctx.shadowBlur = on ? 10 : 0;
+                this.ctx.fill();
+            }
+        }
+        // сброс тени
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowColor = 'transparent';
+    }
+
+    // Бликовый сдвиг по полосе призов (активен при вращении)
+    drawShineSweep() {
+        if (this.phase === 'idle') return;
+        const t = (Date.now() % 1500) / 1500; // 0..1
+        const sweepX = -this.canvas.width + t * (this.canvas.width * 2);
+        this.ctx.save();
+        this.ctx.translate(sweepX, 0);
+        const w = 160;
+        const g = this.ctx.createLinearGradient(0, 0, w, 0);
+        g.addColorStop(0, 'rgba(255,255,255,0.0)');
+        g.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+        g.addColorStop(1, 'rgba(255,255,255,0.0)');
+        this.ctx.fillStyle = g;
+        this.ctx.fillRect(0, this.centerY - 120, w, 240);
         this.ctx.restore();
     }
     
