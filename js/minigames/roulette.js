@@ -101,15 +101,35 @@ class RouletteGame {
 
     createParticles(x, y, count = 5) {
         for (let i = 0; i < count; i++) {
-            const angle = (Math.PI * 2 / count) * i;
+            const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
             this.particles.push({
                 x: x,
                 y: y,
-                vx: Math.cos(angle) * (3 + Math.random() * 3),
-                vy: Math.sin(angle) * (3 + Math.random() * 3),
+                vx: Math.cos(angle) * (3 + Math.random() * 4),
+                vy: Math.sin(angle) * (3 + Math.random() * 4),
                 life: 1,
-                size: 2 + Math.random() * 4,
-                color: ['#FFD700', '#FFA500', '#FF8C00', '#FF6B35'][Math.floor(Math.random() * 4)]
+                size: 3 + Math.random() * 6,
+                color: ['#FFD700', '#FFA500', '#FF8C00', '#FF6B35', '#E74C3C', '#9B59B6', '#3498DB'][Math.floor(Math.random() * 7)],
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.3
+            });
+        }
+    }
+
+    createConfetti() {
+        // Создаём конфетти по всему экрану
+        for (let i = 0; i < 50; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: -20,
+                vx: (Math.random() - 0.5) * 4,
+                vy: 2 + Math.random() * 3,
+                life: 1,
+                size: 4 + Math.random() * 8,
+                color: ['#FFD700', '#FFA500', '#FF6B35', '#E74C3C', '#9B59B6', '#3498DB', '#2ECC71'][Math.floor(Math.random() * 7)],
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.4,
+                isConfetti: true
             });
         }
     }
@@ -118,19 +138,46 @@ class RouletteGame {
         this.particles = this.particles.filter(p => {
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.1; // Гравитация
-            p.life -= 0.02;
-            return p.life > 0;
+            
+            if (p.isConfetti) {
+                p.vy += 0.15; // Больше гравитации для конфетти
+                p.rotation += p.rotSpeed;
+                p.life -= 0.008; // Дольше живут
+            } else {
+                p.vy += 0.1; // Обычная гравитация
+                p.life -= 0.02;
+            }
+            
+            if (p.rotation !== undefined) {
+                p.rotation += p.rotSpeed || 0;
+            }
+            
+            return p.life > 0 && p.y < this.canvas.height + 50;
         });
     }
 
     drawParticles() {
         this.particles.forEach(p => {
-            this.ctx.fillStyle = p.color;
+            this.ctx.save();
             this.ctx.globalAlpha = p.life;
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            this.ctx.fill();
+            
+            if (p.isConfetti) {
+                // Рисуем конфетти как прямоугольники
+                this.ctx.translate(p.x, p.y);
+                this.ctx.rotate(p.rotation);
+                this.ctx.fillStyle = p.color;
+                this.ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+            } else {
+                // Рисуем обычные частицы как круги с сиянием
+                this.ctx.shadowColor = p.color;
+                this.ctx.shadowBlur = p.size * 2;
+                this.ctx.fillStyle = p.color;
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            this.ctx.restore();
         });
         this.ctx.globalAlpha = 1;
     }
@@ -226,13 +273,123 @@ class RouletteGame {
     }
 
     drawBackground() {
-        // Ozon фиолетовый градиент
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#6B2FFF');
-        gradient.addColorStop(1, '#4B1FDD');
+        // Премиальный Ozon градиент с изящным радиальным эффектом
+        const linearGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        linearGradient.addColorStop(0, '#6B2FFF');  // Насыщенный фиолетовый
+        linearGradient.addColorStop(0.5, '#5026E5'); // Промежуточный тон
+        linearGradient.addColorStop(1, '#4B1FDD');  // Глубокий фиолетовый
         
-        this.ctx.fillStyle = gradient;
+        // Базовый фон
+        this.ctx.fillStyle = linearGradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Пульсирующий радиальный градиент в центре (как на стартовом экране)
+        const time = Date.now() / 1000;
+        const pulseSize = 0.9 + Math.sin(time * 1.5) * 0.1; // Пульсирует между 0.8 и 1.0
+        
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const radius = Math.max(this.canvas.width, this.canvas.height) * pulseSize;
+        
+        const radialGradient = this.ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, radius
+        );
+        
+        radialGradient.addColorStop(0, 'rgba(111, 83, 255, 0.8)');
+        radialGradient.addColorStop(0.5, 'rgba(108, 59, 255, 0.3)');
+        radialGradient.addColorStop(1, 'rgba(75, 31, 221, 0)');
+        
+        this.ctx.fillStyle = radialGradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Создаём плавные круги на фоне
+        this.drawBackgroundCircles();
+        
+        // Лучи света от центра (как на стартовом экране)
+        this.drawLightRays();
+    }
+
+    drawBackgroundCircles() {
+        // Большие размытые круги на фоне
+        const circlePositions = [
+            { x: this.canvas.width * 0.2, y: this.canvas.height * 0.2, radius: 100 },
+            { x: this.canvas.width * 0.8, y: this.canvas.height * 0.3, radius: 120 },
+            { x: this.canvas.width * 0.15, y: this.canvas.height * 0.75, radius: 80 },
+            { x: this.canvas.width * 0.8, y: this.canvas.height * 0.8, radius: 110 }
+        ];
+        
+        const time = Date.now() / 1000;
+        
+        circlePositions.forEach((circle, i) => {
+            // Каждый круг движется по своей траектории
+            const offsetX = Math.sin(time * 0.5 + i) * 20;
+            const offsetY = Math.cos(time * 0.3 + i * 0.7) * 20;
+            const pulseSize = 0.8 + Math.sin(time + i * 0.5) * 0.2;
+            
+            const gradient = this.ctx.createRadialGradient(
+                circle.x + offsetX,
+                circle.y + offsetY,
+                0,
+                circle.x + offsetX,
+                circle.y + offsetY,
+                circle.radius * pulseSize
+            );
+            
+            gradient.addColorStop(0, 'rgba(164, 92, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(108, 59, 255, 0)');
+            
+            this.ctx.fillStyle = gradient;
+            this.ctx.beginPath();
+            this.ctx.arc(
+                circle.x + offsetX,
+                circle.y + offsetY,
+                circle.radius * pulseSize,
+                0,
+                Math.PI * 2
+            );
+            this.ctx.fill();
+        });
+    }
+
+    drawLightRays() {
+        // Лучи света из центра
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const time = Date.now() / 1000;
+        const rotation = time * 0.2;
+        
+        this.ctx.save();
+        this.ctx.translate(centerX, centerY);
+        this.ctx.rotate(rotation);
+        
+        const rayCount = 12;
+        const rayLength = Math.max(this.canvas.width, this.canvas.height) * 0.8;
+        
+        for (let i = 0; i < rayCount; i++) {
+            const angle = (Math.PI * 2 / rayCount) * i;
+            const rayOpacity = 0.02 + Math.sin(time * 2 + i) * 0.01; // Пульсирующая прозрачность
+            
+            this.ctx.save();
+            this.ctx.rotate(angle);
+            
+            const gradient = this.ctx.createLinearGradient(0, 0, rayLength, 0);
+            gradient.addColorStop(0, `rgba(255, 215, 0, ${rayOpacity * 2})`); // Золотой
+            gradient.addColorStop(0.3, `rgba(255, 255, 255, ${rayOpacity})`); 
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            this.ctx.fillStyle = gradient;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(rayLength, -15);
+            this.ctx.lineTo(rayLength, 15);
+            this.ctx.closePath();
+            this.ctx.fill();
+            
+            this.ctx.restore();
+        }
+        
+        this.ctx.restore();
     }
 
     drawWheel() {
@@ -318,27 +475,55 @@ class RouletteGame {
         this.ctx.lineWidth = 6;
         this.ctx.stroke();
         
-        // Центральный круг с градиентом
-        const centerGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 35);
-        centerGradient.addColorStop(0, '#FFD700');
-        centerGradient.addColorStop(0.7, '#FFA500');
-        centerGradient.addColorStop(1, '#FF8C00');
+        // Премиум центральный круг с объёмом
+        const centerRadius = 45;
+        
+        // Тень центрального круга
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.shadowBlur = 30;
+        this.ctx.shadowOffsetY = 10;
+        
+        // Градиент центра с металлическим эффектом
+        const centerGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, centerRadius);
+        centerGradient.addColorStop(0, '#FFFACD');    // Светло-золотой центр
+        centerGradient.addColorStop(0.3, '#FFD700');  // Золотой
+        centerGradient.addColorStop(0.7, '#FFA500');  // Оранжево-золотой
+        centerGradient.addColorStop(1, '#FF8C00');    // Тёмно-оранжевый край
         
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, 35, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, centerRadius, 0, Math.PI * 2);
         this.ctx.fillStyle = centerGradient;
         this.ctx.fill();
         
-        // Рамка центра
-        this.ctx.strokeStyle = '#fff';
-        this.ctx.lineWidth = 3;
+        // Металлическая рамка с объёмом
+        this.ctx.strokeStyle = '#FFFFFF';
+        this.ctx.lineWidth = 4;
         this.ctx.stroke();
         
-        // Корона в центре
-        this.ctx.font = 'bold 40px Arial';
+        // Внутренняя тень для глубины
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // Блик света на центре
+        const highlightGradient = this.ctx.createRadialGradient(-10, -10, 0, -10, -10, 25);
+        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+        highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        this.ctx.fillStyle = highlightGradient;
+        this.ctx.beginPath();
+        this.ctx.arc(-10, -10, 25, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Корона в центре с тенью
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 8;
+        this.ctx.shadowOffsetY = 3;
+        
+        this.ctx.font = 'bold 45px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#fff';
+        this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillText('👑', 0, 0);
         
         this.ctx.restore();
@@ -397,39 +582,103 @@ class RouletteGame {
     }
 
     drawUI() {
-        // Заголовок с эффектом
-        const titleScale = 1 + Math.sin(Date.now() / 500) * 0.05;
+        // ЭПИЧНЫЙ заголовок с множественными эффектами
+        const time = Date.now() / 1000;
+        const titleScale = 1 + Math.sin(time * 2) * 0.08;
+        
         this.ctx.save();
         this.ctx.translate(this.canvas.width / 2, 60);
         this.ctx.scale(titleScale, titleScale);
         
-        // Обводка заголовка
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.font = 'bold 32px Exo 2';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
+        // Сияние вокруг заголовка
+        this.ctx.shadowColor = '#FFD700';
+        this.ctx.shadowBlur = 30;
         
-        // Основной текст заголовка
-        this.ctx.fillStyle = '#FFD700';
-        this.ctx.font = 'bold 32px Exo 2';
+        // Большая тёмная обводка
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.lineWidth = 8;
+        this.ctx.font = 'bold 36px Exo 2';
+        this.ctx.textAlign = 'center';
+        this.ctx.strokeText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
+        
+        // Белая обводка
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.lineWidth = 4;
+        this.ctx.strokeText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
+        
+        // Золотой градиент для текста
+        const textGradient = this.ctx.createLinearGradient(0, -20, 0, 20);
+        textGradient.addColorStop(0, '#FFFACD');
+        textGradient.addColorStop(0.5, '#FFD700');
+        textGradient.addColorStop(1, '#FFA500');
+        
+        this.ctx.fillStyle = textGradient;
         this.ctx.fillText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
         
         this.ctx.restore();
         
-        // Инструкция с анимацией
+        // Подзаголовок
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 100);
+        
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.font = 'bold 16px Exo 2';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('💎 КРУТИ И ВЫИГРЫВАЙ 💎', 0, 0);
+        
+        this.ctx.restore();
+        
+        // Инструкция с МЕГА анимацией
         if (!this.wheel.isSpinning) {
-            const pulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
+            const pulse = 0.6 + Math.sin(time * 4) * 0.4;
+            const bounce = 1 + Math.sin(time * 3) * 0.1;
+            
+            this.ctx.save();
+            this.ctx.translate(this.canvas.width / 2, this.canvas.height - 80);
+            this.ctx.scale(bounce, bounce);
+            
+            // Сияние кнопки
+            this.ctx.shadowColor = '#FFD700';
+            this.ctx.shadowBlur = 20;
             this.ctx.globalAlpha = pulse;
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = 'bold 20px Exo 2';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('👆 ТАПНИ ЧТОБЫ КРУТИТЬ', this.canvas.width / 2, this.canvas.height - 100);
+            
+            // Фон кнопки
+            const buttonGradient = this.ctx.createLinearGradient(-120, -20, 120, 20);
+            buttonGradient.addColorStop(0, 'rgba(255, 215, 0, 0.3)');
+            buttonGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.6)');
+            buttonGradient.addColorStop(1, 'rgba(255, 215, 0, 0.3)');
+            
+            this.ctx.fillStyle = buttonGradient;
+            this.ctx.beginPath();
+            this.ctx.roundRect(-120, -25, 240, 50, 25);
+            this.ctx.fill();
+            
+            // Рамка кнопки
+            this.ctx.strokeStyle = '#FFD700';
+            this.ctx.lineWidth = 3;
+            this.ctx.stroke();
+            
+            // Текст кнопки
             this.ctx.globalAlpha = 1;
-        } else {
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = 'bold 20px Exo 2';
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = 'bold 22px Exo 2';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('🎲 КРУТИТСЯ...', this.canvas.width / 2, this.canvas.height - 100);
+            this.ctx.fillText('👆 ТАПНИ ЧТОБЫ КРУТИТЬ 👆', 0, 8);
+            
+            this.ctx.restore();
+        } else {
+            // Текст во время вращения
+            const spinPulse = 0.7 + Math.sin(time * 6) * 0.3;
+            
+            this.ctx.save();
+            this.ctx.globalAlpha = spinPulse;
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 24px Exo 2';
+            this.ctx.textAlign = 'center';
+            this.ctx.shadowColor = '#FFD700';
+            this.ctx.shadowBlur = 15;
+            this.ctx.fillText('🎲 КРУТИТСЯ... 🎲', this.canvas.width / 2, this.canvas.height - 80);
+            this.ctx.restore();
         }
     }
 
@@ -439,13 +688,25 @@ class RouletteGame {
         
         console.log('🎰 Запуск вращения колеса');
         
-        // Создаём праздничные частицы вокруг колеса
-        for (let i = 0; i < 20; i++) {
+        // МЕГА праздничные эффекты!
+        this.createConfetti(); // Конфетти с неба
+        
+        // Взрыв частиц от центра колеса
+        for (let i = 0; i < 30; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const distance = this.wheel.radius + 50;
+            const distance = 20 + Math.random() * 30;
             const x = this.wheel.centerX + Math.cos(angle) * distance;
             const y = this.wheel.centerY + Math.sin(angle) * distance;
             this.createParticles(x, y, 1);
+        }
+        
+        // Кольцо частиц вокруг колеса
+        for (let i = 0; i < 16; i++) {
+            const angle = (Math.PI * 2 / 16) * i;
+            const distance = this.wheel.radius + 40;
+            const x = this.wheel.centerX + Math.cos(angle) * distance;
+            const y = this.wheel.centerY + Math.sin(angle) * distance;
+            this.createParticles(x, y, 2);
         }
         
         // Случайная скорость и направление
