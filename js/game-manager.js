@@ -245,6 +245,9 @@ class GameManager {
         this.levelActiveButton = null;
 
         Object.entries(this.gameCatalog).forEach(([key, meta]) => {
+            // Пропускаем финальный этап в выборе уровней
+            if (key === 'roulette') return;
+            
             const button = document.createElement('button');
             button.className = 'level-item';
             button.innerHTML = `
@@ -339,6 +342,12 @@ class GameManager {
     }
 
     startLevel(levelKey) {
+        // Проверка на финальный этап - не даем запустить его напрямую
+        if (levelKey === 'roulette') {
+            console.warn('⚠️ Финальный этап недоступен для прямого запуска');
+            return;
+        }
+        
         if (!this.gameCatalog[levelKey]) {
             console.warn(`⚠️ Попытка запустить неизвестный уровень: ${levelKey}`);
             return;
