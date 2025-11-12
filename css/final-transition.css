@@ -1,0 +1,108 @@
+/* Стили для финального экрана перехода */
+.final-transition {
+    background: linear-gradient(135deg, #6B2FFF, #4B1FDD) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Анимированные частицы для фона */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float 4s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-20px) translateX(10px);
+        opacity: 0.2;
+    }
+}
+
+/* Стилизация заголовка */
+.final-transition h2 {
+    font-size: 42px !important;
+    font-weight: 900 !important;
+    margin: 40px 0 30px !important;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Стилизация блока с баллами */
+.final-transition #game-instruction {
+    font-size: 24px !important;
+    margin: 20px 0 40px !important;
+    padding: 15px 20px !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    position: relative;
+    z-index: 2;
+}
+
+/* Кнопка "К ВЫПЛАТАМ" */
+.final-transition .btn-primary {
+    position: relative;
+    z-index: 2;
+    transform: scale(1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    }
+}
+
+/* Декоративные элементы */
+.final-transition::before,
+.final-transition::after {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    z-index: 1;
+}
+
+.final-transition::before {
+    top: -100px;
+    left: -100px;
+}
+
+.final-transition::after {
+    bottom: -100px;
+    right: -100px;
+}
