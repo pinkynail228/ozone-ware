@@ -2,7 +2,13 @@
 //  FINAL STAGE - Финальный этап получения награды
 // ============================================
 
-class RouletteGame {
+/**
+ * Финальный этап - завершающая игра с призами.
+ * Полностью переработанная версия с модерным UI и четкими шрифтами.
+ * Включает собственную звуковую систему и 3D иконки вместо эмодзи.
+ * Победа гарантирована - коробка всегда в центре и всегда выигрывает.
+ */
+class FinalStageGame {
     constructor(canvas, ctx, gameManager) {
         console.log('🎁 Финальный этап: Инициализация...');
 
@@ -223,10 +229,17 @@ class RouletteGame {
         
         // Название приза - читаемый размер
         if (textSize > 8) { // Показываем текст только если достаточно крупный
-            this.ctx.font = `bold ${textSize}px Arial`;
+            // Современный системный шрифт с хорошей читаемостью
+            this.ctx.font = `bold ${textSize}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif`;
+            
+            // Усиленный контур для лучшей читаемости
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+            this.ctx.lineWidth = Math.max(3, textSize / 5);
+            
+            // Яркий белый цвет с небольшим свечением
             this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.lineWidth = Math.max(2, textSize / 6);
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            this.ctx.shadowBlur = 2;
             
             const textY = size/2 + textSize + 5;
             this.ctx.strokeText(prize.title, 0, textY);
@@ -472,29 +485,33 @@ class RouletteGame {
         this.ctx.restore();
     }
     
+    /**
+     * Отрисовка центральной кнопки в стиле glassmorphism (тренд 2024 года)
+     */
     drawCenterButton() {
         this.ctx.save();
         
-        // Glassmorphism кнопка (2024 тренд)
-        const buttonWidth = 280;
-        const buttonHeight = 70;
-        const buttonY = this.canvas.height - 100;
-        const cornerRadius = 20;
+        // Размеры кнопки
+        const buttonWidth = 300; // Увеличили ширину для лучшей читаемости
+        const buttonHeight = 80;  // Увеличили высоту для удобства нажатия
+        const buttonY = this.canvas.height - 110; // Немного выше, чтобы не было слишком внизу
+        const cornerRadius = 24; // Более плавные углы
         
-        // Subtle пульсация
-        const pulse = Math.sin(Date.now() / 300) * 0.02 + 1;
+        // Плавная пульсация
+        const pulse = Math.sin(Date.now() / 300) * 0.03 + 1; // Увеличили амплитуду
         this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulse, pulse);
         
-        // Тень кнопки
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.shadowBlur = 15;
-        this.ctx.shadowOffsetY = 5;
+        // Усиленная тень кнопки
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowOffsetY = 8;
         
-        // Фон кнопки - градиент со стеклянным эффектом
+        // Улучшенный градиент - яркий и насыщенный
         const gradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
-        gradient.addColorStop(0, 'rgba(165, 85, 247, 0.7)');
-        gradient.addColorStop(1, 'rgba(212, 70, 239, 0.9)');
+        gradient.addColorStop(0, 'rgba(165, 85, 247, 0.8)'); // Более насыщенный
+        gradient.addColorStop(0.5, 'rgba(190, 75, 240, 0.85)');
+        gradient.addColorStop(1, 'rgba(212, 70, 239, 0.95)');
         
         // Основная форма
         this.ctx.beginPath();
@@ -502,17 +519,25 @@ class RouletteGame {
         this.ctx.fillStyle = gradient;
         this.ctx.fill();
         
-        // Светлая рамка для эффекта стекла
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        // Светлая рамка для эффекта стекла - ярче и заметнее
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.stroke();
+        
+        // Верхняя светлая бликовая полоса для лучшего эффекта стекла
+        this.ctx.beginPath();
+        this.ctx.moveTo(-buttonWidth/2 + cornerRadius, -buttonHeight/2 + 10);
+        this.ctx.lineTo(buttonWidth/2 - cornerRadius, -buttonHeight/2 + 10);
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         this.ctx.lineWidth = 2;
         this.ctx.stroke();
         
-        // Текст на кнопке
+        // Улучшенный текст на кнопке
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.shadowBlur = 4;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.shadowBlur = 5;
         this.ctx.shadowOffsetY = 2;
-        this.ctx.font = 'bold 24px Arial';
+        this.ctx.font = 'bold 30px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial';
         this.ctx.textBaseline = 'middle';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 0);
@@ -520,20 +545,41 @@ class RouletteGame {
         this.ctx.restore();
     }
     
-    createParticles(x, y, count = 1) {
+    /**
+     * Создает частицы в указанной позиции
+     * @param {number} x - Координата X
+     * @param {number} y - Координата Y
+     * @param {number} count - Количество частиц
+     * @param {string} [color] - Цвет частиц, если указан
+     */
+    createParticles(x, y, count = 1, color = null) {
         // Создаем несколько частиц в указанной позиции
+        const colors = ['#FF4081', '#3F51B5', '#FFD700', '#4CAF50', '#9C27B0'];
+        
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = 50 + Math.random() * 150;
+            
+            // Варьируем начальный подъём для более естественного эффекта
+            const initialLift = 70 + Math.random() * 60;
+            
+            // Увеличиваем разброс размеров для визуального разнообразия
+            const particleSize = 2 + Math.random() * 6;
+            
+            // Время жизни частицы - случайное
+            const lifeSpan = 0.7 + Math.random() * 0.5;
+            
+            // Если цвет передан, используем его, иначе случайный
+            const particleColor = color || colors[Math.floor(Math.random() * colors.length)];
             
             this.particles.push({
                 x: x,
                 y: y,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 100, // Начальный подъём
-                size: 3 + Math.random() * 5,
-                life: 1.0,
-                color: ['#FF4081', '#3F51B5', '#FFD700', '#4CAF50', '#9C27B0'][Math.floor(Math.random() * 5)]
+                vy: Math.sin(angle) * speed - initialLift,
+                size: particleSize,
+                life: lifeSpan,
+                color: particleColor
             });
         }
     }
@@ -554,25 +600,57 @@ class RouletteGame {
         this.onSpinComplete();
     }
 
-    // Завершение вращения
+    /**
+     * Завершение игры с выдачей приза и эффектами победы
+     */
     onSpinComplete() {
         // Всегда выигрывает коробка (индекс 3)
         const boxIndex = 3;
         const winnerPrize = this.prizes[boxIndex];
+        console.log('📦 ПОБЕДА: Коробка!', winnerPrize);
         
-        // MEGA эффекты победы
-        for (let i = 0; i < 100; i++) {
+        // Расширенный эффект победы
+        
+        // 1. Волна частиц от центра
+        for (let i = 0; i < 120; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 150;
+            const distance = 30 + Math.random() * 150;
             const x = this.centerX + Math.cos(angle) * distance;
             const y = this.centerY + Math.sin(angle) * distance;
-            this.createParticles(x, y, 2);
+            
+            // Цвета в стиле приза-победителя
+            const particleColor = Math.random() < 0.6 ? 
+                [winnerPrize.color, winnerPrize.gradientColor, '#FFD700'][Math.floor(Math.random() * 3)] : // 60% шанс на цвета приза
+                ['#FF4081', '#3F51B5', '#FFFFFF', '#4CAF50', '#9C27B0'][Math.floor(Math.random() * 5)]; // 40% шанс на случайные цвета
+            
+            this.createParticles(x, y, 2, particleColor);
         }
         
-        // Завершаем игру через 3 секунды (дольше для наслаждения)
+        // 2. Дополнительный взрыв частиц через короткий интервал
+        setTimeout(() => {
+            for (let i = 0; i < 50; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const x = this.centerX + Math.cos(angle) * 20; // Ближе к центру
+                const y = this.centerY + Math.sin(angle) * 20;
+                this.createParticles(x, y, 3, '#FFD700'); // Золотые частицы
+            }
+        }, 300);
+        
+        // 3. Финальная волна частиц перед завершением
+        setTimeout(() => {
+            for (let i = 0; i < 40; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const x = this.centerX + Math.cos(angle) * distance;
+                const y = this.centerY + Math.sin(angle) * distance;
+                this.createParticles(x, y, 2, winnerPrize.gradientColor);
+            }
+        }, 1500);
+        
+        // Завершаем игру через 4 секунды (дольше для наслаждения)
         setTimeout(() => {
             this.win();
-        }, 3000);
+        }, 4000);
     }
 
     // Обработка тапов

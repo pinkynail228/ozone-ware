@@ -450,7 +450,7 @@ class GameManager {
                 this.currentGame = new ScannerGame(this.canvas, this.ctx, this);
                 break;
             case 'roulette':
-                this.currentGame = new RouletteGame(this.canvas, this.ctx, this);
+                this.currentGame = new FinalStageGame(this.canvas, this.ctx, this);
                 break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
