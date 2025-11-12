@@ -13,7 +13,9 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner', 'roulette'];
+        // Убрали 'roulette' из основного пула игр, теперь оно показывается только после 5 игр
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner'];
+        this.gamesRequiredForFinal = 5; // Количество игр, необходимых для финального этапа
         this.playedGames = [];
         this.recentGames = [];
         this.currentGameKey = null;
@@ -593,6 +595,13 @@ class GameManager {
     nextGame() {
         if (this.mode !== 'shift') {
             console.warn('⚠️ Следующая игра доступна только в режиме смены');
+            return;
+        }
+        
+        // Проверяем, не пора ли показывать финальный этап
+        if (this.gamesCompleted >= this.gamesRequiredForFinal && !this.shiftFinished) {
+            console.log('🎁 Достигнуто ' + this.gamesRequiredForFinal + ' игр! Показываем финальный этап');
+            this.showTransition('roulette', () => this.startGame('roulette'));
             return;
         }
 
