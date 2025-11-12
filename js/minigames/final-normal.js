@@ -31,8 +31,8 @@ class FinalNormalGame {
         this.spinSpeed = 0; // px/sec по ленте
         this.phase = 'idle'; // idle | spinFast | easeOut
         this.phaseStart = 0;
-        this.spinFastDuration = 900; // мс
-        this.easeOutDuration = 700; // мс
+        this.spinFastDuration = 2600; // мс (динамичная быстрая фаза)
+        this.easeOutDuration = 1200; // мс (плавное замедление)
         this.targetOffset = 0;
         
         // Аудиоконтекст
@@ -114,7 +114,8 @@ class FinalNormalGame {
                 const required = this.computeRequiredOffsetForIndex(this.targetPrizeIndex);
                 // подбираем ближайшую цель впереди (минимум +1 полный цикл, чтобы был вау-эффект)
                 let target = required;
-                while (target <= current + this.prizeWidth) target += this.cycleWidth; // гарантируем движение вперед
+                // гарантируем как минимум ОДИН ПОЛНЫЙ ЦИКЛ впереди, чтобы не было ощущения телепорта
+                while (target <= current + this.cycleWidth) target += this.cycleWidth;
                 // Добавим еще 0..1 циклов чтобы не казалось телепортом
                 this.targetOffset = target;
                 this.startOffset = current;
