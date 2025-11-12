@@ -17,57 +17,53 @@ class RouletteGame {
         this.gameLoop = null;
         this.lastFrameTime = null;
 
-        // Колесо рулетки
-        this.wheel = {
-            centerX: this.canvas.width / 2,
-            centerY: this.canvas.height / 2 - 50,
-            radius: 140,
-            rotation: 0, // Текущий угол поворота
-            targetRotation: 0, // Целевой угол
-            spinSpeed: 0, // Скорость вращения
-            isSpinning: false
-        };
+        // Призы по кругу (как в современных играх)
+        this.centerX = this.canvas.width / 2;
+        this.centerY = this.canvas.height / 2 - 30;
+        this.prizeRadius = 120; // Радиус расположения призов
+        
+        // Система вращения
+        this.rotation = 0; // Текущий угол поворота призов
+        this.spinSpeed = 0; // Скорость вращения
+        this.isSpinning = false;
+        this.idleRotationSpeed = 0.5; // Медленное вращение в покое
 
-        // 5 секторов с ценными призами (4 крутых + 1 коробка)
-        this.sectors = [
+        // 5 призов расположенных по кругу
+        this.prizes = [
             { 
-                color: '#FF6B35', 
-                gradientColor: '#FF8C5A',
-                prize: '🚗 BMW X5', 
-                text: 'BMW X5',
-                emoji: '🚗'
+                emoji: '🚗',
+                title: 'BMW X5',
+                color: '#FF6B35',
+                gradientColor: '#FF8C5A'
             },
             { 
-                color: '#22C55E', 
-                gradientColor: '#4ADE80',
-                prize: '💰 $100,000', 
-                text: '$100K',
-                emoji: '💰'
+                emoji: '💰',
+                title: '$100K',
+                color: '#22C55E',
+                gradientColor: '#4ADE80'
             },
             { 
-                color: '#3B82F6', 
-                gradientColor: '#60A5FA',
-                prize: '⌚ Rolex', 
-                text: 'Rolex',
-                emoji: '⌚'
+                emoji: '⌚',
+                title: 'Rolex',
+                color: '#3B82F6',
+                gradientColor: '#60A5FA'
             },
             { 
-                color: '#F59E0B', 
-                gradientColor: '#FBBF24',
-                prize: '🏠 Квартира', 
-                text: 'Квартира',
-                emoji: '🏠'
+                emoji: '🏠',
+                title: 'Квартира',
+                color: '#F59E0B',
+                gradientColor: '#FBBF24'
             },
             { 
-                color: '#A855F7', 
-                gradientColor: '#D946EF',
-                prize: '📦 Коробка', 
-                text: 'Коробка',
-                emoji: '📦'
+                emoji: '📦',
+                title: 'Коробка',
+                color: '#A855F7',
+                gradientColor: '#D946EF'
             }
         ];
 
-        this.sectorAngle = (Math.PI * 2) / this.sectors.length; // 72 градуса на сектор
+        this.prizeCount = this.prizes.length;
+        this.prizeAngle = (Math.PI * 2) / this.prizeCount; // 72 градуса между призами
 
         // Стрелка-указатель
         this.pointer = {
@@ -232,19 +228,22 @@ class RouletteGame {
     }
 
     updateWheelRotation(deltaTime) {
-        if (this.wheel.isSpinning) {
-            // Применяем скорость вращения
-            this.wheel.rotation += this.wheel.spinSpeed * deltaTime * 60;
+        if (this.isSpinning) {
+            // Быстрое вращение при спине
+            this.rotation += this.spinSpeed * deltaTime * 60;
             
             // Замедление (трение)
-            this.wheel.spinSpeed *= 0.98;
+            this.spinSpeed *= 0.98;
             
             // Остановка когда скорость мала
-            if (this.wheel.spinSpeed < 0.5) {
-                this.wheel.isSpinning = false;
-                this.wheel.spinSpeed = 0;
+            if (this.spinSpeed < 0.5) {
+                this.isSpinning = false;
+                this.spinSpeed = 0;
                 this.onSpinComplete();
             }
+        } else {
+            // Медленное вращение в режиме ожидания
+            this.rotation += this.idleRotationSpeed * deltaTime * 60;
         }
     }
 
@@ -258,15 +257,15 @@ class RouletteGame {
         // Мерцающие звёзды
         this.drawStars();
         
-        // Колесо рулетки
-        this.drawWheel();
+        // Призы по кругу
+        this.drawPrizes();
+        
+        // Центральная кнопка
+        this.drawCenterButton();
         
         // Частицы
         this.updateParticles();
         this.drawParticles();
-        
-        // Стрелка-указатель
-        this.drawPointer();
         
         // UI убран - никаких текстов!
     }
@@ -387,6 +386,114 @@ class RouletteGame {
             
             this.ctx.restore();
         }
+        
+        this.ctx.restore();
+    }
+
+    drawPrizes() {
+        // Рисуем призы по кругу
+        for (let i = 0; i < this.prizeCount; i++) {
+            const prize = this.prizes[i];
+            const angle = this.rotation + (i * this.prizeAngle);
+            
+            // Позиция приза
+            const x = this.centerX + Math.cos(angle) * this.prizeRadius;
+            const y = this.centerY + Math.sin(angle) * this.prizeRadius;
+            
+            this.drawPrize(prize, x, y, i);
+        }
+    }
+
+    drawPrize(prize, x, y, index) {
+        this.ctx.save();
+        
+        // Размер приза
+        const size = 70;
+        const pulseScale = 1 + Math.sin(Date.now() / 1000 + index) * 0.1;
+        
+        this.ctx.translate(x, y);
+        this.ctx.scale(pulseScale, pulseScale);
+        
+        // Тень приза
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.shadowBlur = 15;
+        this.ctx.shadowOffsetY = 8;
+        
+        // Градиентный фон приза
+        const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, size/2);
+        gradient.addColorStop(0, prize.gradientColor);
+        gradient.addColorStop(1, prize.color);
+        
+        // Круг приза
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, size/2, 0, Math.PI * 2);
+        this.ctx.fillStyle = gradient;
+        this.ctx.fill();
+        
+        // Золотая рамка
+        this.ctx.strokeStyle = '#FFD700';
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke();
+        
+        // Эмодзи приза
+        this.ctx.font = 'bold 35px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillText(prize.emoji, 0, -5);
+        
+        // Название приза
+        this.ctx.font = 'bold 12px Exo 2';
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeText(prize.title, 0, 25);
+        this.ctx.fillText(prize.title, 0, 25);
+        
+        this.ctx.restore();
+    }
+
+    drawCenterButton() {
+        this.ctx.save();
+        
+        // Пульсирующий эффект кнопки
+        const pulseScale = 1 + Math.sin(Date.now() / 500) * 0.05;
+        const buttonSize = 90;
+        
+        this.ctx.translate(this.centerX, this.centerY);
+        this.ctx.scale(pulseScale, pulseScale);
+        
+        // Тень кнопки
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.shadowBlur = 25;
+        this.ctx.shadowOffsetY = 10;
+        
+        // Градиент кнопки
+        const buttonGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, buttonSize/2);
+        buttonGradient.addColorStop(0, '#FFFACD');
+        buttonGradient.addColorStop(0.3, '#FFD700');
+        buttonGradient.addColorStop(1, '#FFA500');
+        
+        // Круг кнопки
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, buttonSize/2, 0, Math.PI * 2);
+        this.ctx.fillStyle = buttonGradient;
+        this.ctx.fill();
+        
+        // Белая рамка
+        this.ctx.strokeStyle = '#FFFFFF';
+        this.ctx.lineWidth = 4;
+        this.ctx.stroke();
+        
+        // Текст "ПОЛУЧИТЬ ПРИЗ"
+        this.ctx.shadowBlur = 5;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.font = 'bold 14px Exo 2';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillText('ПОЛУЧИТЬ', 0, -8);
+        this.ctx.fillText('ПРИЗ', 0, 8);
         
         this.ctx.restore();
     }
@@ -681,67 +788,65 @@ class RouletteGame {
         }
     }
 
-    // Запуск вращения колеса
+    // Запуск вращения призов
     spinWheel() {
-        if (this.wheel.isSpinning) return;
+        if (this.isSpinning) return;
         
-        console.log('🎰 Запуск вращения колеса');
+        console.log('🎰 Запуск вращения призов');
         
         // МЕГА праздничные эффекты!
         this.createConfetti(); // Конфетти с неба
         
-        // Взрыв частиц от центра колеса
+        // Взрыв частиц от центра
         for (let i = 0; i < 30; i++) {
             const angle = Math.random() * Math.PI * 2;
             const distance = 20 + Math.random() * 30;
-            const x = this.wheel.centerX + Math.cos(angle) * distance;
-            const y = this.wheel.centerY + Math.sin(angle) * distance;
+            const x = this.centerX + Math.cos(angle) * distance;
+            const y = this.centerY + Math.sin(angle) * distance;
             this.createParticles(x, y, 1);
         }
         
-        // Кольцо частиц вокруг колеса
+        // Кольцо частиц вокруг призов
         for (let i = 0; i < 16; i++) {
             const angle = (Math.PI * 2 / 16) * i;
-            const distance = this.wheel.radius + 40;
-            const x = this.wheel.centerX + Math.cos(angle) * distance;
-            const y = this.wheel.centerY + Math.sin(angle) * distance;
+            const distance = this.prizeRadius + 40;
+            const x = this.centerX + Math.cos(angle) * distance;
+            const y = this.centerY + Math.sin(angle) * distance;
             this.createParticles(x, y, 2);
         }
         
-        // Случайная скорость и направление
-        this.wheel.spinSpeed = 15 + Math.random() * 10; // 15-25 оборотов в секунду
-        this.wheel.isSpinning = true;
+        // Случайная скорость вращения
+        this.spinSpeed = 15 + Math.random() * 10; // 15-25 оборотов в секунду
+        this.isSpinning = true;
         
         // Звук убран для рулетки
     }
 
     // Завершение вращения
     onSpinComplete() {
-        console.log('🎯 Колесо остановилось');
+        console.log('🎯 Призы остановились');
         
-        // Определяем выигрышный сектор
-        const winnerSector = this.getWinningSector();
-        console.log('🏆 Выигрышный сектор:', winnerSector.prize);
+        // Всегда выигрывает коробка (последний приз в массиве)
+        const winnerPrize = this.prizes[4]; // Коробка
+        console.log('🏆 Выигрышный приз:', winnerPrize.title);
         
         // Показываем результат через секунду
         setTimeout(() => {
-            this.showResult(winnerSector);
+            this.showResult(winnerPrize);
         }, 1000);
     }
 
-    // Определение выигрышного сектора по углу стрелки
-    getWinningSector() {
-        // Нормализуем угол поворота колеса (0 - 2π)
-        let normalizedRotation = this.wheel.rotation % (Math.PI * 2);
-        if (normalizedRotation < 0) normalizedRotation += Math.PI * 2;
+    // Показ результата (всегда коробка)
+    showResult(prize) {
+        console.log('🎁 Результат:', prize.title);
         
-        // Стрелка указывает вверх, поэтому нужно учесть смещение
-        let pointerAngle = (Math.PI * 2 - normalizedRotation + Math.PI / 2) % (Math.PI * 2);
+        // Создаём ещё больше эффектов
+        this.createConfetti();
         
-        // Определяем индекс сектора
-        const sectorIndex = Math.floor(pointerAngle / this.sectorAngle);
-        
-        return this.sectors[sectorIndex];
+        // Завершаем игру через 2 секунды
+        setTimeout(() => {
+            this.win();
+        }, 2000);
     }
 
     // Показ результата (пока просто в консоль)
