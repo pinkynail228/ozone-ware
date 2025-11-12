@@ -342,13 +342,9 @@ class RouletteGame {
             this.ctx.stroke();
         }
         
-        // Эмодзи приза
+        // Современная 3D иконка вместо эмодзи
         this.ctx.shadowBlur = 0;
-        this.ctx.font = `bold ${fontSize}px Arial`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillText(prize.emoji, 0, -5);
+        this.drawPrizeIcon(prize, 0, -5, fontSize);
         
         // Название приза - читаемый размер
         if (textSize > 8) { // Показываем текст только если достаточно крупный
@@ -365,71 +361,331 @@ class RouletteGame {
         this.ctx.restore();
     }
 
+    drawPrizeIcon(prize, x, y, size) {
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        
+        const iconSize = size * 0.6;
+        
+        // Определяем тип приза и рисуем соответствующую 3D иконку
+        switch(prize.emoji) {
+            case '🚗':
+                this.drawCarIcon(iconSize);
+                break;
+            case '💰':
+                this.drawMoneyIcon(iconSize);
+                break;
+            case '⌚':
+                this.drawWatchIcon(iconSize);
+                break;
+            case '🏠':
+                this.drawHouseIcon(iconSize);
+                break;
+            case '📦':
+                this.drawBoxIcon(iconSize);
+                break;
+        }
+        
+        this.ctx.restore();
+    }
+
+    drawCarIcon(size) {
+        // 3D автомобиль с металлическим эффектом
+        const scale = size / 40;
+        this.ctx.scale(scale, scale);
+        
+        // Тень
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.fillRect(-18, 8, 36, 4);
+        
+        // Основной корпус (градиент металла)
+        const carGradient = this.ctx.createLinearGradient(0, -10, 0, 10);
+        carGradient.addColorStop(0, '#E8E8E8');
+        carGradient.addColorStop(0.5, '#C0C0C0');
+        carGradient.addColorStop(1, '#808080');
+        
+        this.ctx.fillStyle = carGradient;
+        this.ctx.beginPath();
+        this.ctx.roundRect(-15, -8, 30, 16, 3);
+        this.ctx.fill();
+        
+        // Окна (стеклянный эффект)
+        const glassGradient = this.ctx.createLinearGradient(0, -6, 0, 2);
+        glassGradient.addColorStop(0, 'rgba(173, 216, 230, 0.8)');
+        glassGradient.addColorStop(1, 'rgba(100, 149, 237, 0.6)');
+        
+        this.ctx.fillStyle = glassGradient;
+        this.ctx.fillRect(-12, -6, 24, 8);
+        
+        // Колёса (чёрные с металлическими дисками)
+        this.ctx.fillStyle = '#2C2C2C';
+        this.ctx.beginPath();
+        this.ctx.arc(-8, 6, 3, 0, Math.PI * 2);
+        this.ctx.arc(8, 6, 3, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Диски колёс
+        this.ctx.fillStyle = '#A0A0A0';
+        this.ctx.beginPath();
+        this.ctx.arc(-8, 6, 2, 0, Math.PI * 2);
+        this.ctx.arc(8, 6, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    drawMoneyIcon(size) {
+        // 3D стопка денег
+        const scale = size / 40;
+        this.ctx.scale(scale, scale);
+        
+        // Стопка купюр с 3D эффектом
+        for (let i = 0; i < 3; i++) {
+            const offset = i * 2;
+            
+            // Тень каждой купюры
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            this.ctx.fillRect(-12 + offset, -6 + offset + 1, 24, 12);
+            
+            // Градиент денег
+            const moneyGradient = this.ctx.createLinearGradient(0, -6 + offset, 0, 6 + offset);
+            moneyGradient.addColorStop(0, '#90EE90');
+            moneyGradient.addColorStop(0.5, '#228B22');
+            moneyGradient.addColorStop(1, '#006400');
+            
+            this.ctx.fillStyle = moneyGradient;
+            this.ctx.fillRect(-12 + offset, -6 + offset, 24, 12);
+            
+            // Символ доллара
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('$', 0 + offset, 2 + offset);
+        }
+    }
+
+    drawWatchIcon(size) {
+        // 3D часы с металлическим корпусом
+        const scale = size / 40;
+        this.ctx.scale(scale, scale);
+        
+        // Тень
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.beginPath();
+        this.ctx.arc(2, 2, 14, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Корпус часов (металлический градиент)
+        const watchGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
+        watchGradient.addColorStop(0, '#FFD700');
+        watchGradient.addColorStop(0.7, '#DAA520');
+        watchGradient.addColorStop(1, '#B8860B');
+        
+        this.ctx.fillStyle = watchGradient;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Циферблат
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 9, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Стрелки
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(0, -6);  // Часовая
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(4, -2);  // Минутная
+        this.ctx.stroke();
+        
+        // Центр
+        this.ctx.fillStyle = '#000000';
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    drawHouseIcon(size) {
+        // 3D дом с объёмом
+        const scale = size / 40;
+        this.ctx.scale(scale, scale);
+        
+        // Тень дома
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.fillRect(-13, 8, 26, 4);
+        
+        // Стены (градиент)
+        const wallGradient = this.ctx.createLinearGradient(-10, -5, 10, 5);
+        wallGradient.addColorStop(0, '#DEB887');
+        wallGradient.addColorStop(1, '#CD853F');
+        
+        this.ctx.fillStyle = wallGradient;
+        this.ctx.fillRect(-10, -2, 20, 12);
+        
+        // Крыша (3D треугольник)
+        const roofGradient = this.ctx.createLinearGradient(0, -12, 0, -2);
+        roofGradient.addColorStop(0, '#8B4513');
+        roofGradient.addColorStop(1, '#A0522D');
+        
+        this.ctx.fillStyle = roofGradient;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -12);
+        this.ctx.lineTo(-12, -2);
+        this.ctx.lineTo(12, -2);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        // Дверь
+        this.ctx.fillStyle = '#654321';
+        this.ctx.fillRect(-3, 2, 6, 8);
+        
+        // Окно
+        this.ctx.fillStyle = '#87CEEB';
+        this.ctx.fillRect(2, 0, 4, 4);
+        
+        // Ручка двери
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.beginPath();
+        this.ctx.arc(1, 6, 0.5, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    drawBoxIcon(size) {
+        // 3D коробка с объёмными гранями
+        const scale = size / 40;
+        this.ctx.scale(scale, scale);
+        
+        // Тень
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.fillRect(-12, 8, 24, 4);
+        
+        // Передняя грань
+        const frontGradient = this.ctx.createLinearGradient(-10, -8, 10, 8);
+        frontGradient.addColorStop(0, '#DDA0DD');
+        frontGradient.addColorStop(1, '#BA55D3');
+        
+        this.ctx.fillStyle = frontGradient;
+        this.ctx.fillRect(-10, -8, 20, 16);
+        
+        // Верхняя грань (3D эффект)
+        const topGradient = this.ctx.createLinearGradient(-10, -8, 0, -12);
+        topGradient.addColorStop(0, '#E6E6FA');
+        topGradient.addColorStop(1, '#DDA0DD');
+        
+        this.ctx.fillStyle = topGradient;
+        this.ctx.beginPath();
+        this.ctx.moveTo(-10, -8);
+        this.ctx.lineTo(-6, -12);
+        this.ctx.lineTo(14, -12);
+        this.ctx.lineTo(10, -8);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        // Правая грань
+        const sideGradient = this.ctx.createLinearGradient(10, -8, 14, -12);
+        sideGradient.addColorStop(0, '#BA55D3');
+        sideGradient.addColorStop(1, '#9932CC');
+        
+        this.ctx.fillStyle = sideGradient;
+        this.ctx.beginPath();
+        this.ctx.moveTo(10, -8);
+        this.ctx.lineTo(14, -12);
+        this.ctx.lineTo(14, 4);
+        this.ctx.lineTo(10, 8);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        // Лента на коробке
+        this.ctx.strokeStyle = '#FFD700';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(-10, 0);
+        this.ctx.lineTo(10, 0);
+        this.ctx.moveTo(0, -8);
+        this.ctx.lineTo(0, 8);
+        this.ctx.stroke();
+        
+        // Бантик
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.beginPath();
+        this.ctx.arc(-2, -8, 2, 0, Math.PI * 2);
+        this.ctx.arc(2, -8, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
     drawCenterButton() {
         this.ctx.save();
         
-        // Современная прямоугольная кнопка
-        const buttonWidth = 260;
-        const buttonHeight = 60;
+        // Glassmorphism кнопка (2024 тренд)
+        const buttonWidth = 280;
+        const buttonHeight = 70;
         const buttonY = this.canvas.height - 100;
-        const cornerRadius = 30;
+        const cornerRadius = 20;
         
-        // Пульсирующий эффект
-        const pulseScale = 1 + Math.sin(Date.now() / 600) * 0.03;
-        const glowIntensity = 0.5 + Math.sin(Date.now() / 400) * 0.3;
+        // Subtle пульсация
+        const pulseScale = 1 + Math.sin(Date.now() / 800) * 0.02;
         
         this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulseScale, pulseScale);
         
-        // Большая мягкая тень
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        this.ctx.shadowBlur = 20;
-        this.ctx.shadowOffsetY = 8;
+        // Многослойная тень (neomorphism)
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        this.ctx.shadowBlur = 30;
+        this.ctx.shadowOffsetY = 12;
         
-        // Премиальный градиент кнопки
-        const buttonGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
-        buttonGradient.addColorStop(0, '#FFD700');  // Золотой верх
-        buttonGradient.addColorStop(0.5, '#FFA500'); // Оранжевый центр
-        buttonGradient.addColorStop(1, '#FF8C00');   // Тёмно-оранжевый низ
+        // Glassmorphism фон - полупрозрачный с градиентом
+        const glassGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
+        glassGradient.addColorStop(0, 'rgba(255, 255, 255, 0.25)');  
+        glassGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)'); 
+        glassGradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');   
         
-        // Рисуем скругленный прямоугольник
+        // Основная кнопка
         this.ctx.beginPath();
         this.ctx.roundRect(-buttonWidth/2, -buttonHeight/2, buttonWidth, buttonHeight, cornerRadius);
-        this.ctx.fillStyle = buttonGradient;
+        this.ctx.fillStyle = glassGradient;
         this.ctx.fill();
         
-        // Белая рамка
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 3;
+        // Тонкая светлая граница (glassmorphism)
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.lineWidth = 1.5;
         this.ctx.stroke();
         
-        // Внутренняя подсветка (блик)
-        const highlightGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, -buttonHeight/4);
-        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+        // Внутренняя тень для глубины
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+        
+        // Subtle блик сверху
+        const highlightGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, -buttonHeight/3);
+        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
         highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
         
         this.ctx.beginPath();
-        this.ctx.roundRect(-buttonWidth/2 + 3, -buttonHeight/2 + 3, buttonWidth - 6, buttonHeight/2, cornerRadius - 3);
+        this.ctx.roundRect(-buttonWidth/2 + 2, -buttonHeight/2 + 2, buttonWidth - 4, buttonHeight/3, cornerRadius - 2);
         this.ctx.fillStyle = highlightGradient;
         this.ctx.fill();
         
-        // Внешнее свечение
-        this.ctx.shadowColor = `rgba(255, 215, 0, ${glowIntensity})`;
-        this.ctx.shadowBlur = 40;
-        this.ctx.shadowOffsetY = 0;
-        this.ctx.strokeStyle = `rgba(255, 215, 0, ${glowIntensity * 0.5})`;
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
+        // Цветная подложка для контраста текста
+        const bgGradient = this.ctx.createLinearGradient(0, -buttonHeight/2, 0, buttonHeight/2);
+        bgGradient.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
+        bgGradient.addColorStop(1, 'rgba(255, 140, 0, 0.3)');
         
-        // Текст кнопки
-        this.ctx.shadowBlur = 3;
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.font = 'bold 20px Exo 2';
+        this.ctx.beginPath();
+        this.ctx.roundRect(-buttonWidth/2 + 1, -buttonHeight/2 + 1, buttonWidth - 2, buttonHeight - 2, cornerRadius - 1);
+        this.ctx.fillStyle = bgGradient;
+        this.ctx.fill();
+        
+        // Современный чистый текст
+        this.ctx.shadowBlur = 2;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowOffsetY = 1;
+        this.ctx.font = '600 18px system-ui, -apple-system, sans-serif'; // Современный шрифт
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillText('🎁 ПОЛУЧИТЬ ПРИЗ 🎁', 0, 0);
+        this.ctx.fillText('ПОЛУЧИТЬ ПРИЗ', 0, 0);
         
         this.ctx.restore();
     }
