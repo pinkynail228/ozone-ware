@@ -98,48 +98,65 @@ class FinalNormalGame {
             // Плавное замедление
             this.spinSpeed *= 0.995;
             
-            // Когда скорость мала, ПРИНУДИТЕЛЬНО ставим коробку в центр
+            // Когда скорость мала, ПРОСТО ДВИГАЕМ ДО КОРОБКИ
             if (this.spinSpeed < 20) {
                 this.isSpinning = false;
                 this.spinSpeed = 0;
                 
-                // КОРОБКА ДОЛЖНА БЫТЬ В ЦЕНТРЕ!
-                // КОРОБКА ТЕПЕРЬ ИМЕЕТ ИНДЕКС 9 (ПОСЛЕДНЯЯ В МАССИВЕ)!
+                console.log('📦 ПРОСТО ДВИГАЕМ ДО КОРОБКИ!');
                 
-                console.log('📦 ПРИЗЫ В МАССИВЕ:');
+                const centerX = this.canvas.width / 2; // 195
+                const targetPrizeIndex = 10; // КОРОБКА
+                
+                console.log('📦 Призы в массиве:');
                 this.prizes.forEach((prize, index) => {
                     console.log(`   ${index}: ${prize.title}`);
                 });
                 
-                const centerX = this.canvas.width / 2; // 195
-                const targetPrizeIndex = 10; // КОРОБКА ТЕПЕРЬ ПОД ИНДЕКСОМ 10!
+                // ПРОСТО ПОДБИРАЕМ offset ТАК, ЧТОБЫ КОРОБКА БЫЛА В ЦЕНТРЕ
+                // Проверяем 1000 разных оффсетов и находим нужный
+                let foundOffset = null;
                 
-                console.log('🎯 Цель: поставить приз с индексом', targetPrizeIndex, 'в центр');
+                for (let testOffset = 0; testOffset < 2000; testOffset++) {
+                    const testPosition = Math.floor((centerX + testOffset) / this.prizeWidth);
+                    const testPrizeIndex = testPosition % this.prizes.length;
+                    
+                    if (testPrizeIndex === targetPrizeIndex) {
+                        foundOffset = testOffset;
+                        console.log(`✅ НАШЛИ OFFSET ДЛЯ КОРОБКИ: ${foundOffset}`);
+                        console.log(`   - testPosition: ${testPosition}`);
+                        console.log(`   - testPrizeIndex: ${testPrizeIndex}`);
+                        break;
+                    }
+                }
                 
-                // Рассчитываем нужный offset
-                const totalCycle = this.prizeWidth * this.prizes.length; // 11 * 120 = 1320
-                const requiredOffset = (targetPrizeIndex * this.prizeWidth - centerX) % totalCycle;
-                
-                // Находим сколько полных циклов прошло
-                const completedCycles = Math.floor(this.prizeOffset / totalCycle);
-                this.prizeOffset = completedCycles * totalCycle + requiredOffset;
-                
-                console.log('📦 КОРОБКА (ИНДЕКС 10) ПРИНУДИТЕЛЬНО УСТАНОВЛЕНА В ЦЕНТР:');
-                console.log('   - Новый offset:', this.prizeOffset);
-                console.log('   - Нужный offset для коробки (индекс 10):', requiredOffset);
-                console.log('   - Циклов прошло:', completedCycles);
-                console.log('   - Общий размер цикла:', totalCycle);
-                
-                // Проверяем какой приз теперь в центре
-                const testCenterX = this.canvas.width / 2;
-                const testPrizeIndex = Math.floor((testCenterX + this.prizeOffset) / this.prizeWidth) % this.prizes.length;
-                console.log('   - ПРОВЕРКА: индекс центрального приза:', testPrizeIndex);
-                console.log('   - ПРОВЕРКА: название приза:', this.prizes[testPrizeIndex].title);
-                
-                if (testPrizeIndex === 10) {
-                    console.log('✅ ПОБЕДА! Коробка в центре!');
+                if (foundOffset !== null) {
+                    // Применяем найденный offset с учетом пройденных циклов
+                    const totalCycle = this.prizeWidth * this.prizes.length;
+                    const completedCycles = Math.floor(this.prizeOffset / totalCycle);
+                    this.prizeOffset = completedCycles * totalCycle + foundOffset;
+                    
+                    console.log(`📦 КОРОБКА УСТАНОВЛЕНА:`);
+                    console.log(`   - Новый offset: ${this.prizeOffset}`);
+                    console.log(`   - Найденный базовый offset: ${foundOffset}`);
+                    console.log(`   - Пройдено циклов: ${completedCycles}`);
+                    
+                    // Проверяем результат
+                    const finalTestPosition = Math.floor((centerX + this.prizeOffset) / this.prizeWidth);
+                    const finalTestPrizeIndex = finalTestPosition % this.prizes.length;
+                    
+                    console.log(`🔎 ПРОВЕРКА РЕЗУЛЬТАТА:`);
+                    console.log(`   - Позиция: ${finalTestPosition}`);
+                    console.log(`   - Индекс приза: ${finalTestPrizeIndex}`);
+                    console.log(`   - Название: ${this.prizes[finalTestPrizeIndex].title}`);
+                    
+                    if (finalTestPrizeIndex === targetPrizeIndex) {
+                        console.log('✅ ПОБЕДА! Коробка в центре!');
+                    } else {
+                        console.log('❌ ОШИБКА! Коробка НЕ в центре!');
+                    }
                 } else {
-                    console.log('❌ ОШИБКА! Коробка НЕ в центре!');
+                    console.log('❌ НЕ НАШЛИ OFFSET ДЛЯ КОРОБКИ!');
                 }
                 
                 // Объявляем победу
