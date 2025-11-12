@@ -31,8 +31,8 @@ class FinalNormalGame {
         this.spinSpeed = 0; // px/sec по ленте
         this.phase = 'idle'; // idle | spinFast | easeOut
         this.phaseStart = 0;
-        this.spinFastDuration = 2600; // мс (динамичная быстрая фаза)
-        this.easeOutDuration = 1200; // мс (плавное замедление)
+        this.spinFastDuration = 4000; // мс (динамичная быстрая фаза) - увеличено до 4 секунд
+        this.easeOutDuration = 1500; // мс (плавное замедление) - увеличено для большего саспенса
         this.targetOffset = 0;
         
         // Аудиоконтекст
@@ -114,12 +114,13 @@ class FinalNormalGame {
             instructionBtn = document.createElement('div');
             instructionBtn.id = 'open-instruction-btn';
             Object.assign(instructionBtn.style, {
-                position: 'fixed', left: '50%', bottom: '120px', transform: 'translateX(-50%)',
-                width: '300px', padding: '16px', borderRadius: '24px',
+                position: 'fixed', left: '50%', bottom: '80px', transform: 'translateX(-50%)',
+                width: '280px', padding: '14px', borderRadius: '24px',
                 background: 'linear-gradient(135deg,#6366F1,#A855F7)', color: '#fff',
                 boxShadow: '0 8px 20px rgba(99,102,241,0.4)', textAlign: 'center',
-                fontWeight: '700', fontSize: '18px', letterSpacing: '0.5px', cursor: 'pointer',
-                zIndex: '9998', border: '2px solid rgba(255,255,255,0.2)'
+                fontWeight: '700', fontSize: '16px', letterSpacing: '0.5px', cursor: 'pointer',
+                zIndex: '9998', border: '2px solid rgba(255,255,255,0.2)',
+                maxWidth: '90%' // Ограничиваем ширину для мобильных устройств
             });
             instructionBtn.textContent = 'ОТКРЫТЬ ИНСТРУКЦИЮ';
             instructionBtn.addEventListener('click', () => {
