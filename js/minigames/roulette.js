@@ -16,16 +16,16 @@ class RouletteGame {
         this.gameLoop = null;
         this.lastFrameTime = null;
 
-        // Призы по кругу (как в современных играх)
+        // Горизонтальная лента призов
         this.centerX = this.canvas.width / 2;
         this.centerY = this.canvas.height / 2 - 30;
-        this.prizeRadius = 120; // Радиус расположения призов
         
-        // Система вращения
-        this.rotation = 0; // Текущий угол поворота призов
-        this.spinSpeed = 0; // Скорость вращения
+        // Система горизонтального движения
+        this.prizeOffset = 0; // Смещение ленты по X
+        this.prizeWidth = 120; // Ширина одного приза с отступами
+        this.spinSpeed = 0; // Скорость прокрутки
         this.isSpinning = false;
-        this.idleRotationSpeed = 0.5; // Медленное вращение в покое
+        this.idleSpeed = 1; // Медленное движение в покое (пикселей за кадр)
 
         // 5 призов расположенных по кругу
         this.prizes = [
@@ -115,8 +115,8 @@ class RouletteGame {
         }
         this.lastFrameTime = currentTime;
 
-        // Обновление анимации вращения
-        this.updateRotation(deltaTime);
+        // Обновление движения ленты
+        this.updateMovement(deltaTime);
 
         // Отрисовка
         this.draw(deltaTime);
@@ -124,23 +124,29 @@ class RouletteGame {
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
     }
 
-    updateRotation(deltaTime) {
+    updateMovement(deltaTime) {
         if (this.isSpinning) {
-            // Быстрое вращение при спине
-            this.rotation += this.spinSpeed * deltaTime * 60;
+            // Быстрое движение при спине
+            this.prizeOffset += this.spinSpeed * deltaTime * 60;
             
             // Замедление (трение)
             this.spinSpeed *= 0.98;
             
             // Остановка когда скорость мала
-            if (this.spinSpeed < 0.5) {
+            if (this.spinSpeed < 2) {
                 this.isSpinning = false;
                 this.spinSpeed = 0;
                 this.onSpinComplete();
             }
         } else {
-            // Медленное вращение в режиме ожидания
-            this.rotation += this.idleRotationSpeed * deltaTime * 60;
+            // Медленное движение в режиме ожидания (раз в секунду)
+            this.prizeOffset += this.idleSpeed * deltaTime * 60;
+        }
+        
+        // Циклическое движение - когда смещение больше ширины приза, сбрасываем
+        const totalWidth = this.prizeWidth * this.prizeCount;
+        if (this.prizeOffset >= totalWidth) {
+            this.prizeOffset -= totalWidth;
         }
     }
 
@@ -250,16 +256,26 @@ class RouletteGame {
     }
 
     drawPrizes() {
-        // Рисуем призы по кругу
-        for (let i = 0; i < this.prizeCount; i++) {
-            const prize = this.prizes[i];
-            const angle = this.rotation + (i * this.prizeAngle);
+        // Рисуем призы горизонтально (несколько циклов для бесшовности)
+        const startX = -this.prizeWidth; // Начинаем левее экрана
+        const endX = this.canvas.width + this.prizeWidth; // Заканчиваем правее экрана
+        
+        let currentX = startX - this.prizeOffset;
+        let prizeIndex = 0;
+        
+        // Рисуем призы пока не заполним весь экран
+        while (currentX < endX) {
+            const prize = this.prizes[prizeIndex % this.prizeCount];
+            const x = currentX + this.prizeWidth / 2;
+            const y = this.centerY;
             
-            // Позиция приза
-            const x = this.centerX + Math.cos(angle) * this.prizeRadius;
-            const y = this.centerY + Math.sin(angle) * this.prizeRadius;
+            // Рисуем только если приз виден на экране
+            if (x > -50 && x < this.canvas.width + 50) {
+                this.drawPrize(prize, x, y, prizeIndex);
+            }
             
-            this.drawPrize(prize, x, y, i);
+            currentX += this.prizeWidth;
+            prizeIndex++;
         }
     }
 
@@ -319,7 +335,9 @@ class RouletteGame {
         const pulseScale = 1 + Math.sin(Date.now() / 500) * 0.05;
         const buttonSize = 90;
         
-        this.ctx.translate(this.centerX, this.centerY);
+        // Кнопка внизу экрана
+        const buttonY = this.canvas.height - 120;
+        this.ctx.translate(this.centerX, buttonY);
         this.ctx.scale(pulseScale, pulseScale);
         
         // Тень кнопки
@@ -412,8 +430,8 @@ class RouletteGame {
             this.createParticles(x, y, 1);
         }
         
-        // Случайная скорость вращения
-        this.spinSpeed = 15 + Math.random() * 10;
+        // Случайная скорость горизонтального движения  
+        this.spinSpeed = 300 + Math.random() * 200; // Пикселей в секунду
         this.isSpinning = true;
     }
 
