@@ -736,6 +736,9 @@ class RouletteGame {
         
         console.log('🎰 Запуск вращения призов');
         
+        // 🎵 ПРАЗДНИЧНЫЙ ЗВУК старта (как в казино)
+        if (this.sound) this.sound.playEffect('collectGood');
+        
         // Создаём эффекты
         for (let i = 0; i < 20; i++) {
             const angle = Math.random() * Math.PI * 2;
@@ -754,23 +757,31 @@ class RouletteGame {
     onSpinComplete() {
         console.log('🎯 Призы остановились');
         
+        // 🎵 ПОБЕДНЫЙ ФАНФАР (как Марио добрался до замка!)
+        if (this.sound) {
+            // Серия звуков для эффекта фанфара
+            this.sound.playEffect('collectGood');
+            setTimeout(() => this.sound.playEffect('collectGood'), 200);
+            setTimeout(() => this.sound.playEffect('collectGood'), 400);
+        }
+        
         // Всегда выигрывает коробка
         const winnerPrize = this.prizes[4];
         console.log('🏆 Выигрышный приз:', winnerPrize.title);
         
-        // Эффекты победы
-        for (let i = 0; i < 30; i++) {
+        // МЕГА эффекты победы
+        for (let i = 0; i < 50; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 100;
+            const distance = Math.random() * 150;
             const x = this.centerX + Math.cos(angle) * distance;
             const y = this.centerY + Math.sin(angle) * distance;
-            this.createParticles(x, y, 1);
+            this.createParticles(x, y, 2);
         }
         
-        // Завершаем игру через 2 секунды
+        // Завершаем игру через 3 секунды (дольше для наслаждения)
         setTimeout(() => {
             this.win();
-        }, 2000);
+        }, 3000);
     }
 
     // Обработка тапов
