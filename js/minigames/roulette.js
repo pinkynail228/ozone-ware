@@ -28,19 +28,46 @@ class RouletteGame {
             isSpinning: false
         };
 
-        // 8 секторов с ценными призами
+        // 5 секторов с ценными призами (4 крутых + 1 коробка)
         this.sectors = [
-            { color: '#FF6B35', prize: '🚗 BMW X5', text: 'BMW X5' },
-            { color: '#4ECDC4', prize: '💰 $100,000', text: '$100,000' },
-            { color: '#45B7D1', prize: '⌚ Rolex', text: 'Rolex Watch' },
-            { color: '#96CEB4', prize: '🏠 Квартира', text: 'Квартира' },
-            { color: '#FFEAA7', prize: '💎 Бриллианты', text: 'Бриллианты' },
-            { color: '#DDA0DD', prize: '🏖️ Мальдивы', text: 'Мальдивы' },
-            { color: '#98D8C8', prize: '📱 iPhone 15', text: 'iPhone 15' },
-            { color: '#F7DC6F', prize: '🎮 PlayStation', text: 'PlayStation' }
+            { 
+                color: '#FF6B35', 
+                gradientColor: '#FF8C5A',
+                prize: '🚗 BMW X5', 
+                text: 'BMW X5',
+                emoji: '🚗'
+            },
+            { 
+                color: '#22C55E', 
+                gradientColor: '#4ADE80',
+                prize: '💰 $100,000', 
+                text: '$100K',
+                emoji: '💰'
+            },
+            { 
+                color: '#3B82F6', 
+                gradientColor: '#60A5FA',
+                prize: '⌚ Rolex', 
+                text: 'Rolex',
+                emoji: '⌚'
+            },
+            { 
+                color: '#F59E0B', 
+                gradientColor: '#FBBF24',
+                prize: '🏠 Квартира', 
+                text: 'Квартира',
+                emoji: '🏠'
+            },
+            { 
+                color: '#A855F7', 
+                gradientColor: '#D946EF',
+                prize: '📦 Коробка', 
+                text: 'Коробка',
+                emoji: '📦'
+            }
         ];
 
-        this.sectorAngle = (Math.PI * 2) / this.sectors.length; // 45 градусов на сектор
+        this.sectorAngle = (Math.PI * 2) / this.sectors.length; // 72 градуса на сектор
 
         // Стрелка-указатель
         this.pointer = {
@@ -49,7 +76,75 @@ class RouletteGame {
             size: 20
         };
 
+        // Частицы для эффектов
+        this.particles = [];
+        this.stars = [];
+        this.initStars();
+
         console.log('✅ RouletteGame: готов к запуску');
+    }
+
+    initStars() {
+        // Создаём звёзды вокруг колеса
+        for (let i = 0; i < 12; i++) {
+            const angle = (Math.PI * 2 / 12) * i;
+            const distance = this.wheel.radius + 80;
+            this.stars.push({
+                x: this.wheel.centerX + Math.cos(angle) * distance,
+                y: this.wheel.centerY + Math.sin(angle) * distance,
+                size: 3 + Math.random() * 5,
+                opacity: 0.3 + Math.random() * 0.7,
+                twinkle: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    createParticles(x, y, count = 5) {
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 / count) * i;
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * (3 + Math.random() * 3),
+                vy: Math.sin(angle) * (3 + Math.random() * 3),
+                life: 1,
+                size: 2 + Math.random() * 4,
+                color: ['#FFD700', '#FFA500', '#FF8C00', '#FF6B35'][Math.floor(Math.random() * 4)]
+            });
+        }
+    }
+
+    updateParticles() {
+        this.particles = this.particles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1; // Гравитация
+            p.life -= 0.02;
+            return p.life > 0;
+        });
+    }
+
+    drawParticles() {
+        this.particles.forEach(p => {
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = p.life;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+        this.ctx.globalAlpha = 1;
+    }
+
+    drawStars() {
+        const time = Date.now() / 1000;
+        this.stars.forEach((star, i) => {
+            // Мерцание звёзд
+            const twinkle = Math.sin(time * 2 + star.twinkle) * 0.5 + 0.5;
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * twinkle})`;
+            this.ctx.beginPath();
+            this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
     }
 
     start() {
@@ -113,8 +208,15 @@ class RouletteGame {
         // Фон
         this.drawBackground();
         
+        // Мерцающие звёзды
+        this.drawStars();
+        
         // Колесо рулетки
         this.drawWheel();
+        
+        // Частицы
+        this.updateParticles();
+        this.drawParticles();
         
         // Стрелка-указатель
         this.drawPointer();
@@ -140,47 +242,104 @@ class RouletteGame {
         this.ctx.translate(this.wheel.centerX, this.wheel.centerY);
         this.ctx.rotate(this.wheel.rotation);
         
-        // Рисуем секторы
+        // Тень колеса (большая и мягкая)
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 40;
+        this.ctx.shadowOffsetY = 15;
+        
+        // Рисуем секторы с градиентами
         for (let i = 0; i < this.sectors.length; i++) {
             const sector = this.sectors[i];
             const startAngle = i * this.sectorAngle;
             const endAngle = (i + 1) * this.sectorAngle;
+            const midAngle = startAngle + this.sectorAngle / 2;
             
-            // Сектор
+            // Радиальный градиент для объёма
+            const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, this.wheel.radius);
+            gradient.addColorStop(0, sector.gradientColor);
+            gradient.addColorStop(1, sector.color);
+            
+            // Сектор с градиентом
             this.ctx.beginPath();
             this.ctx.moveTo(0, 0);
             this.ctx.arc(0, 0, this.wheel.radius, startAngle, endAngle);
             this.ctx.closePath();
-            this.ctx.fillStyle = sector.color;
+            this.ctx.fillStyle = gradient;
             this.ctx.fill();
             
-            // Рамка сектора
-            this.ctx.strokeStyle = '#fff';
-            this.ctx.lineWidth = 2;
+            // Золотая рамка сектора
+            this.ctx.strokeStyle = '#FFD700';
+            this.ctx.lineWidth = 3;
             this.ctx.stroke();
             
-            // Текст приза
-            this.ctx.save();
-            this.ctx.rotate(startAngle + this.sectorAngle / 2);
-            this.ctx.translate(this.wheel.radius * 0.7, 0);
-            this.ctx.rotate(-Math.PI / 2);
+            // Внутренняя тень для глубины
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
             
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 14px Exo 2';
+            // Крупный эмодзи приза
+            this.ctx.save();
+            this.ctx.rotate(midAngle);
+            this.ctx.translate(this.wheel.radius * 0.65, 0);
+            this.ctx.rotate(-midAngle);
+            
+            this.ctx.font = 'bold 50px Arial';
             this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(sector.emoji, 0, 0);
+            
+            this.ctx.restore();
+            
+            // Текст приза (жирный с обводкой)
+            this.ctx.save();
+            this.ctx.rotate(midAngle);
+            this.ctx.translate(this.wheel.radius * 0.35, 0);
+            this.ctx.rotate(-midAngle);
+            
+            // Обводка (чёрная)
+            this.ctx.strokeStyle = '#000';
+            this.ctx.lineWidth = 4;
+            this.ctx.font = 'bold 16px Exo 2';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.strokeText(sector.text, 0, 0);
+            
+            // Основной текст (белый)
+            this.ctx.fillStyle = '#fff';
             this.ctx.fillText(sector.text, 0, 0);
             
             this.ctx.restore();
         }
         
-        // Центральный круг
+        // Внешний ободок (золотой)
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, 30, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#fff';
+        this.ctx.arc(0, 0, this.wheel.radius + 3, 0, Math.PI * 2);
+        this.ctx.strokeStyle = '#FFD700';
+        this.ctx.lineWidth = 6;
+        this.ctx.stroke();
+        
+        // Центральный круг с градиентом
+        const centerGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 35);
+        centerGradient.addColorStop(0, '#FFD700');
+        centerGradient.addColorStop(0.7, '#FFA500');
+        centerGradient.addColorStop(1, '#FF8C00');
+        
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 35, 0, Math.PI * 2);
+        this.ctx.fillStyle = centerGradient;
         this.ctx.fill();
-        this.ctx.strokeStyle = '#333';
+        
+        // Рамка центра
+        this.ctx.strokeStyle = '#fff';
         this.ctx.lineWidth = 3;
         this.ctx.stroke();
+        
+        // Корона в центре
+        this.ctx.font = 'bold 40px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillStyle = '#fff';
+        this.ctx.fillText('👑', 0, 0);
         
         this.ctx.restore();
     }
@@ -188,36 +347,88 @@ class RouletteGame {
     drawPointer() {
         this.ctx.save();
         
-        // Стрелка-треугольник
+        // Пульсирующий эффект стрелки
+        const pulseScale = 1 + Math.sin(Date.now() / 300) * 0.1;
+        
         this.ctx.translate(this.pointer.x, this.pointer.y);
+        this.ctx.scale(pulseScale, pulseScale);
+        
+        // Большая золотая стрелка с градиентом
+        const arrowGradient = this.ctx.createLinearGradient(0, 0, 0, 40);
+        arrowGradient.addColorStop(0, '#FFD700');
+        arrowGradient.addColorStop(0.5, '#FFA500');
+        arrowGradient.addColorStop(1, '#FF8C00');
+        
+        // Тень стрелки
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowOffsetY = 8;
+        
+        // Основная стрелка (большой треугольник)
         this.ctx.beginPath();
         this.ctx.moveTo(0, 0);
-        this.ctx.lineTo(-this.pointer.size / 2, this.pointer.size);
-        this.ctx.lineTo(this.pointer.size / 2, this.pointer.size);
+        this.ctx.lineTo(-25, 50);
+        this.ctx.lineTo(25, 50);
         this.ctx.closePath();
         
-        this.ctx.fillStyle = '#FF6B35';
+        this.ctx.fillStyle = arrowGradient;
         this.ctx.fill();
+        
+        // Белая рамка стрелки
         this.ctx.strokeStyle = '#fff';
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 3;
         this.ctx.stroke();
+        
+        // Внутренняя обводка для глубины
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+        
+        // Блик света на стрелке
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        this.ctx.beginPath();
+        this.ctx.moveTo(-5, 10);
+        this.ctx.lineTo(5, 10);
+        this.ctx.lineTo(0, 35);
+        this.ctx.closePath();
+        this.ctx.fill();
         
         this.ctx.restore();
     }
 
     drawUI() {
-        // Заголовок
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 28px Exo 2';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('🎰 РУЛЕТКА УДАЧИ', this.canvas.width / 2, 60);
+        // Заголовок с эффектом
+        const titleScale = 1 + Math.sin(Date.now() / 500) * 0.05;
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width / 2, 60);
+        this.ctx.scale(titleScale, titleScale);
         
-        // Инструкция
+        // Обводка заголовка
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.font = 'bold 32px Exo 2';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
+        
+        // Основной текст заголовка
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.font = 'bold 32px Exo 2';
+        this.ctx.fillText('🎰 РУЛЕТКА УДАЧИ', 0, 0);
+        
+        this.ctx.restore();
+        
+        // Инструкция с анимацией
         if (!this.wheel.isSpinning) {
-            this.ctx.font = '18px Exo 2';
+            const pulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
+            this.ctx.globalAlpha = pulse;
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 20px Exo 2';
+            this.ctx.textAlign = 'center';
             this.ctx.fillText('👆 ТАПНИ ЧТОБЫ КРУТИТЬ', this.canvas.width / 2, this.canvas.height - 100);
+            this.ctx.globalAlpha = 1;
         } else {
-            this.ctx.font = '18px Exo 2';
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 20px Exo 2';
+            this.ctx.textAlign = 'center';
             this.ctx.fillText('🎲 КРУТИТСЯ...', this.canvas.width / 2, this.canvas.height - 100);
         }
     }
@@ -227,6 +438,15 @@ class RouletteGame {
         if (this.wheel.isSpinning) return;
         
         console.log('🎰 Запуск вращения колеса');
+        
+        // Создаём праздничные частицы вокруг колеса
+        for (let i = 0; i < 20; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = this.wheel.radius + 50;
+            const x = this.wheel.centerX + Math.cos(angle) * distance;
+            const y = this.wheel.centerY + Math.sin(angle) * distance;
+            this.createParticles(x, y, 1);
+        }
         
         // Случайная скорость и направление
         this.wheel.spinSpeed = 15 + Math.random() * 10; // 15-25 оборотов в секунду
