@@ -13,7 +13,7 @@ class GameManager {
         this.maxLives = 4;
         this.lives = this.maxLives;
         this.lastEarned = 0;
-        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner'];
+        this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner', 'roulette'];
         this.playedGames = [];
         this.recentGames = [];
         this.currentGameKey = null;
@@ -126,6 +126,14 @@ class GameManager {
                 description: 'Води сканером по складу, подсвети штрихкод и подтвердите скан.',
                 controls: 'Перетаскивание лампы + тап для скана.',
                 duration: '≈ 7 секунд'
+            },
+            roulette: {
+                title: 'Рулетка удачи',
+                emoji: '🎰',
+                tagline: 'Тапай чтобы крутить колесо и выиграть приз!',
+                description: 'Крути колесо фортуны в конце смены и узнай какой приз тебя ждёт.',
+                controls: 'Тап по экрану для запуска рулетки.',
+                duration: '≈ 10 секунд'
             }
         };
 
@@ -429,6 +437,9 @@ class GameManager {
                 break;
             case 'scanner':
                 this.currentGame = new ScannerGame(this.canvas, this.ctx, this);
+                break;
+            case 'roulette':
+                this.currentGame = new RouletteGame(this.canvas, this.ctx, this);
                 break;
             default:
                 console.error(`❌ Неизвестная игра: ${gameName}`);
