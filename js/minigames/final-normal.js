@@ -82,6 +82,29 @@ class FinalNormalGame {
     }
 
     // ===== Modal: инструкция с поддержкой =====
+    showOpenInstructionButton() {
+        // Создаем кнопку "Открыть инструкцию"
+        let instructionBtn = document.getElementById('open-instruction-btn');
+        if (!instructionBtn) {
+            instructionBtn = document.createElement('div');
+            instructionBtn.id = 'open-instruction-btn';
+            Object.assign(instructionBtn.style, {
+                position: 'fixed', left: '50%', bottom: '120px', transform: 'translateX(-50%)',
+                width: '300px', padding: '16px', borderRadius: '24px',
+                background: 'linear-gradient(135deg,#6366F1,#A855F7)', color: '#fff',
+                boxShadow: '0 8px 20px rgba(99,102,241,0.4)', textAlign: 'center',
+                fontWeight: '700', fontSize: '18px', letterSpacing: '0.5px', cursor: 'pointer',
+                zIndex: '9998', border: '2px solid rgba(255,255,255,0.2)'
+            });
+            instructionBtn.textContent = 'ОТКРЫТЬ ИНСТРУКЦИЮ';
+            instructionBtn.addEventListener('click', () => {
+                instructionBtn.remove();
+                this.showInstructionModal();
+            });
+            document.body.appendChild(instructionBtn);
+        }
+    }
+    
     showInstructionModal() {
         // Создаем контейнер если его нет
         let modal = document.getElementById('instruction-modal');
@@ -106,7 +129,7 @@ class FinalNormalGame {
             phrase.id = 'support-phrase';
             Object.assign(phrase.style, { fontSize: '16px', lineHeight: '1.4', opacity: '0.95', marginBottom: '16px' });
             const btn = document.createElement('button');
-            btn.textContent = 'Прочитать';
+            btn.textContent = 'ИДТИ НА СМЕНУ';
             Object.assign(btn.style, {
                 width: '100%', padding: '12px 16px', borderRadius: '12px',
                 background: 'linear-gradient(135deg,#6366F1,#A855F7)', color: '#fff',
@@ -115,8 +138,8 @@ class FinalNormalGame {
             });
             btn.addEventListener('click', () => {
                 modal.remove();
-                // Завершить игру после прочтения
-                this.win();
+                // Возвращаемся на начальную заставку игры
+                this.gameManager.showStartScreen();
             });
             card.appendChild(title);
             card.appendChild(phrase);
@@ -126,14 +149,14 @@ class FinalNormalGame {
         }
         // Выставляем случайную фразу поддержки
         const phrases = [
-            'Отличная смена! Ты держишь ритм склада 💪',
-            'Спасибо за порядок и скорость — на тебе всё держится 👏',
-            'Твоя внимательность — золото логистики ✨',
-            'Смена пролетела, а ты — красавчик(а). Продолжаем в том же духе! 🚀',
-            'Надёжность — твоё второе имя. Команда это ценит ❤️',
-            'Ты делаешь склад лучше каждый день. Респект! 🙌',
-            'Чётко, быстро, по делу — вот это наш стиль ✅',
-            'Стабильно на 200%. Так держать! 🔥'
+            'Отличная смена! Ты держишь ритм склада, но нужно еще лучше работать 💪',
+            'Спасибо за порядок и скорость — на тебе всё держится. В следующую смену постарайся еще лучше! 👏',
+            'Твоя внимательность — золото логистики. Продолжай совершенствоваться! ✨',
+            'Смена пролетела, а ты — молодец. На следующей смене покажи больше результатов! 🚀',
+            'Надёжность — твоё второе имя. Команда это ценит, но всегда есть куда расти! ❤️',
+            'Ты делаешь склад лучше каждый день. В следующий раз будет еще лучше! 🙌',
+            'Чётко, быстро, по делу — но на следующей смене нужно работать еще усерднее! ✅',
+            'Стабильно на 200%. В следующий раз постарайся выйти на 300%! 🔥'
         ];
         const phraseEl = document.getElementById('support-phrase');
         if (phraseEl) phraseEl.textContent = phrases[Math.floor(Math.random() * phrases.length)];
@@ -460,6 +483,11 @@ class FinalNormalGame {
     }
     
     drawCenterButton() {
+        // Не рисуем кнопку, если уже завершили вращение
+        if (this.phase === 'idle' && this.targetOffset > 0) {
+            return;
+        }
+        
         this.ctx.save();
         
         const buttonWidth = 300;
@@ -566,8 +594,10 @@ class FinalNormalGame {
                 this.createParticles(x, y, 2);
             }, i * 20);
         }
-        // Показываем модалку с инструкцией и фразой поддержки
-        this.showInstructionModal();
+        // Показываем кнопку "Открыть инструкцию"
+        setTimeout(() => {
+            this.showOpenInstructionButton();
+        }, 1500); // Небольшая задержка для лучшего UX
     }
     
     setupControls() {
