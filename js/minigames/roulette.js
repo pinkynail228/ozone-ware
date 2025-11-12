@@ -225,27 +225,10 @@ class RouletteGame {
         // Обновление анимации вращения
         this.updateWheelRotation(deltaTime);
 
-        // Отрисовка
+        // Отрисовка БЕЗ UI (только колесо)
         this.draw(deltaTime);
 
         this.gameLoop = requestAnimationFrame((time) => this.update(time));
-    }
-
-    updateWheelRotation(deltaTime) {
-        if (this.wheel.isSpinning) {
-            // Применяем скорость вращения
-            this.wheel.rotation += this.wheel.spinSpeed * deltaTime * 60;
-            
-            // Замедление (трение)
-            this.wheel.spinSpeed *= 0.98;
-            
-            // Остановка когда скорость мала
-            if (this.wheel.spinSpeed < 0.5) {
-                this.wheel.isSpinning = false;
-                this.wheel.spinSpeed = 0;
-                this.onSpinComplete();
-            }
-        }
     }
 
     draw(deltaTime) {
@@ -268,8 +251,7 @@ class RouletteGame {
         // Стрелка-указатель
         this.drawPointer();
         
-        // UI
-        this.drawUI();
+        // UI убран - никаких текстов!
     }
 
     drawBackground() {
