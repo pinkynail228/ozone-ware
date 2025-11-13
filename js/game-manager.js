@@ -32,6 +32,10 @@ class GameManager {
         this.finalTransitionSubtitle = document.getElementById('final-transition-subtitle');
         this.finalTransitionTitle = document.getElementById('final-transition-title');
         this.finalTransitionDefault = document.querySelector('#transition-screen .transition-default');
+        this._finalTransitionHandler = null;
+        this._finalTransitionScreenHandler = null;
+        this._finalAutoTimeout = null;
+        this._finalTransitionCompleted = false;
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
 
@@ -517,11 +521,30 @@ class GameManager {
 
         if (this.finalTransitionContent) {
             this.finalTransitionContent.classList.add('hidden');
+            this.finalTransitionContent.style.display = 'none';
         }
 
         if (this.finalTransitionDefault) {
             this.finalTransitionDefault.classList.remove('hidden');
+            this.finalTransitionDefault.style.display = '';
         }
+
+        if (this._finalTransitionScreenHandler && transitionScreen) {
+            transitionScreen.removeEventListener('click', this._finalTransitionScreenHandler);
+            this._finalTransitionScreenHandler = null;
+        }
+
+        if (this.finalTransitionButton && this._finalTransitionHandler) {
+            this.finalTransitionButton.removeEventListener('click', this._finalTransitionHandler);
+            this._finalTransitionHandler = null;
+        }
+
+        if (this._finalAutoTimeout) {
+            clearTimeout(this._finalAutoTimeout);
+            this._finalAutoTimeout = null;
+        }
+
+        this._finalTransitionCompleted = false;
 
         if (this.countdownEl) {
             this.countdownEl.textContent = '3';
@@ -569,13 +592,17 @@ class GameManager {
             return;
         }
 
+        this._finalTransitionCompleted = false;
+
         transitionScreen.classList.add('final-transition');
 
         if (this.finalTransitionDefault) {
             this.finalTransitionDefault.classList.add('hidden');
+            this.finalTransitionDefault.style.display = 'none';
         }
 
         this.finalTransitionContent.classList.remove('hidden');
+        this.finalTransitionContent.style.display = 'flex';
 
         const score = this.totalScore || 0;
         if (this.finalTransitionScoreValue) {
@@ -607,20 +634,29 @@ class GameManager {
             }
         }
 
-       if (this.finalTransitionButton) {
+        if (this.finalTransitionButton) {
             this.finalTransitionButton.removeEventListener('click', this._finalTransitionHandler);
         }
 
         this.finalTransitionButton = document.getElementById('final-transition-button');
 
-        if (!this.finalTransitionButton) {
-            callback();
-            return;
-        }
-
-        const handler = () => {
+        const finishTransition = () => {
+            if (this._finalTransitionCompleted) return;
+            this._finalTransitionCompleted = true;
+            if (this._finalAutoTimeout) {
+                clearTimeout(this._finalAutoTimeout);
+                this._finalAutoTimeout = null;
+            }
             this.sound.playEffect('countdownFinal');
-            this.finalTransitionButton.disabled = true;
+            if (this.finalTransitionButton) {
+                this.finalTransitionButton.disabled = true;
+                this.finalTransitionButton.removeEventListener('click', finishTransition);
+                this.finalTransitionButton.style.pointerEvents = 'none';
+            }
+            if (this._finalTransitionScreenHandler) {
+                transitionScreen.removeEventListener('click', this._finalTransitionScreenHandler);
+                this._finalTransitionScreenHandler = null;
+            }
             this._finalTransitionHandler = null;
 
             this.finalTransitionContent.classList.add('hidden');
@@ -632,9 +668,31 @@ class GameManager {
             callback();
         };
 
-        this._finalTransitionHandler = handler;
-        this.finalTransitionButton.disabled = false;
-        this.finalTransitionButton.addEventListener('click', handler, { once: true });
+        if (this.finalTransitionButton) {
+            this.finalTransitionButton.disabled = false;
+            this.finalTransitionButton.style.display = 'inline-flex';
+            this.finalTransitionButton.style.opacity = '1';
+            this.finalTransitionButton.style.pointerEvents = 'auto';
+            this._finalTransitionHandler = finishTransition;
+            this.finalTransitionButton.addEventListener('click', finishTransition);
+        } else {
+            console.warn('⚠️ Финальная кнопка не найдена, запускаем переход автоматически');
+            this._finalAutoTimeout = setTimeout(() => finishTransition(), 2000);
+        }
+
+        // Дополнительно разрешаем тапнуть в любое место для перехода, если кнопки не видно
+        const screenHandler = (event) => {
+            if (this._finalTransitionCompleted) return;
+            if (this.finalTransitionButton && event.target === this.finalTransitionButton) return;
+            finishTransition();
+        };
+        transitionScreen.addEventListener('click', screenHandler, { once: true });
+        this._finalTransitionScreenHandler = screenHandler;
+
+        // Автоматически продолжаем через небольшую паузу, если игрок ничего не нажал
+        this._finalAutoTimeout = setTimeout(() => {
+            finishTransition();
+        }, 5000);
 
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
