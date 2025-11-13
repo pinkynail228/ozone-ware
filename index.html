@@ -75,11 +75,22 @@
 
         <!-- Экран выбора игры / Промежуточный -->
         <div id="transition-screen" class="screen">
-            <div class="game-number">ЗАДАЧА #<span id="game-number-display">1</span></div>
-            <h2 id="game-title">КУРЬЕР-РАННЕР</h2>
-            <p id="game-instruction">Тапай чтобы прыгать!</p>
-            <div class="countdown">
-                <span id="countdown-number">3</span>
+            <div class="transition-default">
+                <div class="game-number">ЗАДАЧА #<span id="game-number-display">1</span></div>
+                <h2 id="game-title">КУРЬЕР-РАННЕР</h2>
+                <p id="game-instruction">Тапай чтобы прыгать!</p>
+                <div class="countdown">
+                    <span id="countdown-number">3</span>
+                </div>
+            </div>
+            <div class="final-transition-content hidden" id="final-transition-content">
+                <div class="final-particles" id="final-transition-particles"></div>
+                <div class="final-title" id="final-transition-title">ПОЗДРАВЛЯЕМ! СМЕНА ЗАВЕРШЕНА</div>
+                <div class="final-score" id="final-transition-score">
+                    Ты заработал <span id="final-transition-score-value">0</span> Озон баллов
+                </div>
+                <button id="final-transition-button" class="btn-primary final-transition-button">К ВЫПЛАТАМ</button>
+                <div class="final-subtitle" id="final-transition-subtitle">Нажми, чтобы получить наставление</div>
             </div>
         </div>
 

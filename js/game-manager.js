@@ -26,7 +26,12 @@ class GameManager {
         this.shiftCompletedGames = new Set();
         this.shiftFinished = false;
         this.finalTransitionButton = null;
-        this.finalTransitionParticles = null;
+        this.finalTransitionContent = document.getElementById('final-transition-content');
+        this.finalTransitionParticlesWrapper = document.getElementById('final-transition-particles');
+        this.finalTransitionScoreValue = document.getElementById('final-transition-score-value');
+        this.finalTransitionSubtitle = document.getElementById('final-transition-subtitle');
+        this.finalTransitionTitle = document.getElementById('final-transition-title');
+        this.finalTransitionDefault = document.querySelector('#transition-screen .transition-default');
 
         this.defaultPressStartText = document.querySelector('.press-start')?.textContent || 'Нажми, чтобы начать!';
 
@@ -506,25 +511,20 @@ class GameManager {
         document.getElementById('game-title').textContent = titles[gameName] || gameName.toUpperCase();
         document.getElementById('game-number-display').textContent = this.gamesCompleted + 1;
 
-        // Сбрасываем финальный стиль, если он был применён
         if (transitionScreen) {
             transitionScreen.classList.remove('final-transition');
         }
 
-        const gameNumber = document.querySelector('.game-number');
-        if (gameNumber) gameNumber.style.display = '';
-
-        const countdownWrapper = document.querySelector('.countdown');
-        if (countdownWrapper) countdownWrapper.style.display = '';
-
-        if (this.finalTransitionButton) {
-            this.finalTransitionButton.remove();
-            this.finalTransitionButton = null;
+        if (this.finalTransitionContent) {
+            this.finalTransitionContent.classList.add('hidden');
         }
 
-        if (this.finalTransitionParticles) {
-            this.finalTransitionParticles.remove();
-            this.finalTransitionParticles = null;
+        if (this.finalTransitionDefault) {
+            this.finalTransitionDefault.classList.remove('hidden');
+        }
+
+        if (this.countdownEl) {
+            this.countdownEl.textContent = '3';
         }
 
         const transitionInfo = this.transitionData[gameName] || { emoji: '🎮', tagline: 'ВПЕРЁД ЗА ХАОСОМ!' };
@@ -564,108 +564,84 @@ class GameManager {
     showFinalTransition(callback, transitionScreen = document.getElementById('transition-screen')) {
         console.log('🎁 Показываем специальную заставку для финального этапа');
 
-        if (!transitionScreen) {
+        if (!transitionScreen || !this.finalTransitionContent) {
             callback();
             return;
         }
 
         transitionScreen.classList.add('final-transition');
 
-        const gameNumber = transitionScreen.querySelector('.game-number');
-        if (gameNumber) gameNumber.style.display = 'none';
-
-        const countdownWrapper = transitionScreen.querySelector('.countdown');
-        if (countdownWrapper) countdownWrapper.style.display = 'none';
-
-        if (this.transitionEmojiEl) this.transitionEmojiEl.textContent = '🎉';
-        if (this.transitionTaglineEl) {
-            this.transitionTaglineEl.textContent = 'ВРЕМЯ ПОЛУЧИТЬ НАСТАВЛЕНИЕ';
+        if (this.finalTransitionDefault) {
+            this.finalTransitionDefault.classList.add('hidden');
         }
 
-        const titleEl = document.getElementById('game-title');
-        if (titleEl) titleEl.textContent = 'СМЕНА ОКОНЧЕНА';
+        this.finalTransitionContent.classList.remove('hidden');
 
         const score = this.totalScore || 0;
-        const instructionEl = document.getElementById('game-instruction');
-        if (instructionEl) {
-            instructionEl.innerHTML = `Ты заработал <span style="font-weight: 700; color: #FFD700;">${score}</span> Озон баллов`; 
-            instructionEl.style.fontSize = '22px';
-            instructionEl.style.marginBottom = '32px';
+        if (this.finalTransitionScoreValue) {
+            this.finalTransitionScoreValue.textContent = score;
         }
 
-        if (this.countdownEl) {
-            this.countdownEl.textContent = '';
+        if (this.finalTransitionTitle) {
+            this.finalTransitionTitle.textContent = 'ПОЗДРАВЛЯЕМ! СМЕНА ЗАВЕРШЕНА';
         }
 
-        if (this.finalTransitionParticles) {
-            this.finalTransitionParticles.remove();
-            this.finalTransitionParticles = null;
+        if (this.finalTransitionSubtitle) {
+            this.finalTransitionSubtitle.textContent = 'Нажми, чтобы получить наставление';
         }
 
-        const particles = document.createElement('div');
-        particles.className = 'particle-container';
-        for (let i = 0; i < 18; i++) {
-            const particle = document.createElement('span');
-            particle.className = 'particle';
-            const size = 4 + Math.random() * 6;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100}%`;
-            particle.style.animationDelay = `${Math.random() * 2}s`;
-            particle.style.animationDuration = `${3 + Math.random() * 2}s`;
-            particles.appendChild(particle);
-        }
-        transitionScreen.appendChild(particles);
-        this.finalTransitionParticles = particles;
-
-        if (this.finalTransitionButton) {
-            this.finalTransitionButton.remove();
-            this.finalTransitionButton = null;
-        }
-
-        const toPaymentsBtn = document.createElement('button');
-        toPaymentsBtn.type = 'button';
-        toPaymentsBtn.textContent = 'К ВЫПЛАТАМ';
-        toPaymentsBtn.className = 'btn-primary final-transition-btn';
-        Object.assign(toPaymentsBtn.style, {
-            padding: '16px 36px',
-            fontSize: '18px',
-            fontWeight: '800',
-            borderRadius: '28px',
-            border: 'none',
-            cursor: 'pointer'
-        });
-
-        const handleButtonClick = () => {
-            toPaymentsBtn.disabled = true;
-            toPaymentsBtn.classList.add('pressed');
-            this.sound.playEffect('countdownFinal');
-
-            if (this.finalTransitionParticles) {
-                this.finalTransitionParticles.remove();
-                this.finalTransitionParticles = null;
+        // Генерируем частицы
+        if (this.finalTransitionParticlesWrapper) {
+            this.finalTransitionParticlesWrapper.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const particle = document.createElement('span');
+                particle.className = 'final-particle';
+                const size = 4 + Math.random() * 8;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 2}s`;
+                particle.style.animationDuration = `${3 + Math.random() * 2}s`;
+                this.finalTransitionParticlesWrapper.appendChild(particle);
             }
+        }
 
+       if (this.finalTransitionButton) {
+            this.finalTransitionButton.removeEventListener('click', this._finalTransitionHandler);
+        }
+
+        this.finalTransitionButton = document.getElementById('final-transition-button');
+
+        if (!this.finalTransitionButton) {
+            callback();
+            return;
+        }
+
+        const handler = () => {
+            this.sound.playEffect('countdownFinal');
+            this.finalTransitionButton.disabled = true;
+            this._finalTransitionHandler = null;
+
+            this.finalTransitionContent.classList.add('hidden');
             transitionScreen.classList.remove('final-transition');
-
-            this.finalTransitionButton = null;
-            toPaymentsBtn.removeEventListener('click', handleButtonClick);
-            toPaymentsBtn.remove();
+            if (this.finalTransitionDefault) {
+                this.finalTransitionDefault.classList.remove('hidden');
+            }
 
             callback();
         };
 
-        toPaymentsBtn.addEventListener('click', handleButtonClick);
-        transitionScreen.appendChild(toPaymentsBtn);
-        this.finalTransitionButton = toPaymentsBtn;
-
-        this.showScreen('transition');
+        this._finalTransitionHandler = handler;
+        this.finalTransitionButton.disabled = false;
+        this.finalTransitionButton.addEventListener('click', handler, { once: true });
 
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
             this.countdownInterval = null;
         }
+
+        this.showScreen('transition');
     }
 
     endGame(success, rawScore) {
