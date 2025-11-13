@@ -545,11 +545,6 @@ class GameManager {
             this._finalTransitionHandler = null;
         }
 
-        if (this._finalAutoTimeout) {
-            clearTimeout(this._finalAutoTimeout);
-            this._finalAutoTimeout = null;
-        }
-
         this._finalTransitionCompleted = false;
 
         if (this.countdownEl) {
@@ -686,8 +681,8 @@ class GameManager {
             this._finalTransitionHandler = finishTransition;
             this.finalTransitionButton.addEventListener('click', finishTransition);
         } else {
-            console.warn('⚠️ Финальная кнопка не найдена, запускаем переход автоматически');
-            this._finalAutoTimeout = setTimeout(() => finishTransition(), 2000);
+            console.warn('⚠️ Финальная кнопка не найдена, запускаем финал сразу');
+            finishTransition();
         }
 
         // Дополнительно разрешаем тапнуть в любое место для перехода, если кнопки не видно
@@ -709,11 +704,6 @@ class GameManager {
             clearTimeout(this._finalScreenHandlerTimer);
         }
         this._finalScreenHandlerTimer = setTimeout(scheduleScreenHandler, 200);
-
-        // Автоматически продолжаем через небольшую паузу, если игрок ничего не нажал
-        this._finalAutoTimeout = setTimeout(() => {
-            finishTransition();
-        }, 6000);
 
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
