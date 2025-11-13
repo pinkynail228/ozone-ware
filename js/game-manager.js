@@ -787,7 +787,7 @@ class GameManager {
         // Проверяем, не пора ли показывать финальный этап
         if (this.gamesCompleted >= this.gamesRequiredForFinal && !this.shiftFinished) {
             console.log('🎁 Достигнуто ' + this.gamesRequiredForFinal + ' игр! Показываем финальный этап');
-            this.showTransition('roulette', () => this.startGame('roulette'));
+            this.showFinalTransition(() => this.startGame('roulette'));
             return;
         }
 
