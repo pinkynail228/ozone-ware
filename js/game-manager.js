@@ -15,7 +15,7 @@ class GameManager {
         this.lastEarned = 0;
         // Убрали 'roulette' из основного пула игр, теперь оно показывается только после 5 игр
         this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner'];
-        this.gamesRequiredForFinal = 5; // Количество игр, необходимых для финального этапа
+        this.gamesRequiredForFinal = 1; // Временно показываем финал после первой успешной игры для тестирования
         this.playedGames = [];
         this.recentGames = [];
         this.currentGameKey = null;
