@@ -34,6 +34,7 @@ class GameManager {
         this.finalTransitionDefault = document.querySelector('#transition-screen .transition-default');
         this._finalTransitionHandler = null;
         this._finalTransitionScreenHandler = null;
+        this._finalScreenHandlerTimer = null;
         this._finalAutoTimeout = null;
         this._finalTransitionCompleted = false;
 
@@ -534,6 +535,11 @@ class GameManager {
             this._finalTransitionScreenHandler = null;
         }
 
+        if (this._finalScreenHandlerTimer) {
+            clearTimeout(this._finalScreenHandlerTimer);
+            this._finalScreenHandlerTimer = null;
+        }
+
         if (this.finalTransitionButton && this._finalTransitionHandler) {
             this.finalTransitionButton.removeEventListener('click', this._finalTransitionHandler);
             this._finalTransitionHandler = null;
@@ -647,6 +653,10 @@ class GameManager {
                 clearTimeout(this._finalAutoTimeout);
                 this._finalAutoTimeout = null;
             }
+            if (this._finalScreenHandlerTimer) {
+                clearTimeout(this._finalScreenHandlerTimer);
+                this._finalScreenHandlerTimer = null;
+            }
             this.sound.playEffect('countdownFinal');
             if (this.finalTransitionButton) {
                 this.finalTransitionButton.disabled = true;
@@ -681,18 +691,29 @@ class GameManager {
         }
 
         // Дополнительно разрешаем тапнуть в любое место для перехода, если кнопки не видно
-        const screenHandler = (event) => {
+        const scheduleScreenHandler = () => {
             if (this._finalTransitionCompleted) return;
-            if (this.finalTransitionButton && event.target === this.finalTransitionButton) return;
-            finishTransition();
+            const screenHandler = (event) => {
+                if (this._finalTransitionCompleted) return;
+                if (this.finalTransitionButton && (event.target === this.finalTransitionButton || this.finalTransitionButton.contains(event.target))) {
+                    return;
+                }
+                finishTransition();
+            };
+            transitionScreen.addEventListener('click', screenHandler, { once: true });
+            this._finalTransitionScreenHandler = screenHandler;
+            this._finalScreenHandlerTimer = null;
         };
-        transitionScreen.addEventListener('click', screenHandler, { once: true });
-        this._finalTransitionScreenHandler = screenHandler;
+
+        if (this._finalScreenHandlerTimer) {
+            clearTimeout(this._finalScreenHandlerTimer);
+        }
+        this._finalScreenHandlerTimer = setTimeout(scheduleScreenHandler, 200);
 
         // Автоматически продолжаем через небольшую паузу, если игрок ничего не нажал
         this._finalAutoTimeout = setTimeout(() => {
             finishTransition();
-        }, 5000);
+        }, 6000);
 
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
