@@ -35,6 +35,7 @@ class GameManager {
         this._finalTransitionHandler = null;
         this._finalTransitionScreenHandler = null;
         this._finalScreenHandlerTimer = null;
+        this._finalEnableButtonTimer = null;
         this._finalAutoTimeout = null;
         this._finalTransitionCompleted = false;
 
@@ -204,6 +205,8 @@ class GameManager {
         this.debugPanel = document.getElementById('debug-panel');
         this.debugInfo = document.getElementById('debug-info');
         this.debugMode = false;
+
+        this.ensureFinalTransitionElements();
 
         // Переходы
         this.countdownInterval = null;
@@ -581,6 +584,36 @@ class GameManager {
             }
         }, 900); // чуть быстрее, чтобы добавить драйва
     }
+
+    ensureFinalTransitionElements(transitionScreen = document.getElementById('transition-screen')) {
+        if (!transitionScreen) return false;
+
+        let content = transitionScreen.querySelector('#final-transition-content');
+        if (!content) {
+            transitionScreen.insertAdjacentHTML('beforeend', `
+                <div class="final-transition-content hidden" id="final-transition-content">
+                    <div class="final-transition-particles" id="final-transition-particles"></div>
+                    <div class="final-transition-body">
+                        <div class="final-transition-title" id="final-transition-title">ПОЗДРАВЛЯЕМ! СМЕНА ЗАВЕРШЕНА</div>
+                        <div class="final-transition-score" id="final-transition-score">Ты заработал <span id="final-transition-score-value">0</span> Озон баллов</div>
+                        <button id="final-transition-button" class="btn-primary final-transition-button">К ВЫПЛАТАМ</button>
+                        <div class="final-subtitle final-transition-subtitle" id="final-transition-subtitle">Нажми, чтобы получить наставление</div>
+                    </div>
+                </div>
+            `);
+            content = transitionScreen.querySelector('#final-transition-content');
+        }
+
+        this.finalTransitionContent = content;
+        this.finalTransitionParticlesWrapper = document.getElementById('final-transition-particles');
+        this.finalTransitionScoreValue = document.getElementById('final-transition-score-value');
+        this.finalTransitionSubtitle = document.getElementById('final-transition-subtitle');
+        this.finalTransitionTitle = document.getElementById('final-transition-title');
+        this.finalTransitionButton = document.getElementById('final-transition-button');
+        this.finalTransitionDefault = transitionScreen.querySelector('.transition-default');
+
+        return Boolean(this.finalTransitionContent);
+    }
     
     /**
      * Специальная заставка для финального этапа с казино
@@ -588,7 +621,7 @@ class GameManager {
     showFinalTransition(callback, transitionScreen = document.getElementById('transition-screen')) {
         console.log('🎁 Показываем специальную заставку для финального этапа');
 
-        if (!transitionScreen || !this.finalTransitionContent) {
+        if (!transitionScreen || !this.ensureFinalTransitionElements(transitionScreen)) {
             callback();
             return;
         }
@@ -652,6 +685,10 @@ class GameManager {
                 clearTimeout(this._finalScreenHandlerTimer);
                 this._finalScreenHandlerTimer = null;
             }
+            if (this._finalEnableButtonTimer) {
+                clearTimeout(this._finalEnableButtonTimer);
+                this._finalEnableButtonTimer = null;
+            }
             this.sound.playEffect('countdownFinal');
             if (this.finalTransitionButton) {
                 this.finalTransitionButton.disabled = true;
@@ -674,36 +711,25 @@ class GameManager {
         };
 
         if (this.finalTransitionButton) {
-            this.finalTransitionButton.disabled = false;
             this.finalTransitionButton.style.display = 'inline-flex';
             this.finalTransitionButton.style.opacity = '1';
-            this.finalTransitionButton.style.pointerEvents = 'auto';
-            this._finalTransitionHandler = finishTransition;
-            this.finalTransitionButton.addEventListener('click', finishTransition);
+            this.finalTransitionButton.disabled = true;
+            this.finalTransitionButton.style.pointerEvents = 'none';
+
+            const enableButton = () => {
+                if (!this.finalTransitionButton || this._finalTransitionCompleted) return;
+                this.finalTransitionButton.disabled = false;
+                this.finalTransitionButton.style.pointerEvents = 'auto';
+                this._finalTransitionHandler = finishTransition;
+                this.finalTransitionButton.addEventListener('click', finishTransition, { once: true });
+                this._finalEnableButtonTimer = null;
+            };
+
+            this._finalEnableButtonTimer = setTimeout(enableButton, 250);
         } else {
             console.warn('⚠️ Финальная кнопка не найдена, запускаем финал сразу');
             finishTransition();
         }
-
-        // Дополнительно разрешаем тапнуть в любое место для перехода, если кнопки не видно
-        const scheduleScreenHandler = () => {
-            if (this._finalTransitionCompleted) return;
-            const screenHandler = (event) => {
-                if (this._finalTransitionCompleted) return;
-                if (this.finalTransitionButton && (event.target === this.finalTransitionButton || this.finalTransitionButton.contains(event.target))) {
-                    return;
-                }
-                finishTransition();
-            };
-            transitionScreen.addEventListener('click', screenHandler, { once: true });
-            this._finalTransitionScreenHandler = screenHandler;
-            this._finalScreenHandlerTimer = null;
-        };
-
-        if (this._finalScreenHandlerTimer) {
-            clearTimeout(this._finalScreenHandlerTimer);
-        }
-        this._finalScreenHandlerTimer = setTimeout(scheduleScreenHandler, 200);
 
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
