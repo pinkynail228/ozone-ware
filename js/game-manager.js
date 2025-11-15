@@ -15,7 +15,7 @@ class GameManager {
         this.lastEarned = 0;
         // Убрали 'roulette' из основного пула игр, теперь оно показывается только после 5 игр
         this.gamesList = ['delivery', 'sorting', 'finder', 'catcher', 'calculator', 'shopping', 'address', 'weighing', 'loadingDock', 'inspection', 'scanner'];
-        this.gamesRequiredForFinal = 1; // Временно показываем финал после первой успешной игры для тестирования
+        this.gamesRequiredForFinal = 5; // После пяти игр показываем финальный экран завершения смены
         this.playedGames = [];
         this.recentGames = [];
         this.currentGameKey = null;
@@ -596,8 +596,8 @@ class GameManager {
                     <div class="final-transition-body">
                         <div class="final-transition-title" id="final-transition-title">ПОЗДРАВЛЯЕМ! СМЕНА ЗАВЕРШЕНА</div>
                         <div class="final-transition-score" id="final-transition-score">Ты заработал <span id="final-transition-score-value">0</span> Озон баллов</div>
-                        <button id="final-transition-button" class="btn-primary final-transition-button">К ВЫПЛАТАМ</button>
-                        <div class="final-subtitle final-transition-subtitle" id="final-transition-subtitle">Нажми, чтобы получить наставление</div>
+                        <button id="final-transition-button" class="btn-primary final-transition-button">НА ЗАСТАВКУ</button>
+                        <div class="final-subtitle final-transition-subtitle" id="final-transition-subtitle">Нажми кнопку, чтобы вернуться на заставку</div>
                     </div>
                 </div>
             `);
@@ -614,9 +614,9 @@ class GameManager {
 
         return Boolean(this.finalTransitionContent);
     }
-    
+
     /**
-     * Специальная заставка для финального этапа с казино
+     * Специальная заставка для финального этапа
      */
     showFinalTransition(callback, transitionScreen = document.getElementById('transition-screen')) {
         console.log('🎁 Показываем специальную заставку для финального этапа');
@@ -648,7 +648,11 @@ class GameManager {
         }
 
         if (this.finalTransitionSubtitle) {
-            this.finalTransitionSubtitle.textContent = 'Нажми, чтобы получить наставление';
+            this.finalTransitionSubtitle.textContent = 'Нажми кнопку, чтобы вернуться на заставку';
+        }
+
+        if (this.finalTransitionButton) {
+            this.finalTransitionButton.textContent = 'НА ЗАСТАВКУ';
         }
 
         // Генерируем частицы
@@ -677,10 +681,6 @@ class GameManager {
         const finishTransition = () => {
             if (this._finalTransitionCompleted) return;
             this._finalTransitionCompleted = true;
-            if (this._finalAutoTimeout) {
-                clearTimeout(this._finalAutoTimeout);
-                this._finalAutoTimeout = null;
-            }
             if (this._finalScreenHandlerTimer) {
                 clearTimeout(this._finalScreenHandlerTimer);
                 this._finalScreenHandlerTimer = null;
@@ -689,7 +689,6 @@ class GameManager {
                 clearTimeout(this._finalEnableButtonTimer);
                 this._finalEnableButtonTimer = null;
             }
-            this.sound.playEffect('countdownFinal');
             if (this.finalTransitionButton) {
                 this.finalTransitionButton.disabled = true;
                 this.finalTransitionButton.removeEventListener('click', finishTransition);
@@ -823,13 +822,19 @@ class GameManager {
         
         // Проверяем, не пора ли показывать финальный этап
         if (this.gamesCompleted >= this.gamesRequiredForFinal && !this.shiftFinished) {
-            console.log('🎁 Достигнуто ' + this.gamesRequiredForFinal + ' игр! Показываем финальный этап');
-            this.showFinalTransition(() => this.startGame('roulette'));
+            console.log('🎉 Смена выполнена! Показываем финальный экран завершения');
+            this.shiftFinished = true;
+            this.showFinalTransition(() => this.resetAndShowStartScreen());
             return;
         }
 
         const gameName = this.getRandomGame();
         this.showTransition(gameName, () => this.startGame(gameName));
+    }
+
+    resetAndShowStartScreen() {
+        console.log('🏁 Смена завершена, возвращаемся на стартовую заставку');
+        this.showStartScreen();
     }
 
     restart() {
